@@ -1,0 +1,18 @@
+
+.containter {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; 
+    align-items: center;    
+    height: 100vh;   
+}
+  
+  .registerContainer {
+    width: 40vw;
+    text-align: center;
+    padding: 4rem;
+  }
+
+  .loginText {
+    padding-right: 1rem;
+  }
