@@ -1,6 +1,7 @@
 import React from 'react';
 import { UploadOutlined, UserOutlined, VideoCameraOutlined } from '@ant-design/icons';
 import { Layout, Menu, theme } from 'antd';
+import UploadFeature from '../component/Upload/upload';
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -44,6 +45,12 @@ const Dashboard: React.FC = () => {
             }}
           >
             <h3> Welcome to ROGO PORTAL</h3>
+            <div style={{ display: 'flex', flexDirection: 'column'}}>
+              <div style={{ padding: '2rem'}}>
+                Upload your necessary documents here:
+              </div>
+              <div style={{ alignItems: 'center', marginLeft: '2rem'}}><UploadFeature/></div>
+            </div>
           </div>
         </Content>
         <Footer style={{ textAlign: 'center' }}>
