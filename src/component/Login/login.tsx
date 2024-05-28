@@ -5,8 +5,8 @@ import { publicSupabase } from '../../api/SupabaseClient';
 import { useNavigate } from 'react-router-dom';
 
 type FieldType = {
-  email?: string;
-  password?: string;
+  email: string;
+  password: string;
   remember?: string;
 };
 
@@ -23,12 +23,12 @@ const Login: React.FC = () => {
         const { remember, ...userData } = values;
         console.log('values',userData)
       try {
-        const { data, error } = await publicSupabase.from('userLogin').insert(userData).select();
+        const {data, error} = await publicSupabase.auth.signInWithPassword(userData)
         if (error) {
           throw error;
         }
         if(data) {
-          console.log('Data inserted:', data);
+          console.log('Successfully Logged In', data);
           navigate('/dashboard')
         }
       } catch (error:any) {
