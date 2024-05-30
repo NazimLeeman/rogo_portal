@@ -28,7 +28,7 @@ const normFile = (e: any) => {
 };
 
 const StudentForm: React.FC = () => {
-//   const [componentDisabled, setComponentDisabled] = useState<boolean>(true);
+  //   const [componentDisabled, setComponentDisabled] = useState<boolean>(true);
 
   return (
     <>
@@ -65,7 +65,11 @@ const StudentForm: React.FC = () => {
         <Form.Item label="TreeSelect">
           <TreeSelect
             treeData={[
-              { title: 'Light', value: 'light', children: [{ title: 'Bamboo', value: 'bamboo' }] },
+              {
+                title: 'Light',
+                value: 'light',
+                children: [{ title: 'Bamboo', value: 'bamboo' }],
+              },
             ]}
           />
         </Form.Item>
@@ -100,7 +104,11 @@ const StudentForm: React.FC = () => {
         <Form.Item label="Switch" valuePropName="checked">
           <Switch />
         </Form.Item>
-        <Form.Item label="Upload" valuePropName="fileList" getValueFromEvent={normFile}>
+        <Form.Item
+          label="Upload"
+          valuePropName="fileList"
+          getValueFromEvent={normFile}
+        >
           <Upload action="/upload.do" listType="picture-card">
             <button style={{ border: 0, background: 'none' }} type="button">
               <PlusOutlined />
@@ -118,10 +126,10 @@ const StudentForm: React.FC = () => {
           <ColorPicker />
         </Form.Item>
         <Form.Item>
-      <Button type="primary" htmlType="submit">
-        Submit
-      </Button>
-    </Form.Item>
+          <Button type="primary" htmlType="submit">
+            Submit
+          </Button>
+        </Form.Item>
       </Form>
     </>
   );

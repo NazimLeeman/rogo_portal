@@ -4,7 +4,10 @@ import { getConfig } from '../config';
 const config = getConfig();
 
 // Public Client to manage users.
-export const publicSupabase = createClient(config.supabaseUrl, config.supabaseAnonKey);
+export const publicSupabase = createClient(
+  config.supabaseUrl,
+  config.supabaseAnonKey,
+);
 
 // // Private Client, initialize for each company.
 // export let privateSupabase: SupabaseClient;
@@ -13,8 +16,6 @@ export const publicSupabase = createClient(config.supabaseUrl, config.supabaseAn
 // export const initializePrivateSupabase = (url: string, anonKey: string) => {
 //   privateSupabase = createClient(url, anonKey);
 // };
-
-
 
 // export const userSession = async () => {
 //   const data = await privateSupabase.auth.getSession();

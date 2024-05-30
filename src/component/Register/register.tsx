@@ -10,15 +10,16 @@ type RegisterFieldType = {
   confirmPassword?: string;
   firstName?: string;
   lastName?: string;
-  role?: string; 
+  role?: string;
 };
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
 
   const onFinish = async (values: RegisterFieldType) => {
-    console.log('values',values)
-    const { email, password, confirmPassword, firstName, lastName, role } = values;
+    console.log('values', values);
+    const { email, password, confirmPassword, firstName, lastName, role } =
+      values;
     if (password !== confirmPassword) {
       console.error('Passwords do not match!');
       return;
@@ -31,7 +32,7 @@ const Register: React.FC = () => {
         password: password!,
       });
 
-      console.log(error,data)
+      console.log(error, data);
 
       if (error) {
         throw error;
@@ -67,11 +68,11 @@ const Register: React.FC = () => {
   };
 
   return (
-    <div className='flex flex-col justify-center items-center h-screen'>
-           <div>
-              <h1 className='text-xl'> Complete your registeration seamlessly </h1>
-           </div>
-      <div className='w-[40vw] text-center p-16'>
+    <div className="flex flex-col justify-center items-center h-screen">
+      <div>
+        <h1 className="text-xl"> Complete your registeration seamlessly </h1>
+      </div>
+      <div className="w-[40vw] text-center p-16">
         <Form
           name="basic"
           labelCol={{ span: 8 }}
@@ -101,13 +102,18 @@ const Register: React.FC = () => {
             label="Confirm Password"
             name="confirmPassword"
             dependencies={['password']}
-            rules={[{ required: true, message: 'Please confirm your password!' },
+            rules={[
+              { required: true, message: 'Please confirm your password!' },
               ({ getFieldValue }) => ({
                 validator(_, value) {
                   if (!value || getFieldValue('password') === value) {
                     return Promise.resolve();
                   }
-                  return Promise.reject(new Error('The new password that you entered do not match!'));
+                  return Promise.reject(
+                    new Error(
+                      'The new password that you entered do not match!',
+                    ),
+                  );
                 },
               }),
             ]}
@@ -118,7 +124,9 @@ const Register: React.FC = () => {
           <Form.Item
             label="First Name"
             name="firstName"
-            rules={[{ required: true, message: 'Please input your first name!' }]}
+            rules={[
+              { required: true, message: 'Please input your first name!' },
+            ]}
           >
             <Input />
           </Form.Item>
@@ -126,7 +134,9 @@ const Register: React.FC = () => {
           <Form.Item
             label="Last Name"
             name="lastName"
-            rules={[{ required: true, message: 'Please input your last name!' }]}
+            rules={[
+              { required: true, message: 'Please input your last name!' },
+            ]}
           >
             <Input />
           </Form.Item>

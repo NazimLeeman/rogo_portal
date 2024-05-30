@@ -13,7 +13,7 @@
 //     // userSession,
 //     // getUserRole,
 //   } from "../api/SupabaseClient";
-  
+
 //   interface ISupabaseContext {
 //     // userIdPrivate: any;
 //     // setUserIdPrivate: any;
@@ -23,7 +23,7 @@
 //     // userSession: () => Promise<any>;
 //     // getUserRole: () => Promise<number>;
 //   }
-  
+
 //   const SupabaseContext = createContext<ISupabaseContext>({
 //     // userIdPrivate: "",
 //     // setUserIdPrivate: "",
@@ -33,7 +33,7 @@
 //     // userSession: userSession,
 //     // getUserRole: async () => 0,
 //   });
-  
+
 //   export const SupabaseProvider: React.FC<{ children: ReactNode }> = ({
 //     children,
 //   }) => {
@@ -47,12 +47,12 @@
 //         initializePrivateSupabase(projectUrl, anonKey);
 //       }
 //     }, []);
-  
+
 //     const handleInitializePrivateSupabase = (url: string, anonKey: string) => {
 //       initializePrivateSupabase(url, anonKey);
 //       setPrivateClient(privateSupabase);
 //     };
-  
+
 //     const value = {
 //       userIdPrivate,
 //       setUserIdPrivate,
@@ -72,7 +72,7 @@
 //       </SupabaseContext.Provider>
 //     );
 //   };
-  
+
 //   export const useSupabase = () => {
 //     const context = useContext(SupabaseContext);
 //     if (context === undefined) {
@@ -80,4 +80,3 @@
 //     }
 //     return context;
 //   };
-  
