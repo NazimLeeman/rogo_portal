@@ -1,5 +1,5 @@
 import React from 'react';
-import './register.css';
+// import './register.css';
 import { Button, Form, Input, Select } from 'antd';
 import { publicSupabase } from '../../api/SupabaseClient';
 import { useNavigate } from 'react-router-dom';
@@ -67,12 +67,11 @@ const Register: React.FC = () => {
   };
 
   return (
-    <div className='containter'>
-        <div>
-            <img src="" alt="" />
-           <h1> Complete your registeration seamlessly </h1>
-        </div>
-      <div className='registerContainer'>
+    <div className='flex flex-col justify-center items-center h-screen'>
+           <div>
+              <h1 className='text-xl'> Complete your registeration seamlessly </h1>
+           </div>
+      <div className='w-[40vw] text-center p-16'>
         <Form
           name="basic"
           labelCol={{ span: 8 }}

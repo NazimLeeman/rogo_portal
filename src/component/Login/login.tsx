@@ -1,5 +1,5 @@
 import React from 'react';
-import './login.css';
+// import './login.css';
 import { Button, Checkbox, Form, Input } from 'antd';
 import { publicSupabase } from '../../api/SupabaseClient';
 import { useNavigate } from 'react-router-dom';
@@ -41,12 +41,11 @@ const Login: React.FC = () => {
     };
   
     return (
-      <div className='hero'>
-        <div>
-            <img src="" alt="" />
-           <h1> Welcome to ROGO</h1>
-        </div>
-      <div className='loginContainer'>
+      <div className='flex flex-col justify-center items-center h-screen'>
+           <div>
+              <h1 className='text-xl'> Welcome to ROGO</h1>
+           </div>
+      <div className='flex flex-col w-[40vw] p-8'>
       <Form
         name="basic"
         labelCol={{ span: 8 }}
@@ -84,12 +83,14 @@ const Login: React.FC = () => {
         </Form.Item>
       </Form>
       </div>
+      <div>
       <div><p>Don't have a account?</p></div>
-        <div className='register'>
+        <div className='flex flex-col p-2'>
           <Button type="primary" htmlType="submit" onClick={handleRegisterClick}>
               Register
             </Button>
         </div>
+      </div>
       </div>
     );
   };
