@@ -56,7 +56,7 @@ const Register: React.FC = () => {
         }
 
         console.log('Additional user data inserted successfully');
-        navigate('/dashboard');
+        navigate('/login');
       }
     } catch (error: any) {
       console.error('Error registering user:', error.message);
