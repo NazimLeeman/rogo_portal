@@ -4,14 +4,23 @@ import {
   UserOutlined,
   VideoCameraOutlined,
   InboxOutlined,
+  LogoutOutlined
 } from '@ant-design/icons';
 import { Layout, Menu, theme } from 'antd';
+import { useNavigate, useLocation } from "react-router-dom";
 import UploadFeature from '../component/Upload/upload';
 import StudentForm from '../component/StudentForm/studentForm';
+import { publicSupabase } from '../api/SupabaseClient';
 
 const { Header, Content, Footer, Sider } = Layout;
 
 const navLabels = ['Students', 'Status', 'Info', 'Payment'];
+
+const logoutLabel = [{
+  key: '5',
+  icon: React.createElement(LogoutOutlined),
+  label: 'Logout'
+}]
 
 const items = [
   UserOutlined,
@@ -30,9 +39,23 @@ const Dashboard: React.FC = () => {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const handleNavClick = (key: string) => {
     setSelectedNav(key);
     // Optionally, you can add additional logic here to display different content based on the selected navigation item
+  };
+
+  const handleLogout = () => {
+    Promise.all([publicSupabase.auth.signOut()])
+      .then(() => {
+        localStorage.clear();
+        navigate("/");
+      })
+      .catch(error => {
+        console.error("Error during sign out:", error);
+      });
   };
 
   return (
@@ -54,6 +77,13 @@ const Dashboard: React.FC = () => {
           selectedKeys={selectedNav ? [selectedNav] : []}
           onClick={(info) => handleNavClick(info.key)}
           items={items}
+        />
+        <Menu
+          theme="dark"
+          mode="inline"
+          items={logoutLabel}
+          onClick={() => handleLogout()}
+          style={{ position: 'absolute', bottom: 0, width: '100%' }}
         />
       </Sider>
       <Layout>
@@ -92,7 +122,7 @@ const Dashboard: React.FC = () => {
           </div>
         </Content>
         <Footer style={{ textAlign: 'center' }}>
-          Ant Design ©{new Date().getFullYear()} Created by Ant UED
+          Rogo Portal ©{new Date().getFullYear()} Created by Runtime Terror Squad
         </Footer>
       </Layout>
     </Layout>

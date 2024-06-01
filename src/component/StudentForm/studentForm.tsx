@@ -62,7 +62,7 @@ const StudentForm: React.FC = () => {
             <Select.Option value="demo">Demo</Select.Option>
           </Select>
         </Form.Item>
-        <Form.Item label="TreeSelect">
+        {/* <Form.Item label="TreeSelect">
           <TreeSelect
             treeData={[
               {
@@ -88,14 +88,14 @@ const StudentForm: React.FC = () => {
               },
             ]}
           />
-        </Form.Item>
+        </Form.Item> */}
         <Form.Item label="DatePicker">
           <DatePicker />
         </Form.Item>
         <Form.Item label="RangePicker">
           <RangePicker />
         </Form.Item>
-        <Form.Item label="InputNumber">
+        {/* <Form.Item label="InputNumber">
           <InputNumber />
         </Form.Item>
         <Form.Item label="TextArea">
@@ -103,7 +103,7 @@ const StudentForm: React.FC = () => {
         </Form.Item>
         <Form.Item label="Switch" valuePropName="checked">
           <Switch />
-        </Form.Item>
+        </Form.Item> */}
         <Form.Item
           label="Upload"
           valuePropName="fileList"
@@ -116,9 +116,9 @@ const StudentForm: React.FC = () => {
             </button>
           </Upload>
         </Form.Item>
-        <Form.Item label="Button">
+        {/* <Form.Item label="Button">
           <Button>Button</Button>
-        </Form.Item>
+        </Form.Item> */}
         <Form.Item label="Slider">
           <Slider />
         </Form.Item>
