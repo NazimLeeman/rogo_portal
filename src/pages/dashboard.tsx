@@ -1,26 +1,33 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   UploadOutlined,
   UserOutlined,
   VideoCameraOutlined,
   InboxOutlined,
-  LogoutOutlined
+  LogoutOutlined,
 } from '@ant-design/icons';
 import { Layout, Menu, theme } from 'antd';
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from 'react-router-dom';
 import UploadFeature from '../component/Upload/upload';
 import StudentForm from '../component/StudentForm/studentForm';
 import { publicSupabase } from '../api/SupabaseClient';
+import { Select } from 'antd';
+import type { SelectProps } from 'antd';
+import { StudentInfo } from '../interface/studentInfo.interface';
+
+const { Option } = Select;
 
 const { Header, Content, Footer, Sider } = Layout;
 
 const navLabels = ['Students', 'Status', 'Info', 'Payment'];
 
-const logoutLabel = [{
-  key: '5',
-  icon: React.createElement(LogoutOutlined),
-  label: 'Logout'
-}]
+const logoutLabel = [
+  {
+    key: '5',
+    icon: React.createElement(LogoutOutlined),
+    label: 'Logout',
+  },
+];
 
 const items = [
   UserOutlined,
@@ -35,12 +42,18 @@ const items = [
 
 const Dashboard: React.FC = () => {
   const [selectedNav, setSelectedNav] = useState<string | null>('1');
+  const [students, setStudents] = useState<StudentInfo[] | null>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    getStudentInfo();
+  }, []);
 
   const handleNavClick = (key: string) => {
     setSelectedNav(key);
@@ -51,11 +64,50 @@ const Dashboard: React.FC = () => {
     Promise.all([publicSupabase.auth.signOut()])
       .then(() => {
         localStorage.clear();
-        navigate("/");
+        navigate('/');
       })
-      .catch(error => {
-        console.error("Error during sign out:", error);
+      .catch((error) => {
+        console.error('Error during sign out:', error);
       });
+  };
+
+  const onChange = (value: string) => {
+    console.log(`selected ${value}`);
+  };
+
+  const onBlur = () => {
+    console.log('blur');
+  };
+
+  const onFocus = () => {
+    console.log('focus');
+  };
+
+  const onSearch = (val: string) => {
+    console.log('search:', val);
+  };
+
+  const getStudentInfo = async () => {
+    try {
+      const { data: StudentInfo, error } = await publicSupabase
+        .from('studentInfo')
+        .select('*');
+      setStudents(StudentInfo);
+      setLoading(false);
+      if (error) throw error;
+    } catch (error) {
+      console.error('ERROR: ', error);
+      setLoading(false);
+    }
+  };
+
+  const filterOption: SelectProps<string>['filterOption'] = (input, option) => {
+    // Ensure option and option.children are defined
+    return (
+      (option?.children as unknown as string)
+        .toLowerCase()
+        .indexOf(input.toLowerCase()) >= 0
+    );
   };
 
   return (
@@ -104,6 +156,33 @@ const Dashboard: React.FC = () => {
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   <div className="p-8">
+                    <p className="text-xl">Search an Existing Student</p>
+                  </div>
+                  {students !== null && (
+                    <div>
+                      <Select
+                        showSearch
+                        style={{ width: 200 }}
+                        placeholder="nazim@gmail.com"
+                        optionFilterProp="children"
+                        onChange={onChange}
+                        onFocus={onFocus}
+                        onBlur={onBlur}
+                        onSearch={onSearch}
+                        filterOption={filterOption}
+                      >
+                        {students.map((student) => (
+                          <Option key={student.id} value={student.email}>
+                            {student.email}
+                          </Option>
+                        ))}
+                        {/* <Option value="jack">Jack</Option>
+                      <Option value="lucy">Lucy</Option>
+                      <Option value="tom">Tom</Option> */}
+                      </Select>
+                    </div>
+                  )}
+                  <div className="p-8">
                     <p className="text-xl">Create a New Student File</p>
                   </div>
                   <div>
@@ -122,7 +201,8 @@ const Dashboard: React.FC = () => {
           </div>
         </Content>
         <Footer style={{ textAlign: 'center' }}>
-          Rogo Portal ©{new Date().getFullYear()} Created by Runtime Terror Squad
+          Rogo Portal ©{new Date().getFullYear()} Created by Runtime Terror
+          Squad
         </Footer>
       </Layout>
     </Layout>

@@ -24,42 +24,46 @@ export const userSession = async () => {
   }
 };
 
-export const getCurrentUser = async (client: SupabaseClient): Promise<User | null> => {
-  const { data: { session } } = await client.auth.getSession();
+export const getCurrentUser = async (
+  client: SupabaseClient,
+): Promise<User | null> => {
+  const {
+    data: { session },
+  } = await client.auth.getSession();
   return session?.user || null;
 };
 
 export const fetchPrivateSetup = async (email: string) => {
   return await publicSupabase
-    .from("private_projects")
-    .select("project_url, anon_key")
-    .contains("project_emails", [email])
+    .from('private_projects')
+    .select('project_url, anon_key')
+    .contains('project_emails', [email])
     .single();
-}
+};
 
 export const publicSignIn = async (email: string, password: string) => {
   return await publicSupabase.auth.signInWithPassword({ email, password });
 };
 
 export const privateSignIn = async (email: string, password: string) => {
-  currentUserEmail = email
-  currentPassword = password
+  currentUserEmail = email;
+  currentPassword = password;
   return await privateSupabase.auth.signInWithPassword({
     email,
     password,
   });
-}
+};
 
 export const getUserRole = async (): Promise<number> => {
   const user = await getCurrentUser(privateSupabase);
   const { data, error } = await privateSupabase
-    .from("profiles")
-    .select("role:roles(id)")
-    .eq("id", user?.id)
+    .from('profiles')
+    .select('role:roles(id)')
+    .eq('id', user?.id)
     .single();
 
   if (error) {
-    console.error("Error fetching user role:", error);
+    console.error('Error fetching user role:', error);
   }
 
   if (data && data.role) {
@@ -67,5 +71,5 @@ export const getUserRole = async (): Promise<number> => {
     return role.id;
   }
 
-  return 0
+  return 0;
 };

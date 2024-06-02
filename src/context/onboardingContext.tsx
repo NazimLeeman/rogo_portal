@@ -4,22 +4,22 @@
 //     useState,
 //     ReactNode,
 //   } from "react";
-  
+
 //   interface IOnboardingContext {
 //     onboardingSaved: boolean;
 //     setIsOnboardingSaved: any;
 //   }
-  
+
 //   const OnboardingContext = createContext<IOnboardingContext>({
 //     onboardingSaved: false,
 //     setIsOnboardingSaved: false
 //   });
-  
+
 //   export const OnboardingContextProvider: React.FC<{ children: ReactNode }> = ({
 //     children,
 //   }) => {
 //     const [onboardingSaved, setIsOnboardingSaved] = useState(false);
-    
+
 //     const value = {
 //       onboardingSaved,
 //       setIsOnboardingSaved,

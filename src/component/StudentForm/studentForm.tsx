@@ -30,6 +30,26 @@ const normFile = (e: any) => {
 const StudentForm: React.FC = () => {
   //   const [componentDisabled, setComponentDisabled] = useState<boolean>(true);
 
+  const { Option } = Select;
+
+  const prefixSelector = (
+    <Form.Item name="prefix" noStyle>
+      <Select style={{ width: 70 }}>
+        <Option value="86">+86</Option>
+        <Option value="87">+87</Option>
+      </Select>
+    </Form.Item>
+  );
+
+  const suffixSelector = (
+    <Form.Item name="suffix" noStyle>
+      <Select style={{ width: 70 }}>
+        <Option value="USD">$</Option>
+        <Option value="BDT">¥</Option>
+      </Select>
+    </Form.Item>
+  );
+
   return (
     <>
       {/* <Checkbox
@@ -39,71 +59,44 @@ const StudentForm: React.FC = () => {
         Form disabled
       </Checkbox> */}
       <Form
-        labelCol={{ span: 4 }}
+        labelCol={{ span: 6 }}
         wrapperCol={{ span: 14 }}
         layout="horizontal"
         // disabled={componentDisabled}
         style={{ maxWidth: 600 }}
       >
-        <Form.Item label="Checkbox" name="disabled" valuePropName="checked">
+        {/* <Form.Item label="Checkbox" name="disabled" valuePropName="checked">
           <Checkbox>Checkbox</Checkbox>
-        </Form.Item>
-        <Form.Item label="Radio">
-          <Radio.Group>
-            <Radio value="apple"> Apple </Radio>
-            <Radio value="pear"> Pear </Radio>
-          </Radio.Group>
-        </Form.Item>
-        <Form.Item label="Input">
+        </Form.Item> */}
+        <Form.Item label="First Name">
           <Input />
         </Form.Item>
-        <Form.Item label="Select">
+        <Form.Item label="Last Name">
+          <Input />
+        </Form.Item>
+        <Form.Item label="Email">
+          <Input />
+        </Form.Item>
+        <Form.Item label="Program">
           <Select>
-            <Select.Option value="demo">Demo</Select.Option>
+            <Select.Option value="honors">Honors</Select.Option>
+            <Select.Option value="masters">Masters</Select.Option>
           </Select>
         </Form.Item>
-        {/* <Form.Item label="TreeSelect">
-          <TreeSelect
-            treeData={[
-              {
-                title: 'Light',
-                value: 'light',
-                children: [{ title: 'Bamboo', value: 'bamboo' }],
-              },
-            ]}
-          />
+        <Form.Item
+          name="phone"
+          label="Phone Number"
+          // rules={[{ required: true, message: 'Please input phone number!' }]}
+        >
+          <Input addonBefore={prefixSelector} />
         </Form.Item>
-        <Form.Item label="Cascader">
-          <Cascader
-            options={[
-              {
-                value: 'zhejiang',
-                label: 'Zhejiang',
-                children: [
-                  {
-                    value: 'hangzhou',
-                    label: 'Hangzhou',
-                  },
-                ],
-              },
-            ]}
-          />
-        </Form.Item> */}
-        <Form.Item label="DatePicker">
-          <DatePicker />
+        <Form.Item
+          name="budget"
+          label="Budget"
+          // rules={[{ required: true, message: 'Please input amount!' }]}
+        >
+          <InputNumber addonAfter={suffixSelector} style={{ width: '100%' }} />
         </Form.Item>
-        <Form.Item label="RangePicker">
-          <RangePicker />
-        </Form.Item>
-        {/* <Form.Item label="InputNumber">
-          <InputNumber />
-        </Form.Item>
-        <Form.Item label="TextArea">
-          <TextArea rows={4} />
-        </Form.Item>
-        <Form.Item label="Switch" valuePropName="checked">
-          <Switch />
-        </Form.Item> */}
         <Form.Item
           label="Upload"
           valuePropName="fileList"
@@ -115,15 +108,6 @@ const StudentForm: React.FC = () => {
               <div style={{ marginTop: 8 }}>Upload</div>
             </button>
           </Upload>
-        </Form.Item>
-        {/* <Form.Item label="Button">
-          <Button>Button</Button>
-        </Form.Item> */}
-        <Form.Item label="Slider">
-          <Slider />
-        </Form.Item>
-        <Form.Item label="ColorPicker">
-          <ColorPicker />
         </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit">

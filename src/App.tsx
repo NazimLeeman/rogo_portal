@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { routes } from './routes';
-import { useAuth } from "./hooks/useAuth";
+import { useAuth } from './hooks/useAuth';
 // import { privateSupabase } from "./api/SupabaseClient";
 // import { useSupabase } from "./context/supabaseContext";
 // import { useOnboarding } from './context/onboardingContext';
@@ -14,14 +14,11 @@ function App() {
   // );
   const location = useLocation();
 
-  const excludedPaths = [
-    "/login",
-    "/register"
-  ];
+  const excludedPaths = ['/login', '/register'];
 
-  const isPathExcluded = excludedPaths.some((path) => 
-    location.pathname.startsWith(path)
-  )
+  const isPathExcluded = excludedPaths.some((path) =>
+    location.pathname.startsWith(path),
+  );
 
   if (loading) {
     return <div>Loading...</div>;
