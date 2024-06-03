@@ -156,13 +156,13 @@ const Dashboard: React.FC = () => {
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   <div className="p-8">
-                    <p className="text-xl">Search an Existing Student</p>
+                    <p className="text-xl">Search an Existing Student Account</p>
                   </div>
                   {students !== null && (
-                    <div>
+                    <div className='p-2 ml-8'>
                       <Select
                         showSearch
-                        style={{ width: 200 }}
+                        style={{ width: 400 }}
                         placeholder="nazim@gmail.com"
                         optionFilterProp="children"
                         onChange={onChange}
@@ -176,14 +176,11 @@ const Dashboard: React.FC = () => {
                             {student.email}
                           </Option>
                         ))}
-                        {/* <Option value="jack">Jack</Option>
-                      <Option value="lucy">Lucy</Option>
-                      <Option value="tom">Tom</Option> */}
                       </Select>
                     </div>
                   )}
                   <div className="p-8">
-                    <p className="text-xl">Create a New Student File</p>
+                    <p className="text-xl">Create a New Student Account</p>
                   </div>
                   <div>
                     <StudentForm />
