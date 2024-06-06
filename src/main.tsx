@@ -4,13 +4,18 @@ import App from './App.tsx';
 import './index.css';
 import { SupabaseProvider } from './context/supabaseContext.tsx';
 import { BrowserRouter } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+import { FileProvider } from './context/FileContext.tsx';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <SupabaseProvider>
+      <FileProvider> 
       <BrowserRouter>
         <App />
+        <Toaster/>
       </BrowserRouter>
+      </FileProvider>
     </SupabaseProvider>
   </React.StrictMode>,
 );

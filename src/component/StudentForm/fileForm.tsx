@@ -11,6 +11,7 @@ import {
   InputNumber,
   Radio,
   Select,
+  SelectProps,
   Slider,
   Switch,
   TreeSelect,
@@ -18,8 +19,9 @@ import {
 } from 'antd';
 import { publicSupabase } from '../../api/SupabaseClient';
 import { useNavigate } from 'react-router-dom';
-import { StudentInfo } from '../../interface/studentInfo.interface';
+import { StudentFile, StudentInfo } from '../../interface/studentInfo.interface';
 import toast from 'react-hot-toast';
+import { useFile } from '../../context/FileContext';
 
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
@@ -31,58 +33,37 @@ const normFile = (e: any) => {
   return e?.fileList;
 };
 
-const StudentForm: React.FC = () => {
+const FileForm: React.FC = () => {
   //   const [componentDisabled, setComponentDisabled] = useState<boolean>(true);
+  // const [students, setStudents] = useState<StudentInfo[] | null>([]);
+  const { students, setStudents} = useFile();
   const formRef = useRef<any>(null);
 
   const { Option } = Select;
 
   const navigate = useNavigate();
 
-  const onFinish = async (values: StudentInfo) => {
-    // const { email, ...userData } = values;
-    console.log('values', values);
-    // try {
-    //   const { data, error } =
-    //     await publicSupabase.auth.signInWithOtp({
-    //       email: email,
-    //       options: {
-    //         emailRedirectTo: 'http://localhost:5173/dashboard'
-    //       }
-    //     });
-    //   if (error) {
-    //     throw error;
-    //   }
-    //   if (data) {
-    //     console.log('Successfully send email', data);
-        postStudentInfo(values)
-    //   }
-
-    // } catch (error: any) {
-    //   console.error('Error inserting data:', error.message);
-    // }
-  };
-
-  const postStudentInfo = async (userData: StudentInfo) => {
+  const onFinish = async (values: StudentFile) => {
     try {
-      console.log('user',userData)
-      const { data, error } = await publicSupabase
-        .from('studentInfo')
-        .insert({
-          first_name: userData.first_name,
-          last_name: userData.last_name,
-          email: userData.email,
-          phone_number: userData.phone_number
-        });
-      if (error) {
-        toast.error("Error while creating StudentInfo")
-        throw error;
-      } 
-      toast.success("Successfully created StudentInfo");
-      formRef.current.resetFields();
-    } catch (error) {
-      console.error('ERROR: ', error);
-    }
+        console.log('user',values)
+        const { data, error } = await publicSupabase
+          .from('studentFile')
+          .insert({
+            university_name: values.university_name,
+            program: values.program,
+            subject: values.subject,
+            budget: values.budget,
+            student_id: values.student_id
+          });
+        if (error) {
+          toast.error("Error while creating StudentFile")
+          throw error;
+        } 
+        toast.success("Successfully created Student File");
+        formRef.current.resetFields();
+      } catch (error) {
+        console.error('ERROR: ', error);
+      }
   };
 
   const onFinishFailed = (errorInfo: any) => {
@@ -107,6 +88,15 @@ const StudentForm: React.FC = () => {
     </Form.Item>
   );
 
+  const filterOption: SelectProps<string>['filterOption'] = (input, option) => {
+    // Ensure option and option.children are defined
+    return (
+      (option?.children as unknown as string)
+        .toLowerCase()
+        .indexOf(input.toLowerCase()) >= 0
+    );
+  };
+
   return (
     <>
       {/* <Checkbox
@@ -128,47 +118,63 @@ const StudentForm: React.FC = () => {
         {/* <Form.Item label="Checkbox" name="disabled" valuePropName="checked">
           <Checkbox>Checkbox</Checkbox>
         </Form.Item> */}
-        <Form.Item 
-          label="First Name"
-          name="first_name"
-          rules={[{ required: true, message: 'Please input first name!' }]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item 
-        label="Last Name"
-        name="last_name"
-          rules={[{ required: true, message: 'Please input last name!' }]}
-          >
-          <Input />
-        </Form.Item>
-        <Form.Item 
-        label="Email"
-        name="email"
-          rules={[{ required: true, message: 'Please input email!' }]}
-        >
-          <Input />
-        </Form.Item>    
         <Form.Item
-          label="Phone Number"
-          name="phone_number"
-          rules={[{ required: true, message: 'Please input phone number!' }]}
+        label="Student Email"
+        name="student_id"
+          rules={[{ required: true, message: 'Please input student email!' }]}
         >
-          <Input addonBefore={prefixSelector} />
+            {students !== null && (
+        <Select
+            showSearch
+            style={{ width: 400 }}
+            placeholder="nazim@gmail.com"
+            optionFilterProp="children"
+            // onChange={onChange}
+            // onFocus={onFocus}
+            // onBlur={onBlur}
+            // onSearch={onSearch}
+            filterOption={filterOption}
+            >
+            {students.map((student) => (
+                <Option key={student.id} value={student.id}>
+                {student.email}
+                </Option>
+            ))}
+            </Select>
+            )}
         </Form.Item>
-        {/* <Form.Item label="Program">
+        <Form.Item 
+          label="University"
+          name="university_name"
+          rules={[{ required: true, message: 'Please input university name!' }]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item 
+        name="program"
+        label="Program"
+        rules={[{ required: true, message: 'Please input program!' }]}>
           <Select>
             <Select.Option value="honors">Honors</Select.Option>
             <Select.Option value="masters">Masters</Select.Option>
           </Select>
         </Form.Item>
+        <Form.Item 
+        label="Subject"
+        name="subject"
+          rules={[{ required: true, message: 'Please input subject!' }]}
+          >
+          <Input />
+        </Form.Item>
+        
         <Form.Item
           name="budget"
           label="Budget"
+          rules={[{ required: true, message: 'Please input budget!' }]}
         >
           <InputNumber addonAfter={suffixSelector} style={{ width: '100%' }} />
         </Form.Item>
-        <Form.Item
+        {/* <Form.Item
           label="Upload"
           valuePropName="fileList"
           getValueFromEvent={normFile}
@@ -190,4 +196,4 @@ const StudentForm: React.FC = () => {
   );
 };
 
-export default StudentForm;
+export default FileForm;

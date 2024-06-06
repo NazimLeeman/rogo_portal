@@ -6,20 +6,22 @@ import {
   InboxOutlined,
   LogoutOutlined,
 } from '@ant-design/icons';
-import { Layout, Menu, theme } from 'antd';
+import { Card, Layout, Menu, Space, theme } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import UploadFeature from '../component/Upload/upload';
 import StudentForm from '../component/StudentForm/studentForm';
 import { publicSupabase } from '../api/SupabaseClient';
 import { Select } from 'antd';
 import type { SelectProps } from 'antd';
-import { StudentInfo } from '../interface/studentInfo.interface';
+import { StudentFile, StudentInfo } from '../interface/studentInfo.interface';
+import FileForm from '../component/StudentForm/fileForm';
+import { useFile } from '../context/FileContext';
 
 const { Option } = Select;
 
 const { Header, Content, Footer, Sider } = Layout;
 
-const navLabels = ['Students', 'Status', 'Info', 'Payment'];
+const navLabels = ['Student Info', 'Student File', 'Status', 'Payment'];
 
 const logoutLabel = [
   {
@@ -42,11 +44,15 @@ const items = [
 
 const Dashboard: React.FC = () => {
   const [selectedNav, setSelectedNav] = useState<string | null>('1');
-  const [students, setStudents] = useState<StudentInfo[] | null>([]);
+  // const [students, setStudents] = useState<StudentInfo[] | null>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [selectedStudent, setSelectedStudent] = useState<StudentInfo | null>(null);
+  const [selectedStudentFile, setSelectedStudentFile] = useState<StudentFile | null>(null);
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+
+  const { students, setStudents } = useFile();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -72,7 +78,9 @@ const Dashboard: React.FC = () => {
   };
 
   const onChange = (value: string) => {
-    console.log(`selected ${value}`);
+    const student = students?.find(student => student.id === value) || null;
+    setSelectedStudent(student);
+    console.log("selected", student);
   };
 
   const onBlur = () => {
@@ -109,6 +117,23 @@ const Dashboard: React.FC = () => {
         .indexOf(input.toLowerCase()) >= 0
     );
   };
+
+  const handleSudentFile = async (id: string) => {
+    try {
+      const { data, error } = await publicSupabase
+        .from('studentFile')
+        .select('*')
+        .eq('student_id', id);
+      // setStudents(StudentInfo);
+      // setLoading(false);
+      if (error) throw error;
+      console.log(data)
+      // setSelectedStudentFile(data)
+    } catch (error) {
+      console.error('ERROR: ', error);
+      // setLoading(false);
+    }
+  }
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -154,7 +179,7 @@ const Dashboard: React.FC = () => {
                 <div className="text-xl">
                   <h1> Welcome to ROGO PORTAL</h1>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <div className='flex flex-col'>
                   <div className="p-8">
                     <p className="text-xl">Search an Existing Student Account</p>
                   </div>
@@ -172,11 +197,22 @@ const Dashboard: React.FC = () => {
                         filterOption={filterOption}
                       >
                         {students.map((student) => (
-                          <Option key={student.id} value={student.email}>
+                          <Option key={student.id} value={student.id}>
                             {student.email}
                           </Option>
                         ))}
                       </Select>
+                    </div>
+                  )}
+                  {selectedStudent && (
+                    <div className='pl-10 pt-2'>
+    <Card title={selectedStudent.email} 
+    // extra={<a href="#">More</a>} 
+    style={{ width: 400 }}>
+      <p>Currently {selectedStudent.first_name} has {selectedStudent.student_files.length} student file ongoing.</p>
+      <button className='mt-2 hover:text-[#0000FF]'
+      onClick={() => handleSudentFile(selectedStudent.id)}>Click here to see in details.</button>             
+    </Card>
                     </div>
                   )}
                   <div className="p-8">
@@ -192,7 +228,13 @@ const Dashboard: React.FC = () => {
                 </div>
               </div>
             )}
-            {selectedNav === '2' && <div>Content for Nav 2</div>}
+            {selectedNav === '2' && <div>
+            <div className="p-8">
+                    <p className="text-xl">Create a New Student File</p>
+                    <span className='mt-2'>You need to create a student account before creating a file.</span>
+                  </div>
+              <FileForm/>
+              </div>}
             {selectedNav === '3' && <div>Content for Nav 3</div>}
             {selectedNav === '4' && <div>Content for Nav 4</div>}
           </div>
