@@ -6,7 +6,7 @@ import {
   InboxOutlined,
   LogoutOutlined,
 } from '@ant-design/icons';
-import { Card, Layout, Menu, Space, theme } from 'antd';
+import { Card, Layout, Menu, Modal, Space, theme } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import UploadFeature from '../component/Upload/upload';
 import StudentForm from '../component/StudentForm/studentForm';
@@ -45,9 +45,11 @@ const items = [
 const Dashboard: React.FC = () => {
   const [selectedNav, setSelectedNav] = useState<string | null>('1');
   // const [students, setStudents] = useState<StudentInfo[] | null>([]);
+  const [open, setOpen] = useState<boolean>(false);
+  const [modalLoading, setModalLoading] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedStudent, setSelectedStudent] = useState<StudentInfo | null>(null);
-  const [selectedStudentFile, setSelectedStudentFile] = useState<StudentFile | null>(null);
+  const [selectedStudentFile, setSelectedStudentFile] = useState<any[] | null>(null);
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -120,15 +122,16 @@ const Dashboard: React.FC = () => {
 
   const handleSudentFile = async (id: string) => {
     try {
-      const { data, error } = await publicSupabase
-        .from('studentFile')
-        .select('*')
-        .eq('student_id', id);
+      const { data: StudentFile, error } = await publicSupabase
+      .from('studentFile')
+      .select('*')
+      .eq('student_id', id);
       // setStudents(StudentInfo);
       // setLoading(false);
       if (error) throw error;
-      console.log(data)
-      // setSelectedStudentFile(data)
+      console.log(StudentFile)
+      setSelectedStudentFile(StudentFile)
+      setOpen(true);
     } catch (error) {
       console.error('ERROR: ', error);
       // setLoading(false);
@@ -211,8 +214,22 @@ const Dashboard: React.FC = () => {
     style={{ width: 400 }}>
       <p>Currently {selectedStudent.first_name} has {selectedStudent.student_files.length > 0 ? selectedStudent.student_files.length : "no"} student file ongoing.</p>
     {selectedStudent.student_files.length > 0 && (
+      <>
       <button className='mt-2 hover:text-[#0000FF]'
-      onClick={() => handleSudentFile(selectedStudent.id)}>Click here to see in details.</button>             
+      onClick={() => handleSudentFile(selectedStudent.id)}>Click here to see in details.</button> 
+      {selectedStudentFile !== null && (
+      <Modal
+        title={<p>{selectedStudentFile[0].university_name}</p>}
+        open={open}
+        onCancel={() => setOpen(false)}
+        onOk={() => setOpen(false)}
+        >
+        <p>Program: {selectedStudentFile[0].program}</p>
+        <p>Subject: {selectedStudentFile[0].subject}</p>
+        <p>Budget: {selectedStudentFile[0].budget}</p>
+      </Modal>            
+      )}
+        </>
     )}
     </Card>
                     </div>
