@@ -3,19 +3,18 @@ import {
   UploadOutlined,
   UserOutlined,
   VideoCameraOutlined,
-  InboxOutlined,
   LogoutOutlined,
 } from '@ant-design/icons';
-import { Card, Layout, Menu, Modal, Space, theme } from 'antd';
-import { useNavigate, useLocation } from 'react-router-dom';
-import UploadFeature from '../component/Upload/upload';
+import { Card, Layout, Menu, Modal, theme } from 'antd';
+import { useNavigate } from 'react-router-dom';
 import StudentForm from '../component/StudentForm/studentForm';
 import { publicSupabase } from '../api/SupabaseClient';
 import { Select } from 'antd';
 import type { SelectProps } from 'antd';
-import { StudentFile, StudentInfo } from '../interface/studentInfo.interface';
+import { StudentInfo } from '../interface/studentInfo.interface';
 import FileForm from '../component/StudentForm/fileForm';
 import { useFile } from '../context/FileContext';
+import SearchTable from '../component/Table/table';
 
 const { Option } = Select;
 
@@ -43,10 +42,9 @@ const items = [
 }));
 
 const Dashboard: React.FC = () => {
-  const [selectedNav, setSelectedNav] = useState<string | null>('1');
+  // const [selectedNav, setSelectedNav] = useState<string | null>('1');
   // const [students, setStudents] = useState<StudentInfo[] | null>([]);
   const [open, setOpen] = useState<boolean>(false);
-  const [modalLoading, setModalLoading] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedStudent, setSelectedStudent] = useState<StudentInfo | null>(null);
   const [selectedStudentFile, setSelectedStudentFile] = useState<any[] | null>(null);
@@ -54,10 +52,9 @@ const Dashboard: React.FC = () => {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  const { students, setStudents } = useFile();
+  const { students, setStudents, selectedNav, setSelectedNav } = useFile();
 
   const navigate = useNavigate();
-  const location = useLocation();
 
   useEffect(() => {
     getStudentInfo();
@@ -251,9 +248,15 @@ const Dashboard: React.FC = () => {
               </div>
             )}
             {selectedNav === '2' && <div>
-            <div className="p-8">
+              <div>
+              <div>
+                    <p className="text-xl">Search Student File</p>
+                  </div>
+                <SearchTable/>
+              </div>
+            <div className="p-5">
                     <p className="text-xl">Create a New Student File</p>
-                    <span className='mt-2'>You need to create a student account before creating a file.</span>
+                    <span>You need to create a student account before creating a file.</span>
                   </div>
               <FileForm/>
               </div>}

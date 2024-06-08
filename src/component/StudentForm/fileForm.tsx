@@ -169,7 +169,11 @@ const FileForm: React.FC = () => {
           name="university_name"
           rules={[{ required: true, message: 'Please input university name!' }]}
         >
-          <Input />
+          {/* <Input /> */}
+          <Select>
+            <Select.Option value="RSUH">RSUH</Select.Option>
+            <Select.Option value="OXFORD">OXFORD</Select.Option>
+          </Select>
         </Form.Item>
         <Form.Item 
         name="program"
