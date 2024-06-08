@@ -40,27 +40,27 @@ const StudentForm: React.FC = () => {
   const navigate = useNavigate();
 
   const onFinish = async (values: StudentInfo) => {
-    // const { email, ...userData } = values;
+    const { email, ...userData } = values;
     console.log('values', values);
-    // try {
-    //   const { data, error } =
-    //     await publicSupabase.auth.signInWithOtp({
-    //       email: email,
-    //       options: {
-    //         emailRedirectTo: 'http://localhost:5173/dashboard'
-    //       }
-    //     });
-    //   if (error) {
-    //     throw error;
-    //   }
-    //   if (data) {
-    //     console.log('Successfully send email', data);
+    try {
+      const { data, error } =
+        await publicSupabase.auth.signInWithOtp({
+          email: email,
+          options: {
+            emailRedirectTo: 'http://localhost:5173/dashboard'
+          }
+        });
+      if (error) {
+        throw error;
+      }
+      if (data) {
+        console.log('Successfully send email', data);
         postStudentInfo(values)
-    //   }
+      }
 
-    // } catch (error: any) {
-    //   console.error('Error inserting data:', error.message);
-    // }
+    } catch (error: any) {
+      console.error('Error inserting data:', error);
+    }
   };
 
   const postStudentInfo = async (userData: StudentInfo) => {
