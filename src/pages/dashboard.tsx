@@ -209,9 +209,11 @@ const Dashboard: React.FC = () => {
     <Card title={selectedStudent.email} 
     // extra={<a href="#">More</a>} 
     style={{ width: 400 }}>
-      <p>Currently {selectedStudent.first_name} has {selectedStudent.student_files.length} student file ongoing.</p>
+      <p>Currently {selectedStudent.first_name} has {selectedStudent.student_files.length > 0 ? selectedStudent.student_files.length : "no"} student file ongoing.</p>
+    {selectedStudent.student_files.length > 0 && (
       <button className='mt-2 hover:text-[#0000FF]'
       onClick={() => handleSudentFile(selectedStudent.id)}>Click here to see in details.</button>             
+    )}
     </Card>
                     </div>
                   )}

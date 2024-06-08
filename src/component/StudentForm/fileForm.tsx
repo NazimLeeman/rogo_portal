@@ -54,11 +54,32 @@ const FileForm: React.FC = () => {
             subject: values.subject,
             budget: values.budget,
             student_id: values.student_id
-          });
+          })
+          .select('id')
+          .single();
         if (error) {
           toast.error("Error while creating StudentFile")
           throw error;
         } 
+        const newStudentFileId = data.id;
+        const { data: rpcData, error: rpcError } = await publicSupabase
+      .rpc('append_student_file', {
+        student_id: values.student_id,
+        new_file_id: newStudentFileId
+      });
+
+    if (rpcError) {
+      toast.error("Error while updating studentInfo with StudentFile ID");
+      throw rpcError;
+    }
+      //   const { data: updateData, error: updateError } = await publicSupabase
+      // .from('studentInfo')
+      // .update({ student_files: newStudentFileId })
+      // .eq('id', values.student_id); 
+      // if(updateError) {
+      //   toast.error("Error while updating studentInfo with StudentFile ID");
+      // throw updateError;
+      // }
         toast.success("Successfully created Student File");
         formRef.current.resetFields();
       } catch (error) {
