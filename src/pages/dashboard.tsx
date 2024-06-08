@@ -63,9 +63,12 @@ const Dashboard: React.FC = () => {
     getStudentInfo();
   }, []);
 
+  useEffect(() => {
+    setSelectedStudent(null)
+  },[selectedNav])
+
   const handleNavClick = (key: string) => {
     setSelectedNav(key);
-    // Optionally, you can add additional logic here to display different content based on the selected navigation item
   };
 
   const handleLogout = () => {
