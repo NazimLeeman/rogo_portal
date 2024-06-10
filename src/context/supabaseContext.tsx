@@ -15,8 +15,12 @@ import {
 } from '../api/SupabaseClient';
 
 interface ISupabaseContext {
+  userId:any;
+  setUserId:any;
   userIdPrivate: any;
   setUserIdPrivate: any;
+  userEmail: any,
+  setUserEmail: any,
   publicSupabase: SupabaseClient;
   privateSupabase: SupabaseClient | null;
   initializePrivateSupabase: (url: string, anonKey: string) => void;
@@ -25,8 +29,12 @@ interface ISupabaseContext {
 }
 
 const SupabaseContext = createContext<ISupabaseContext>({
+  userId: '',
+  setUserId: '',
   userIdPrivate: '',
   setUserIdPrivate: '',
+  userEmail: '',
+  setUserEmail: '',
   publicSupabase: publicSupabase,
   privateSupabase: privateSupabase,
   initializePrivateSupabase: initializePrivateSupabase,
@@ -39,6 +47,8 @@ export const SupabaseProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const [privateClient, setPrivateClient] =
     useState<SupabaseClient>(privateSupabase);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userIdPrivate, setUserIdPrivate] = useState(null);
   useEffect(() => {
     const projectUrl = localStorage.getItem('supabaseProjectUrl');
@@ -54,8 +64,12 @@ export const SupabaseProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   const value = {
+    userId,
+    setUserId,
     userIdPrivate,
     setUserIdPrivate,
+    userEmail,
+    setUserEmail,
     publicSupabase,
     privateSupabase: privateClient,
     initializePrivateSupabase: handleInitializePrivateSupabase,
