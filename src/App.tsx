@@ -1,4 +1,10 @@
-import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import {
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+  useNavigate,
+} from 'react-router-dom';
 import { routes } from './routes';
 import { useAuth } from './hooks/useAuth';
 import { useRole } from './hooks/useRole';
@@ -20,7 +26,7 @@ import MagicLogin from './component/Login/magicLogin';
 
 function App() {
   const { userId, loading } = useAuth();
-  const [selectedNav, setSelectedNav] = useState<any>("1");
+  const [selectedNav, setSelectedNav] = useState<any>('1');
   const { userRole } = useRole();
   // const { userIdPrivate } = useSupabase();
   // const { onboardingSaved } = useOnboarding();
@@ -32,15 +38,15 @@ function App() {
   const navigate = useNavigate();
 
   const { Option } = Select;
-  
+
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
-  
+
   const { Header, Content, Footer, Sider } = Layout;
-  
+
   const navLabels = ['Student Info', 'Student File', 'Status', 'Payment'];
-  
+
   const logoutLabel = [
     {
       key: '5',
@@ -48,7 +54,7 @@ function App() {
       label: 'Logout',
     },
   ];
-  
+
   const items = [
     UserOutlined,
     VideoCameraOutlined,
@@ -59,11 +65,11 @@ function App() {
     icon: React.createElement(icon),
     label: navLabels[index],
   }));
-  
+
   const handleNavClick = (key: string) => {
     setSelectedNav(key);
   };
-  
+
   const handleLogout = () => {
     Promise.all([publicSupabase.auth.signOut()])
       .then(() => {
@@ -94,65 +100,67 @@ function App() {
     return <MagicLogin />;
   }
 
-
   return (
     <>
-    <Layout style={{ minHeight: '100vh' }}>
-      <Sider
-        breakpoint="lg"
-        collapsedWidth="0"
-        onBreakpoint={(broken) => {
-          console.log(broken);
+      <Layout style={{ minHeight: '100vh' }}>
+        <Sider
+          breakpoint="lg"
+          collapsedWidth="0"
+          onBreakpoint={(broken) => {
+            console.log(broken);
           }}
           onCollapse={(collapsed, type) => {
             console.log(collapsed, type);
-            }}
-            >
-        <div className="demo-logo-vertical" />
-        <Menu
-          theme="dark"
-          mode="inline"
-          selectedKeys={selectedNav ? [selectedNav] : []}
-          onClick={(info) => handleNavClick(info.key)}
-          items={items}
+          }}
+        >
+          <div className="demo-logo-vertical" />
+          <Menu
+            theme="dark"
+            mode="inline"
+            selectedKeys={selectedNav ? [selectedNav] : []}
+            onClick={(info) => handleNavClick(info.key)}
+            items={items}
           />
-        <Menu
-          theme="dark"
-          mode="inline"
-          items={logoutLabel}
-          onClick={() => handleLogout()}
-          style={{ position: 'absolute', bottom: 0, width: '100%' }}
+          <Menu
+            theme="dark"
+            mode="inline"
+            items={logoutLabel}
+            onClick={() => handleLogout()}
+            style={{ position: 'absolute', bottom: 0, width: '100%' }}
           />
-    </Sider>
-    <Layout>
-        <Header style={{ padding: 0, background: colorBgContainer }} />
-        <Content style={{ margin: '24px 16px 0' }}>
-          <div
-            style={{
-              padding: 24,
-              minHeight: '80vh',
-              background: colorBgContainer,
-              borderRadius: borderRadiusLG,
+        </Sider>
+        <Layout>
+          <Header style={{ padding: 0, background: colorBgContainer }} />
+          <Content style={{ margin: '24px 16px 0' }}>
+            <div
+              style={{
+                padding: 24,
+                minHeight: '80vh',
+                background: colorBgContainer,
+                borderRadius: borderRadiusLG,
               }}
-              >
+            >
               <Routes>
                 {routes
-                .filter((route) => route.path !== '/login')
-                .map(({ path, element }, key) => (
-                  <Route key={key} path={path} element={element} />
+                  .filter((route) => route.path !== '/login')
+                  .map(({ path, element }, key) => (
+                    <Route key={key} path={path} element={element} />
                   ))}
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="*" element={<Navigate to='/dashboard' replace />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route
+                  path="*"
+                  element={<Navigate to="/dashboard" replace />}
+                />
               </Routes>
-          </div>
+            </div>
           </Content>
-        <Footer style={{ textAlign: 'center' }}>
-          Rogo Portal ©{new Date().getFullYear()} Created by Runtime Terror
-          Squad
-        </Footer>
+          <Footer style={{ textAlign: 'center' }}>
+            Rogo Portal ©{new Date().getFullYear()} Created by Runtime Terror
+            Squad
+          </Footer>
+        </Layout>
       </Layout>
-  </Layout>
-  </>
+    </>
   );
 }
 

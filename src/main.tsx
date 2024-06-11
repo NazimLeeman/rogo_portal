@@ -11,9 +11,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <SupabaseProvider>
       <BrowserRouter>
-        <FileProvider> 
-            <App />
-          <Toaster/>
+        <FileProvider>
+          <App />
+          <Toaster />
         </FileProvider>
       </BrowserRouter>
     </SupabaseProvider>

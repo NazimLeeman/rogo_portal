@@ -43,21 +43,19 @@ const StudentForm: React.FC = () => {
     const { email, ...userData } = values;
     console.log('values', values);
     try {
-      const { data, error } =
-        await publicSupabase.auth.signInWithOtp({
-          email: email,
-          options: {
-            emailRedirectTo: 'http://localhost:5173/dashboard'
-          }
-        });
+      const { data, error } = await publicSupabase.auth.signInWithOtp({
+        email: email,
+        options: {
+          emailRedirectTo: 'http://localhost:5173/dashboard',
+        },
+      });
       if (error) {
         throw error;
       }
       if (data) {
         console.log('Successfully send email', data);
-        postStudentInfo(values)
+        postStudentInfo(values);
       }
-
     } catch (error: any) {
       console.error('Error inserting data:', error);
     }
@@ -65,20 +63,18 @@ const StudentForm: React.FC = () => {
 
   const postStudentInfo = async (userData: StudentInfo) => {
     try {
-      console.log('user',userData)
-      const { data, error } = await publicSupabase
-        .from('studentInfo')
-        .insert({
-          first_name: userData.first_name,
-          last_name: userData.last_name,
-          email: userData.email,
-          phone_number: userData.phone_number
-        });
+      console.log('user', userData);
+      const { data, error } = await publicSupabase.from('studentInfo').insert({
+        first_name: userData.first_name,
+        last_name: userData.last_name,
+        email: userData.email,
+        phone_number: userData.phone_number,
+      });
       if (error) {
-        toast.error("Error while creating StudentInfo")
+        toast.error('Error while creating StudentInfo');
         throw error;
-      } 
-      toast.success("Successfully created StudentInfo");
+      }
+      toast.success('Successfully created StudentInfo');
       formRef.current.resetFields();
     } catch (error) {
       console.error('ERROR: ', error);
@@ -116,7 +112,7 @@ const StudentForm: React.FC = () => {
         Form disabled
       </Checkbox> */}
       <Form
-      ref={formRef}
+        ref={formRef}
         labelCol={{ span: 6 }}
         wrapperCol={{ span: 14 }}
         layout="horizontal"
@@ -128,27 +124,27 @@ const StudentForm: React.FC = () => {
         {/* <Form.Item label="Checkbox" name="disabled" valuePropName="checked">
           <Checkbox>Checkbox</Checkbox>
         </Form.Item> */}
-        <Form.Item 
+        <Form.Item
           label="First Name"
           name="first_name"
           rules={[{ required: true, message: 'Please input first name!' }]}
         >
           <Input />
         </Form.Item>
-        <Form.Item 
-        label="Last Name"
-        name="last_name"
+        <Form.Item
+          label="Last Name"
+          name="last_name"
           rules={[{ required: true, message: 'Please input last name!' }]}
-          >
+        >
           <Input />
         </Form.Item>
-        <Form.Item 
-        label="Email"
-        name="email"
+        <Form.Item
+          label="Email"
+          name="email"
           rules={[{ required: true, message: 'Please input email!' }]}
         >
           <Input />
-        </Form.Item>    
+        </Form.Item>
         <Form.Item
           label="Phone Number"
           name="phone_number"

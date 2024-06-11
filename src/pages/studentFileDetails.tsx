@@ -6,58 +6,68 @@ import { UploadOutlined } from '@ant-design/icons';
 import props from '../component/Upload/upload';
 import { useParams } from 'react-router-dom';
 import { publicSupabase } from '../api/SupabaseClient';
+import { Steps } from 'antd';
 import Step from '../component/Step/step';
 
+// let description = 'This is a description.';
+// const Step: React.FC = () => {
+//   return (
+//     <Steps
+//       direction="vertical"
+//       current={1}
+//       items={[
+//         {
+//           title: 'Pending',
+//           description,
+//         },
+//         {
+//           title: 'Wating',
+//           description,
+//         },
+//         {
+//           title: 'Waiting',
+//           description,
+//         },
+//       ]}
+//     />
+//   );
+// };
+
 const StudentFileDetails: React.FC = () => {
-    const { 
-        selectedNav,
-        setSelectedNav,
-        studentInfo,
-        setStudentInfo,
-        studentFiles,
-        setStudentFiles,
-        fileData,
-        setFileData
-    } = useFile();
-    const { fileId } = useParams();
-    // const [fileData, setFileData] = useState<any[]>();
+  const {
+    selectedNav,
+    setSelectedNav,
+    studentInfo,
+    setStudentInfo,
+    studentFiles,
+    setStudentFiles,
+    fileData,
+    setFileData,
+  } = useFile();
+  const { fileId } = useParams();
 
-    // useEffect(() => {
-    //   // This will log the updated studentInfo value whenever it changes
-    //   console.log('studentInfo:', studentInfo);
-    // }, [studentInfo]);
+  const formRef = useRef<any>(null);
 
-    // let initialValue = {};
-
-    const formRef = useRef<any>(null);
-
-    // if(studentInfo) {
-         const initialValue = {
-            first_name: studentInfo?.first_name,
-            last_name: studentInfo?.last_name,
-            email: studentInfo?.email,
-            phone_number: studentInfo?.phone_number,
-            university_name: studentFiles?.university_name,
-            program: studentFiles?.program,
-            subject: studentFiles?.subject,
-            budget: studentFiles?.budget
-        }
-    // }
-
-    // useEffect(() => {
-    //     fetchFileDetails();
-    // },[fileData])
+  const initialValue = {
+    first_name: studentInfo?.first_name,
+    last_name: studentInfo?.last_name,
+    email: studentInfo?.email,
+    phone_number: studentInfo?.phone_number,
+    university_name: studentFiles?.university_name,
+    program: studentFiles?.program,
+    subject: studentFiles?.subject,
+    budget: studentFiles?.budget,
+  };
 
   const { Option } = Select;
 
   const navigate = useNavigate();
 
   const handleBack = () => {
-    navigate('/file-submission')
-  }
+    navigate('/file-submission');
+  };
 
-  const onFinish = async (values:any) => {
-    // const { email, ...userData } = values;
+  const onFinish = async (values: any) => {
     console.log('values', values);
   };
 
@@ -67,12 +77,12 @@ const StudentFileDetails: React.FC = () => {
         .from('filedetails')
         .select('*')
         .eq('id', fileId);
-  
+
       if (error) {
         throw error;
       }
-  
-      console.log(data)
+
+      console.log(data);
       setFileData(data);
     } catch (error) {
       console.error('Error fetching file details:', error);
@@ -83,15 +93,17 @@ const StudentFileDetails: React.FC = () => {
     console.log('Failed:', errorInfo);
   };
 
-    return (
-        <>
-        <Button className='mb-8' onClick={handleBack}>Back</Button>
-        <div>
-            <p className='mb-4'>Status Timeline</p> 
-                <Step/>
-        </div>
+  return (
+    <>
+      <Button className="mb-8" onClick={handleBack}>
+        Back
+      </Button>
+      <div>
+        <p className="mb-4">Status Timeline</p>
+        <Step />
+      </div>
     </>
-    )
-}
+  );
+};
 
 export default StudentFileDetails;

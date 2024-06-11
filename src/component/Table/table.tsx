@@ -17,19 +17,17 @@ interface DataType {
 
 type DataIndex = keyof StudentFile;
 
-
 const SearchTable: React.FC = () => {
-    const [searchText, setSearchText] = useState('');
-    const [searchedColumn, setSearchedColumn] = useState('');
-    const { studentsFile, setStudentsFile } = useFile();
-    const data: StudentFile[] | null = studentsFile;
-  
+  const [searchText, setSearchText] = useState('');
+  const [searchedColumn, setSearchedColumn] = useState('');
+  const { studentsFile, setStudentsFile } = useFile();
+  const data: StudentFile[] | null = studentsFile;
+
   const searchInput = useRef<InputRef>(null);
 
   useEffect(() => {
     getStudentFile();
   }, []);
-  
 
   const getStudentFile = async () => {
     try {
@@ -58,23 +56,35 @@ const SearchTable: React.FC = () => {
     setSearchText('');
   };
 
-
-
-  const getColumnSearchProps = (dataIndex: DataIndex): TableColumnType<StudentFile> => ({
-    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+  const getColumnSearchProps = (
+    dataIndex: DataIndex,
+  ): TableColumnType<StudentFile> => ({
+    filterDropdown: ({
+      setSelectedKeys,
+      selectedKeys,
+      confirm,
+      clearFilters,
+      close,
+    }) => (
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Input
           ref={searchInput}
           placeholder={`Search ${dataIndex}`}
           value={selectedKeys[0]}
-          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-          onPressEnter={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
+          onChange={(e) =>
+            setSelectedKeys(e.target.value ? [e.target.value] : [])
+          }
+          onPressEnter={() =>
+            handleSearch(selectedKeys as string[], confirm, dataIndex)
+          }
           style={{ marginBottom: 8, display: 'block' }}
         />
         <Space>
           <Button
             type="primary"
-            onClick={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
+            onClick={() =>
+              handleSearch(selectedKeys as string[], confirm, dataIndex)
+            }
             icon={<SearchOutlined />}
             size="small"
             style={{ width: 90 }}
@@ -143,7 +153,7 @@ const SearchTable: React.FC = () => {
       dataIndex: 'student_id',
       key: 'student_id',
       width: '30%',
-    //   ...getColumnSearchProps('name'),
+      //   ...getColumnSearchProps('name'),
     },
     {
       title: 'University',
@@ -153,38 +163,38 @@ const SearchTable: React.FC = () => {
       ...getColumnSearchProps('university_name'),
     },
     {
-        title: 'Program',
-        dataIndex: 'program',
-        key: 'program',
-        width: '20%',
-        ...getColumnSearchProps('program'),
-      },
-      {
-        title: 'Subject',
-        dataIndex: 'subject',
-        key: 'subject',
-        width: '20%',
-        ...getColumnSearchProps('subject'),
-      },
+      title: 'Program',
+      dataIndex: 'program',
+      key: 'program',
+      width: '20%',
+      ...getColumnSearchProps('program'),
+    },
+    {
+      title: 'Subject',
+      dataIndex: 'subject',
+      key: 'subject',
+      width: '20%',
+      ...getColumnSearchProps('subject'),
+    },
     {
       title: 'Budget',
       dataIndex: 'budget',
       key: 'budget',
-    //   ...getColumnSearchProps('address'),
-    //   sorter: (a, b) => a.address.length - b.address.length,
+      //   ...getColumnSearchProps('address'),
+      //   sorter: (a, b) => a.address.length - b.address.length,
       sortDirections: ['descend', 'ascend'],
     },
   ];
 
-  return ( 
+  return (
     <>
-    {data && data.length > 0 ? (
-      <Table columns={columns} dataSource={data} />
-    ) : (
-      <div>Please Wait</div>
-    )}
-  </>
-  ) 
+      {data && data.length > 0 ? (
+        <Table columns={columns} dataSource={data} />
+      ) : (
+        <div>Please Wait</div>
+      )}
+    </>
+  );
 };
 
 export default SearchTable;

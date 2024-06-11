@@ -15,12 +15,12 @@ import {
 } from '../api/SupabaseClient';
 
 interface ISupabaseContext {
-  userId:any;
-  setUserId:any;
+  userId: any;
+  setUserId: any;
   userIdPrivate: any;
   setUserIdPrivate: any;
-  userEmail: any,
-  setUserEmail: any,
+  userEmail: any;
+  setUserEmail: any;
   publicSupabase: SupabaseClient;
   privateSupabase: SupabaseClient | null;
   initializePrivateSupabase: (url: string, anonKey: string) => void;

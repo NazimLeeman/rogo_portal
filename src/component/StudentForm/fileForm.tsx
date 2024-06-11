@@ -19,7 +19,10 @@ import {
 } from 'antd';
 import { publicSupabase } from '../../api/SupabaseClient';
 import { useNavigate } from 'react-router-dom';
-import { StudentFile, StudentInfo } from '../../interface/studentInfo.interface';
+import {
+  StudentFile,
+  StudentInfo,
+} from '../../interface/studentInfo.interface';
 import toast from 'react-hot-toast';
 import { useFile } from '../../context/FileContext';
 
@@ -36,7 +39,7 @@ const normFile = (e: any) => {
 const FileForm: React.FC = () => {
   //   const [componentDisabled, setComponentDisabled] = useState<boolean>(true);
   // const [students, setStudents] = useState<StudentInfo[] | null>([]);
-  const { students, setStudents} = useFile();
+  const { students, setStudents } = useFile();
   const formRef = useRef<any>(null);
 
   const { Option } = Select;
@@ -45,46 +48,48 @@ const FileForm: React.FC = () => {
 
   const onFinish = async (values: StudentFile) => {
     try {
-        console.log('user',values)
-        const { data, error } = await publicSupabase
-          .from('studentFile')
-          .insert({
-            university_name: values.university_name,
-            program: values.program,
-            subject: values.subject,
-            budget: values.budget,
-            student_id: values.student_id
-          })
-          .select('id')
-          .single();
-        if (error) {
-          toast.error("Error while creating StudentFile")
-          throw error;
-        } 
-        const newStudentFileId = data.id;
-        const { data: rpcData, error: rpcError } = await publicSupabase
-      .rpc('append_student_file', {
-        student_id: values.student_id,
-        new_file_id: newStudentFileId
-      });
+      console.log('user', values);
+      const { data, error } = await publicSupabase
+        .from('studentFile')
+        .insert({
+          university_name: values.university_name,
+          program: values.program,
+          subject: values.subject,
+          budget: values.budget,
+          student_id: values.student_id,
+        })
+        .select('id')
+        .single();
+      if (error) {
+        toast.error('Error while creating StudentFile');
+        throw error;
+      }
+      const newStudentFileId = data.id;
+      const { data: rpcData, error: rpcError } = await publicSupabase.rpc(
+        'append_student_file',
+        {
+          student_id: values.student_id,
+          new_file_id: newStudentFileId,
+        },
+      );
 
-    if (rpcError) {
-      toast.error("Error while updating studentInfo with StudentFile ID");
-      throw rpcError;
-    }
+      if (rpcError) {
+        toast.error('Error while updating studentInfo with StudentFile ID');
+        throw rpcError;
+      }
       //   const { data: updateData, error: updateError } = await publicSupabase
       // .from('studentInfo')
       // .update({ student_files: newStudentFileId })
-      // .eq('id', values.student_id); 
+      // .eq('id', values.student_id);
       // if(updateError) {
       //   toast.error("Error while updating studentInfo with StudentFile ID");
       // throw updateError;
       // }
-        toast.success("Successfully created Student File");
-        formRef.current.resetFields();
-      } catch (error) {
-        console.error('ERROR: ', error);
-      }
+      toast.success('Successfully created Student File');
+      formRef.current.resetFields();
+    } catch (error) {
+      console.error('ERROR: ', error);
+    }
   };
 
   const onFinishFailed = (errorInfo: any) => {
@@ -127,7 +132,7 @@ const FileForm: React.FC = () => {
         Form disabled
       </Checkbox> */}
       <Form
-      ref={formRef}
+        ref={formRef}
         labelCol={{ span: 6 }}
         wrapperCol={{ span: 14 }}
         layout="horizontal"
@@ -140,31 +145,31 @@ const FileForm: React.FC = () => {
           <Checkbox>Checkbox</Checkbox>
         </Form.Item> */}
         <Form.Item
-        label="Student Email"
-        name="student_id"
+          label="Student Email"
+          name="student_id"
           rules={[{ required: true, message: 'Please input student email!' }]}
         >
-            {students !== null && (
-        <Select
-            showSearch
-            style={{ width: 400 }}
-            placeholder="nazim@gmail.com"
-            optionFilterProp="children"
-            // onChange={onChange}
-            // onFocus={onFocus}
-            // onBlur={onBlur}
-            // onSearch={onSearch}
-            filterOption={filterOption}
+          {students !== null && (
+            <Select
+              showSearch
+              style={{ width: 400 }}
+              placeholder="nazim@gmail.com"
+              optionFilterProp="children"
+              // onChange={onChange}
+              // onFocus={onFocus}
+              // onBlur={onBlur}
+              // onSearch={onSearch}
+              filterOption={filterOption}
             >
-            {students.map((student) => (
+              {students.map((student) => (
                 <Option key={student.id} value={student.id}>
-                {student.email}
+                  {student.email}
                 </Option>
-            ))}
+              ))}
             </Select>
-            )}
+          )}
         </Form.Item>
-        <Form.Item 
+        <Form.Item
           label="University"
           name="university_name"
           rules={[{ required: true, message: 'Please input university name!' }]}
@@ -175,23 +180,24 @@ const FileForm: React.FC = () => {
             <Select.Option value="OXFORD">OXFORD</Select.Option>
           </Select>
         </Form.Item>
-        <Form.Item 
-        name="program"
-        label="Program"
-        rules={[{ required: true, message: 'Please input program!' }]}>
+        <Form.Item
+          name="program"
+          label="Program"
+          rules={[{ required: true, message: 'Please input program!' }]}
+        >
           <Select>
             <Select.Option value="honors">Honors</Select.Option>
             <Select.Option value="masters">Masters</Select.Option>
           </Select>
         </Form.Item>
-        <Form.Item 
-        label="Subject"
-        name="subject"
+        <Form.Item
+          label="Subject"
+          name="subject"
           rules={[{ required: true, message: 'Please input subject!' }]}
-          >
+        >
           <Input />
         </Form.Item>
-        
+
         <Form.Item
           name="budget"
           label="Budget"

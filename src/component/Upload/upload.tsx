@@ -91,4 +91,3 @@ const props: UploadProps = {
 };
 
 export default props;
-

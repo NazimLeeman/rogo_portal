@@ -41,21 +41,21 @@ const StudentSidebar: React.FC = () => {
   const [open, setOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
 
-//   const {
-//     token: { colorBgContainer, borderRadiusLG },
-//   } = theme.useToken();
+  //   const {
+  //     token: { colorBgContainer, borderRadiusLG },
+  //   } = theme.useToken();
 
   const { selectedNav, setSelectedNav } = useFile();
 
   const navigate = useNavigate();
 
-//   useEffect(() => {
-//     getStudentInfo();
-//   }, []);
+  //   useEffect(() => {
+  //     getStudentInfo();
+  //   }, []);
 
-//   useEffect(() => {
-//     setSelectedStudent(null)
-//   },[selectedNav])
+  //   useEffect(() => {
+  //     setSelectedStudent(null)
+  //   },[selectedNav])
 
   const handleNavClick = (key: string) => {
     setSelectedNav(key);
@@ -92,37 +92,37 @@ const StudentSidebar: React.FC = () => {
 
   const handleSudentFile = async (id: string) => {
     // navigate('/')
-  }
+  };
 
   return (
     // <Layout style={{ minHeight: '100vh' }}>
-      <Sider
-        breakpoint="lg"
-        collapsedWidth="0"
-        onBreakpoint={(broken) => {
-          console.log(broken);
-        }}
-        onCollapse={(collapsed, type) => {
-          console.log(collapsed, type);
-        }}
-      >
-        <div className="demo-logo-vertical" />
-        <Menu
-          theme="dark"
-          mode="inline"
-          selectedKeys={selectedNav ? [selectedNav] : []}
-          onClick={(info) => handleNavClick(info.key)}
-          items={items}
-        />
-        <Menu
-          theme="dark"
-          mode="inline"
-          items={logoutLabel}
-          onClick={() => handleLogout()}
-          style={{ position: 'absolute', bottom: 0, width: '100%' }}
-        />
-      </Sider>
-     //</Layout> 
+    <Sider
+      breakpoint="lg"
+      collapsedWidth="0"
+      onBreakpoint={(broken) => {
+        console.log(broken);
+      }}
+      onCollapse={(collapsed, type) => {
+        console.log(collapsed, type);
+      }}
+    >
+      <div className="demo-logo-vertical" />
+      <Menu
+        theme="dark"
+        mode="inline"
+        selectedKeys={selectedNav ? [selectedNav] : []}
+        onClick={(info) => handleNavClick(info.key)}
+        items={items}
+      />
+      <Menu
+        theme="dark"
+        mode="inline"
+        items={logoutLabel}
+        onClick={() => handleLogout()}
+        style={{ position: 'absolute', bottom: 0, width: '100%' }}
+      />
+    </Sider>
+    //</Layout>
   );
 };
 

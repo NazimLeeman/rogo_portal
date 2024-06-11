@@ -19,22 +19,21 @@ const MagicLogin: React.FC = () => {
   const onFinish = async (values: FieldType) => {
     console.log('values', values);
     try {
-        const { data, error } =
-          await publicSupabase.auth.signInWithOtp({
-            email: values.email,
-            options: {
-              emailRedirectTo: 'http://localhost:5173',
-              shouldCreateUser: false
-            }
-          });
-        if (error) {
-          toast.error(error.message)
-          throw error;
-        }
-          toast.success("Email sent successfully")
-      } catch (error: any) {
-        console.error('Error inserting data:', error);
+      const { data, error } = await publicSupabase.auth.signInWithOtp({
+        email: values.email,
+        options: {
+          emailRedirectTo: 'http://localhost:5173',
+          shouldCreateUser: false,
+        },
+      });
+      if (error) {
+        toast.error(error.message);
+        throw error;
       }
+      toast.success('Email sent successfully');
+    } catch (error: any) {
+      console.error('Error inserting data:', error);
+    }
   };
 
   const onFinishFailed = (errorInfo: any) => {

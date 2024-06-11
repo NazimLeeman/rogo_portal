@@ -31,11 +31,11 @@ export const routes = [
   {
     name: 'file-submission',
     path: '/file-submission',
-    element: < StudentFileSubmission/>
+    element: <StudentFileSubmission />,
   },
   {
     name: 'file-details',
     path: '/file-details/:fileId',
-    element: < StudentFileDetails/>
-  }
+    element: <StudentFileDetails />,
+  },
 ];

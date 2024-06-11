@@ -4,13 +4,10 @@ import StudentDashboard from './studentDashboard';
 import { useRole } from '../hooks/useRole';
 
 const Dashboard: React.FC = () => {
-
   const { userRole } = useRole();
 
   return (
-    <>
-    {userRole === "Admin" ? <AdminDashboard/> : <StudentDashboard/>}
-    </>
+    <>{userRole === 'Admin' ? <AdminDashboard /> : <StudentDashboard />}</>
   );
 };
 
