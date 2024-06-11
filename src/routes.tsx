@@ -5,6 +5,7 @@ import Register from './component/Register/register';
 import Dashboard from './pages/dashboard';
 import StudentDashboard from './pages/studentDashboard';
 import StudentFileSubmission from './pages/studentFileSubmission';
+import StudentFileDetails from './pages/studentFileDetails';
 
 export const routes = [
   // {
@@ -31,5 +32,10 @@ export const routes = [
     name: 'file-submission',
     path: '/file-submission',
     element: < StudentFileSubmission/>
+  },
+  {
+    name: 'file-details',
+    path: '/file-details/:fileId',
+    element: < StudentFileDetails/>
   }
 ];

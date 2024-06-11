@@ -10,12 +10,12 @@ import { FileProvider } from './context/FileContext.tsx';
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <SupabaseProvider>
-      <FileProvider> 
       <BrowserRouter>
-        <App />
-        <Toaster/>
+        <FileProvider> 
+            <App />
+          <Toaster/>
+        </FileProvider>
       </BrowserRouter>
-      </FileProvider>
     </SupabaseProvider>
   </React.StrictMode>,
 );

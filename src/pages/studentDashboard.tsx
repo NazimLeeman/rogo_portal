@@ -42,8 +42,8 @@ const items = [
 
 const StudentDashboard: React.FC = () => {
   // const [selectedNav, setSelectedNav] = useState<string | null>('1');
-  const [students, setStudents] = useState<StudentInfo | null>(null);
-  const [ studentFile, setStudentFiles] = useState<StudentFile>();
+  // const [studentInfo, setStudentInfo] = useState<StudentInfo | null>(null);
+  // const [ studentFiles, setStudentFiles] = useState<StudentFile | null>(null);
   const [open, setOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedStudent, setSelectedStudent] = useState<StudentInfo | null>(null);
@@ -54,13 +54,18 @@ const StudentDashboard: React.FC = () => {
   } = theme.useToken();
 
   const {userEmail, setUserEmail} = useSupabase();
-  const { selectedNav, setSelectedNav } = useFile();
+  const { selectedNav, setSelectedNav, studentInfo, setStudentInfo, studentFiles, setStudentFiles } = useFile();
 
   const navigate = useNavigate();
 
   useEffect(() => {
     getStudentInfo();
   }, []);
+
+  useEffect(() => {
+    // This will log the updated studentInfo value whenever it changes
+    console.log('from dashboard studentInfo:', studentInfo);
+  }, [studentInfo]);
 
   useEffect(() => {
     setSelectedStudent(null)
@@ -112,7 +117,7 @@ const StudentDashboard: React.FC = () => {
         //   await getStudentFile();
         // }
         console.log(userEmail)
-        setStudents((prevStudents) => {
+        setStudentInfo((prevStudent) => {
           // If you expect a single StudentInfo object
           if (data[0]?.id) {
             getStudentFile(data[0].id);
@@ -136,8 +141,6 @@ const StudentDashboard: React.FC = () => {
         if (error) throw error;
         setStudentFiles(data[0]);
       console.log('data',data[0])
-      console.log('data',students?.id)
-          console.log('students',students)
       console.log('userEmail', userEmail)
     } catch (error) {
       console.error('ERROR: ', error);
@@ -170,7 +173,7 @@ const StudentDashboard: React.FC = () => {
               <div>
                 <div className="text-xl">
                   <h1> Welcome to ROGO</h1>
-                  {students && students.student_files.length > 0 ? (                      
+                  {studentInfo && studentInfo.student_files.length > 0 ? (                      
                       <p>You have currently these files going on.</p>
                     ) : (
                       <p>You have currently no files going on.</p>
@@ -178,21 +181,21 @@ const StudentDashboard: React.FC = () => {
                   }
                 </div>
                 <div className='flex flex-col'>
-                  {students !== null && (
+                  {studentInfo !== null && (
                     <div className='p-2 ml-8'>
                     </div>
                   )}
-                  {studentFile && (
+                  {studentFiles && (
                     <div className='pl-10 pt-2'>
-    <Card title={studentFile.university_name}
+    <Card title={studentFiles.university_name}
     // extra={<a href="#">More</a>} 
     style={{ width: 400 }}>
-      <p>Program: {studentFile.program}</p>
-        <p>Subject: {studentFile.subject}</p>
-        <p>Budget: {studentFile.budget}</p>
+      <p>Program: {studentFiles.program}</p>
+        <p>Subject: {studentFiles.subject}</p>
+        <p>Budget: {studentFiles.budget}</p>
       <>
       <Button style={{ color: 'white', background: 'purple', border: "none"}} className='mt-2'
-      onClick={() => handleSudentFile(studentFile.student_id)}>Click here to proceed</Button> 
+      onClick={() => handleSudentFile(studentFiles.student_id)}>Click here to proceed</Button> 
       {/* {studentFile !== null && (
       <Modal
         title={<p>{studentFile.university_name}</p>}
