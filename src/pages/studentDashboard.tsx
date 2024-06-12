@@ -168,7 +168,7 @@ const StudentDashboard: React.FC = () => {
   };
 
   const handleSudentFile = async (id: string) => {
-    navigate('/file-submission');
+    navigate('/agreement');
   };
 
   return (

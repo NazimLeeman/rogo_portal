@@ -40,7 +40,7 @@ const StudentFileDetails: React.FC = () => {
   } = useFile();
   // const { fileId } = useParams();
   const [files, setFiles] = useState<any[]>([]);
-  const [downloadUrl, setDownloadUrl] = useState<any>();
+  const [downloadUrl, setDownloadUrl] = useState<any[]>([]);
 
   const navigate = useNavigate();
 
@@ -51,6 +51,10 @@ const StudentFileDetails: React.FC = () => {
   useEffect(() => {
     getFilesForStudent()
   },[])
+
+  useEffect(() => {
+    console.log('loggggggggggggg',downloadUrl)
+  },[downloadUrl])
 
   // const onFinish = async (values: any) => {
   //   console.log('values', values);
@@ -91,6 +95,7 @@ const StudentFileDetails: React.FC = () => {
         throw error;
     }
     console.log('data from avatars',data)
+    signedUrls(data)
     setFiles(data);
     return data || [];
 };
@@ -99,6 +104,25 @@ const getFileUrl = (studentId:any, fileName:string) => {
   const publicUrl = publicSupabase.storage.from('avatars').getPublicUrl(`${studentId}/${fileName}`, {download: true});
   return publicUrl.data.publicUrl;
 }
+
+const signedUrls = async(resultData:any) => {
+  const name = resultData.map((item:any) => {
+    return `${studentInfo?.id}/${item.name}`
+  })
+  const { data, error } = await publicSupabase
+  .storage
+  .from('avatars')
+  .createSignedUrls(name, 60, { download: true}) 
+
+  if(error) {
+    throw error;
+  }
+  setDownloadUrl(data)
+  console.log('signedddddd urls', data)
+} 
+
+//https://hjepyfajiikqdtdwcert.supabase.co/storage/v1/object/public/avatars/f3556710-58a1-4f42-9a53-cd1826ff575c/Screenshot%20from%202024-06-05%2011-03-39.png
+//https://hjepyfajiikqdtdwcert.supabase.co/storage/v1/object/sign/avatars/f3556710-58a1-4f42-9a53-cd1826ff575c/Screenshot%20from%202024-06-05%2011-03-39.png
 
   return (
     <>
@@ -123,16 +147,26 @@ const getFileUrl = (studentId:any, fileName:string) => {
       </div>
       <div>
       <p className="text-xl">Documents</p>
-      {files.length > 0 ? (
-    <ul>
-      {files.map((file) => (
-        <li key={file.name}>
-          <a href={getFileUrl(studentInfo?.id,file.name)} download={file.name} target="_blank" rel="noopener noreferrer">
-            {file.name}
-          </a>
-        </li>
-      ))}
-    </ul>
+      {downloadUrl.length > 0 ? (
+        <ul>
+          {downloadUrl.map((file:any) => (
+            <li key={file.path}>
+             <img src={file.signedUrl} style={{ width:"300px", height:"150px"}} />
+             <a href={file.signedUrl} rel="noopener noreferrer">
+        Download
+      </a>
+           </li>
+          ))}
+        </ul>
+    // <ul>
+    //   {files.map((file) => (
+    //     <li key={file.name}>
+    //       <img src={getFileUrl(studentInfo?.id,file.name)} />
+    //       {getFileUrl(studentInfo?.id,file.name)}
+    //         {/* {file.name} */}
+    //     </li>
+    //   ))}
+    // </ul>
   ) : (
     <p>No files available</p>
   )}

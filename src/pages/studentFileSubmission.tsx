@@ -41,7 +41,7 @@ const StudentFileSubmission: React.FC = () => {
   const navigate = useNavigate();
 
   const handleBack = () => {
-    navigate('/dashboard');
+    navigate('/agreement');
   };
 
   const onFinish = async (values: any) => {

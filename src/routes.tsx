@@ -6,6 +6,7 @@ import Dashboard from './pages/dashboard';
 import StudentDashboard from './pages/studentDashboard';
 import StudentFileSubmission from './pages/studentFileSubmission';
 import StudentFileDetails from './pages/studentFileDetails';
+import Agreement from './pages/agreement';
 
 export const routes = [
   // {
@@ -37,5 +38,10 @@ export const routes = [
     name: 'file-details',
     path: '/file-details/:fileId',
     element: <StudentFileDetails />,
+  },
+  {
+    name: 'agreement',
+    path: '/agreement',
+    element: <Agreement />,
   },
 ];
