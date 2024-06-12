@@ -48,11 +48,6 @@ export const FileProvider = ({ children }: FileProviderProps) => {
   const [studentFiles, setStudentFiles] = useState<StudentFile | null>(null);
   const [fileData, setFileData] = useState<any[]>();
 
-  useEffect(() => {
-    // This will log the updated studentInfo whenever it changes
-    console.log('studentInfo:', studentInfo);
-  }, [studentInfo]);
-
   return (
     <FileContext.Provider
       value={{

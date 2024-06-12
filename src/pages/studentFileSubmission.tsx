@@ -18,16 +18,13 @@ const StudentFileSubmission: React.FC = () => {
     setStudentFiles,
   } = useFile();
 
-  useEffect(() => {
-    // This will log the updated studentInfo value whenever it changes
-    console.log('studentInfo:', studentInfo);
-  }, [studentInfo]);
-
-  // let initialValue = {};
+  // useEffect(() => {
+  //   // This will log the updated studentInfo value whenever it changes
+  //   console.log('studentInfo:', studentInfo);
+  // }, [studentInfo]);
 
   const formRef = useRef<any>(null);
 
-  // if(studentInfo) {
   const initialValue = {
     first_name: studentInfo?.first_name,
     last_name: studentInfo?.last_name,
@@ -38,11 +35,6 @@ const StudentFileSubmission: React.FC = () => {
     subject: studentFiles?.subject,
     budget: studentFiles?.budget,
   };
-  // }
-
-  useEffect(() => {
-    console.log('initial', initialValue);
-  });
 
   const { Option } = Select;
 
@@ -77,28 +69,6 @@ const StudentFileSubmission: React.FC = () => {
       console.log(error);
     }
   };
-
-  //   const postStudentInfo = async (userData) => {
-  //     try {
-  //       console.log('user',userData)
-  //       const { data, error } = await publicSupabase
-  //         .from('studentInfo')
-  //         .insert({
-  //           first_name: userData.first_name,
-  //           last_name: userData.last_name,
-  //           email: userData.email,
-  //           phone_number: userData.phone_number
-  //         });
-  //       if (error) {
-  //         toast.error("Error while creating StudentInfo")
-  //         throw error;
-  //       }
-  //       toast.success("Successfully created StudentInfo");
-  //       formRef.current.resetFields();
-  //     } catch (error) {
-  //       console.error('ERROR: ', error);
-  //     }
-  //   };
 
   const onFinishFailed = (errorInfo: any) => {
     console.log('Failed:', errorInfo);
@@ -140,58 +110,29 @@ const StudentFileSubmission: React.FC = () => {
             name="first_name"
             rules={[{ required: true, message: 'Please input first name!' }]}
           >
-            <Input />
+            <Input disabled />
           </Form.Item>
           <Form.Item
             label="Last Name"
             name="last_name"
             rules={[{ required: true, message: 'Please input last name!' }]}
           >
-            <Input />
+            <Input disabled />
           </Form.Item>
           <Form.Item
             label="Email"
             name="email"
             rules={[{ required: true, message: 'Please input email!' }]}
           >
-            <Input />
+            <Input disabled />
           </Form.Item>
           <Form.Item
             label="Phone Number"
             name="phone_number"
             rules={[{ required: true, message: 'Please input phone number!' }]}
           >
-            <Input />
+            <Input disabled />
           </Form.Item>
-          {/* <Form.Item label="Program">
-          <Select>
-            <Select.Option value="honors">Honors</Select.Option>
-            <Select.Option value="masters">Masters</Select.Option>
-          </Select>
-        </Form.Item>
-        <Form.Item
-          name="budget"
-          label="Budget"
-        >
-          <InputNumber addonAfter={suffixSelector} style={{ width: '100%' }} />
-        </Form.Item>
-        <Form.Item
-          label="Upload"
-          valuePropName="fileList"
-          getValueFromEvent={normFile}
-        >
-          <Upload action="/upload.do" listType="picture-card">
-            <button style={{ border: 0, background: 'none' }} type="button">
-              <PlusOutlined />
-              <div style={{ marginTop: 8 }}>Upload</div>
-            </button>
-          </Upload>
-        </Form.Item> */}
-          {/* <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
-          <Button type="primary" htmlType="submit">
-            Create
-          </Button>
-        </Form.Item> */}
         </div>
         <h1>File section</h1>
         <div
@@ -206,28 +147,28 @@ const StudentFileSubmission: React.FC = () => {
             name="university_name"
             rules={[{ required: true, message: 'Please input first name!' }]}
           >
-            <Input />
+            <Input disabled />
           </Form.Item>
           <Form.Item
             label="Program"
             name="program"
             rules={[{ required: true, message: 'Please input last name!' }]}
           >
-            <Input />
+            <Input disabled />
           </Form.Item>
           <Form.Item
             label="Subject"
             name="subject"
             rules={[{ required: true, message: 'Please input email!' }]}
           >
-            <Input />
+            <Input disabled />
           </Form.Item>
           <Form.Item
             label="Budget"
             name="budget"
             rules={[{ required: true, message: 'Please input phone number!' }]}
           >
-            <Input />
+            <Input disabled />
           </Form.Item>
         </div>
         <h1>Upload section</h1>
@@ -237,16 +178,11 @@ const StudentFileSubmission: React.FC = () => {
             paddingLeft: '200px',
             gridTemplateColumns: 'repeat(2, 1fr)',
             gap: '12px',
-            rowGap: '40px',
+            rowGap: '32px',
           }}
         >
           <UploadFeature />
         </div>
-        <Form.Item className="pl-60 pt-8">
-          <Button type="primary" htmlType="submit">
-            Submit
-          </Button>
-        </Form.Item>
       </Form>
     </>
   );
