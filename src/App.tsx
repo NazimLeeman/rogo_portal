@@ -47,6 +47,8 @@ function App() {
 
   const navLabels = ['Student Info', 'Student File', 'Status', 'Payment'];
 
+  const studentNavLabels = ['Home']
+
   const logoutLabel = [
     {
       key: '5',
@@ -66,6 +68,16 @@ function App() {
     label: navLabels[index],
   }));
 
+  const studentItems =[
+    UserOutlined
+  ].map((icon, index) => ({
+    key: String(index + 1),
+    icon: React.createElement(icon),
+    label: studentNavLabels[index],
+  }));
+
+  const menuItems = userRole === 'Admin' ? items : studentItems;
+
   const handleNavClick = (key: string) => {
     setSelectedNav(key);
   };
@@ -80,7 +92,6 @@ function App() {
         console.error('Error during sign out:', error);
       });
   };
-  // const { selectedNav, setSelectedNav } = useFile();
 
   const excludedPaths = ['/login', '/register'];
 
@@ -119,7 +130,7 @@ function App() {
             mode="inline"
             selectedKeys={selectedNav ? [selectedNav] : []}
             onClick={(info) => handleNavClick(info.key)}
-            items={items}
+            items={menuItems}
           />
           <Menu
             theme="dark"

@@ -16,6 +16,7 @@ import FileForm from '../component/StudentForm/fileForm';
 import { useFile } from '../context/FileContext';
 import SearchTable from '../component/Table/table';
 import { useSupabase } from '../context/supabaseContext';
+import { useRole } from '../hooks/useRole';
 
 const { Option } = Select;
 
@@ -40,10 +41,11 @@ const items = [
   label: navLabels[index],
 }));
 
-const StudentDashboard: React.FC = () => {
-  // const [selectedNav, setSelectedNav] = useState<string | null>('1');
-  // const [studentInfo, setStudentInfo] = useState<StudentInfo | null>(null);
-  // const [ studentFiles, setStudentFiles] = useState<StudentFile | null>(null);
+interface EmailProps {
+  userEmail: string; // Define the possible values for statusType
+}
+
+const StudentDashboard: React.FC= () => {
   const [open, setOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedStudent, setSelectedStudent] = useState<StudentInfo | null>(
@@ -57,7 +59,10 @@ const StudentDashboard: React.FC = () => {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  const { userEmail, setUserEmail } = useSupabase();
+  const {userEmail } = useRole();
+  const [isUserEmailAvailable, setIsUserEmailAvailable] = useState(false);
+
+  // const { userEmail, setUserEmail } = useSupabase();
   const {
     selectedNav,
     setSelectedNav,
@@ -69,22 +74,21 @@ const StudentDashboard: React.FC = () => {
 
   const navigate = useNavigate();
 
+  // useEffect(() => {
+  //   getStudentInfo();
+  // }, []);
   useEffect(() => {
-    getStudentInfo();
-  }, []);
+    if (userEmail && !isUserEmailAvailable) {
+      getStudentInfo();
+      setIsUserEmailAvailable(true);
+    }
+  }, [userEmail]);
 
   // useEffect(() => {
   //   // This will log the updated studentInfo value whenever it changes
   //   console.log('from dashboard studentInfo:', studentInfo);
   // }, [studentInfo]);
 
-  useEffect(() => {
-    setSelectedStudent(null);
-  }, [selectedNav]);
-
-  const handleNavClick = (key: string) => {
-    setSelectedNav(key);
-  };
 
   const handleLogout = () => {
     Promise.all([publicSupabase.auth.signOut()])
@@ -103,18 +107,6 @@ const StudentDashboard: React.FC = () => {
   //   console.log("selected", student);
   // };
 
-  const onBlur = () => {
-    console.log('blur');
-  };
-
-  const onFocus = () => {
-    console.log('focus');
-  };
-
-  const onSearch = (val: string) => {
-    console.log('search:', val);
-  };
-
   const getStudentInfo = async () => {
     try {
       const { data, error } = await publicSupabase
@@ -122,19 +114,20 @@ const StudentDashboard: React.FC = () => {
         .select('*')
         .eq('email', userEmail);
       if (error) throw error;
-      // setStudents(data[0]);
-      // setLoading(false);
-      // if(students?.id) {
-      //   await getStudentFile();
-      // }
-      // console.log(userEmail);
+
       setStudentInfo((prevStudent) => {
-        // If you expect a single StudentInfo object
+        //A single StudentInfo object
         if (data[0]?.id) {
           getStudentFile(data[0].id);
         }
         return data[0];
-      });
+        });
+        console.log(userEmail)
+        console.log(data)
+      // if( data && data.length === 0) {
+      //   console.log(data)
+      //   getStudentInfo()
+      // }
       setLoading(false);
     } catch (error) {
       console.error('ERROR: ', error);

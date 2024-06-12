@@ -70,6 +70,7 @@ export const useAuth = () => {
   return {
     userId,
     loading,
+    userEmail
     // userIdPrivate,
     // setUserIdPrivate
   };

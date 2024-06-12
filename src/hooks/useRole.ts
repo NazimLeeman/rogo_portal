@@ -6,6 +6,7 @@ export const useRole = () => {
   const [userRole, setUserRole] = useState<string | null>(null);
   //   const [userIdPrivate, setUserIdPrivate] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [userEmail, setUserEmail] = useState<string>("");
   const { publicSupabase, userId } = useSupabase();
   useEffect(() => {
     // Attempt to recover session from localStorage first
@@ -16,10 +17,16 @@ export const useRole = () => {
     const localAuthSession = localStorage.getItem('supabase.auth.token');
     const sessionAuthData = localAuthSession && JSON.parse(localAuthSession);
     const userIdFromStorage = sessionAuthData?.currentSession?.user?.id || null;
+    const userEmailFromStorage = sessionAuthData?.currentSession?.user?.email || null;
     if (userRoleFromStorage) {
       setUserRole(userRoleFromStorage);
       setLoading(false);
+      }
+      
+      if(userEmailFromStorage) {
+      setUserEmail(userEmailFromStorage)
     }
+
 
     const getUserRole = async () => {
       const { data, error } = await publicSupabase
@@ -98,6 +105,7 @@ export const useRole = () => {
   return {
     userRole,
     loading,
+    userEmail
     // userIdPrivate,
     // setUserIdPrivate
   };
