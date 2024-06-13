@@ -17,7 +17,6 @@ const MagicLogin: React.FC = () => {
   };
 
   const onFinish = async (values: FieldType) => {
-    console.log('values', values);
     try {
       const { data, error } = await publicSupabase.auth.signInWithOtp({
         email: values.email,

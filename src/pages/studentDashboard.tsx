@@ -1,49 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import {
-  UploadOutlined,
-  UserOutlined,
-  VideoCameraOutlined,
-  LogoutOutlined,
-} from '@ant-design/icons';
-import { Button, Card, Layout, Menu, Modal, theme } from 'antd';
+import { Button, Card, theme } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import StudentForm from '../component/StudentForm/studentForm';
 import { publicSupabase } from '../api/SupabaseClient';
-import { Select } from 'antd';
 import type { SelectProps } from 'antd';
-import { StudentFile, StudentInfo } from '../interface/studentInfo.interface';
+import { StudentInfo } from '../interface/studentInfo.interface';
 import FileForm from '../component/StudentForm/fileForm';
 import { useFile } from '../context/FileContext';
 import SearchTable from '../component/Table/table';
-import { useSupabase } from '../context/supabaseContext';
 import { useRole } from '../hooks/useRole';
 
-const { Option } = Select;
-
-const navLabels = ['Student Info', 'Student File', 'Status', 'Payment'];
-
-const logoutLabel = [
-  {
-    key: '5',
-    icon: React.createElement(LogoutOutlined),
-    label: 'Logout',
-  },
-];
-
-const items = [
-  UserOutlined,
-  VideoCameraOutlined,
-  UploadOutlined,
-  UserOutlined,
-].map((icon, index) => ({
-  key: String(index + 1),
-  icon: React.createElement(icon),
-  label: navLabels[index],
-}));
-
-interface EmailProps {
-  userEmail: string; // Define the possible values for statusType
-}
 
 const StudentDashboard: React.FC= () => {
   const [open, setOpen] = useState<boolean>(false);
@@ -74,9 +39,6 @@ const StudentDashboard: React.FC= () => {
 
   const navigate = useNavigate();
 
-  // useEffect(() => {
-  //   getStudentInfo();
-  // }, []);
   useEffect(() => {
     if (userEmail && !isUserEmailAvailable) {
       getStudentInfo();
@@ -88,18 +50,6 @@ const StudentDashboard: React.FC= () => {
   //   // This will log the updated studentInfo value whenever it changes
   //   console.log('from dashboard studentInfo:', studentInfo);
   // }, [studentInfo]);
-
-
-  const handleLogout = () => {
-    Promise.all([publicSupabase.auth.signOut()])
-      .then(() => {
-        localStorage.clear();
-        navigate('/');
-      })
-      .catch((error) => {
-        console.error('Error during sign out:', error);
-      });
-  };
 
   // const onChange = (value: string) => {
   //   const student = students?.find(student => student.id === value) || null;
@@ -122,12 +72,6 @@ const StudentDashboard: React.FC= () => {
         }
         return data[0];
         });
-        console.log(userEmail)
-        console.log(data)
-      // if( data && data.length === 0) {
-      //   console.log(data)
-      //   getStudentInfo()
-      // }
       setLoading(false);
     } catch (error) {
       console.error('ERROR: ', error);
@@ -207,18 +151,6 @@ const StudentDashboard: React.FC= () => {
                     >
                       Click here to proceed
                     </Button>
-                    {/* {studentFile !== null && (
-      <Modal
-        title={<p>{studentFile.university_name}</p>}
-        open={open}
-        onCancel={() => setOpen(false)}
-        onOk={() => setOpen(false)}
-        >
-        <p>Program: {studentFile.program}</p>
-        <p>Subject: {studentFile.subject}</p>
-        <p>Budget: {studentFile.budget}</p>
-      </Modal>            
-      )} */}
                   </>
                 </Card>
               </div>

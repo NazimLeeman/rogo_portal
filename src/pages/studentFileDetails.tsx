@@ -94,6 +94,7 @@ const StudentFileDetails: React.FC = () => {
     if (error) {
         throw error;
     }
+    console.log('listtttttttttt', studentInfo?.id)
     console.log('data from avatars',data)
     signedUrls(data)
     setFiles(data);

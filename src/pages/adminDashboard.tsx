@@ -5,7 +5,7 @@ import {
   VideoCameraOutlined,
   LogoutOutlined,
 } from '@ant-design/icons';
-import { Card, Layout, Menu, Modal, theme } from 'antd';
+import { Button, Card, Layout, Menu, Modal, theme } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import StudentForm from '../component/StudentForm/studentForm';
 import { publicSupabase } from '../api/SupabaseClient';
@@ -15,6 +15,7 @@ import { StudentInfo } from '../interface/studentInfo.interface';
 import FileForm from '../component/StudentForm/fileForm';
 import { useFile } from '../context/FileContext';
 import SearchTable from '../component/Table/table';
+import toast from 'react-hot-toast';
 
 const { Option } = Select;
 
@@ -54,36 +55,24 @@ const AdminDashboard: React.FC = () => {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  const { students, setStudents, selectedNav, setSelectedNav } = useFile();
+  const { students, setStudents, selectedNav, setSelectedNav, fileData, setFileData, studentInfo, setStudentInfo } = useFile();
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    getStudentInfo();
+    getStudentsInfo();
   }, []);
 
   useEffect(() => {
     setSelectedStudent(null);
   }, [selectedNav]);
 
-  const handleNavClick = (key: string) => {
-    setSelectedNav(key);
-  };
-
-  const handleLogout = () => {
-    Promise.all([publicSupabase.auth.signOut()])
-      .then(() => {
-        localStorage.clear();
-        navigate('/');
-      })
-      .catch((error) => {
-        console.error('Error during sign out:', error);
-      });
-  };
 
   const onChange = (value: string) => {
+    console.log(value)
     const student = students?.find((student) => student.id === value) || null;
     setSelectedStudent(student);
+    handleSudentFile(value)
     console.log('selected', student);
   };
 
@@ -99,7 +88,7 @@ const AdminDashboard: React.FC = () => {
     console.log('search:', val);
   };
 
-  const getStudentInfo = async () => {
+  const getStudentsInfo = async () => {
     try {
       const { data: StudentInfo, error } = await publicSupabase
         .from('studentInfo')
@@ -107,6 +96,36 @@ const AdminDashboard: React.FC = () => {
       setStudents(StudentInfo);
       setLoading(false);
       if (error) throw error;
+    } catch (error) {
+      console.error('ERROR: ', error);
+      setLoading(false);
+    }
+  };
+
+  const getStudentInfo = async (id: string, fileId: string) => {
+    try {
+      console.log('from getStudentInfo id',id)
+      console.log('from getStudentInfo fileId',fileId)
+      const { data, error } = await publicSupabase
+        .from('studentInfo')
+        .select('*')
+        .eq('id', id);
+      if (error) throw error;
+      console.log(data)
+      if (data && data.length > 0) {
+        setStudentInfo(data[0]); // Set the student info
+        navigate(`/file-details/${fileId}`); // Navigate to the details page
+      } else {
+        console.error('No student info found');
+        // Optionally, handle the case when no student info is found
+      }
+      // setStudentInfo((prevStudent) => {
+      //   //A single StudentInfo object
+      //   setStudentInfo(data[0])
+      //   return data[0];
+      //   });
+      // navigate(`/file-details/${fileId}`);
+      // setLoading(false);
     } catch (error) {
       console.error('ERROR: ', error);
       setLoading(false);
@@ -137,6 +156,29 @@ const AdminDashboard: React.FC = () => {
     } catch (error) {
       console.error('ERROR: ', error);
       // setLoading(false);
+    }
+  };
+
+  const handleStudentFileDetails = async (id: string, student_id:string) => {
+    try {
+      const { data: fileDetailsData, error: fileDetailsError } =
+        await publicSupabase
+          .from('filedetails')
+          .select()
+          .eq('studentfileid', id);
+
+      if (fileDetailsError) {
+        toast.error('Error while opening file.');
+        throw fileDetailsError;
+      }
+      const fileId = fileDetailsData[0].id;
+      console.log('file Dataaaaaaaaaaaaaaaaa',fileDetailsData)
+      setFileData(fileDetailsData)
+      getStudentInfo(student_id, fileId);
+      console.log('file iddddddddd',fileId)
+      
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -181,7 +223,60 @@ const AdminDashboard: React.FC = () => {
             )}
             {selectedStudent && (
               <div className="pl-10 pt-2">
-                <Card
+                <p>
+                    Currently {selectedStudent.first_name} has{' '}
+                    {selectedStudent.student_files.length > 0
+                      ? selectedStudent.student_files.length
+                      : 'no'}{' '}
+                    student file ongoing.
+                  </p>
+                  <div className='flex flex-row justify-center items-center gap-6'>
+                    {selectedStudentFile && selectedStudentFile.length > 0 && selectedStudentFile.map((studentFile, index) => 
+                      <Card
+                      key={index}
+                      title={studentFile.university_name}
+                      style={{ width: 400, margin: '10px 0' }}
+                    >
+                      <p>Program: {studentFile.program}</p>
+                      <p>Subject: {studentFile.subject}</p>
+                      <p>Budget: {studentFile.budget}</p>
+                      <Button
+                        style={{
+                          color: 'white',
+                          background: '#1677ff',
+                          border: 'none',
+                        }}
+                        className="mt-2"
+                        onClick={() => handleStudentFileDetails(studentFile.id, studentFile.student_id)}
+                      >
+                        Click here to proceed
+                      </Button>
+                    </Card>
+                    )}
+                {/* <Card
+                  title={studentFiles.university_name}
+                  // extra={<a href="#">More</a>}
+                  style={{ width: 400 }}
+                  >
+                  <p>Program: {studentFiles.program}</p>
+                  <p>Subject: {studentFiles.subject}</p>
+                  <p>Budget: {studentFiles.budget}</p>
+                  <>
+                    <Button
+                      style={{
+                        color: 'white',
+                        background: 'purple',
+                        border: 'none',
+                        }}
+                        className="mt-2"
+                        onClick={() => handleSudentFile(studentFiles.student_id)}
+                        >
+                      Click here to proceed
+                    </Button>
+                  </>
+                </Card> */}
+              </div>
+                {/* <Card
                   title={selectedStudent.email}
                   // extra={<a href="#">More</a>}
                   style={{ width: 400 }}
@@ -217,7 +312,7 @@ const AdminDashboard: React.FC = () => {
                       )}
                     </>
                   )}
-                </Card>
+                </Card> */}
               </div>
             )}
             <div className="p-8">

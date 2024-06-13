@@ -26,7 +26,8 @@ import MagicLogin from './component/Login/magicLogin';
 
 function App() {
   const { userId, loading } = useAuth();
-  const [selectedNav, setSelectedNav] = useState<any>('1');
+  // const [selectedNav, setSelectedNav] = useState<any>('1');
+  const {selectedNav, setSelectedNav} = useFile();
   const { userRole } = useRole();
   // const { userIdPrivate } = useSupabase();
   // const { onboardingSaved } = useOnboarding();

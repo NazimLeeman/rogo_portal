@@ -19,7 +19,6 @@ const Login: React.FC = () => {
 
   const onFinish = async (values: FieldType) => {
     const { remember, ...userData } = values;
-    console.log('values', userData);
     try {
       const { data, error } =
         await publicSupabase.auth.signInWithPassword(userData);
@@ -27,7 +26,6 @@ const Login: React.FC = () => {
         throw error;
       }
       if (data) {
-        console.log('Successfully Logged In', data);
         navigate('/dashboard');
       }
     } catch (error: any) {
