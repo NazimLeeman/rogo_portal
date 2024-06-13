@@ -41,46 +41,32 @@ const StudentFileDetails: React.FC = () => {
   // const { fileId } = useParams();
   const [files, setFiles] = useState<any[]>([]);
   const [downloadUrl, setDownloadUrl] = useState<any[]>([]);
-
+  const [ userRole, setUserRole] = useState<any>("")
+  
+  
   const navigate = useNavigate();
 
+  const getUserRole = () => {
+    const localRoleSession = localStorage.getItem('supabase.auth.role');
+    const sessionRoleData = localRoleSession && JSON.parse(localRoleSession);
+    const userRoleFromStorage = sessionRoleData?.currentRole || null;
+    console.log('sessionRole', sessionRoleData)
+    console.log('userRoleeeeeeeeeee', userRoleFromStorage)
+    setUserRole(userRoleFromStorage)
+  }
+
   const handleBack = () => {
-    navigate('/file-submission');
+    if(userRole === 'Admin') {
+      navigate('/dashboard')
+    } else {
+      navigate('/file-submission');
+    }
   };
 
   useEffect(() => {
+    getUserRole()
     getFilesForStudent()
   },[])
-
-  useEffect(() => {
-    console.log('loggggggggggggg',downloadUrl)
-  },[downloadUrl])
-
-  // const onFinish = async (values: any) => {
-  //   console.log('values', values);
-  // };
-
-  // const fetchFileDetails = async () => {
-  //   try {
-  //     const { data, error } = await publicSupabase
-  //       .from('filedetails')
-  //       .select('*')
-  //       .eq('id', fileId);
-
-  //     if (error) {
-  //       throw error;
-  //     }
-
-  //     console.log(data);
-  //     setFileData(data);
-  //   } catch (error) {
-  //     console.error('Error fetching file details:', error);
-  //   }
-  // };
-
-  // const onFinishFailed = (errorInfo: any) => {
-  //   console.log('Failed:', errorInfo);
-  // };
 
   const onChange: CheckboxProps['onChange'] = (e) => {
     console.log(`checked = ${e.target.checked}`);
@@ -149,25 +135,20 @@ const signedUrls = async(resultData:any) => {
       <div>
       <p className="text-xl">Documents</p>
       {downloadUrl.length > 0 ? (
-        <ul>
+      <div >
+        <ul className='grid grid-cols-2 gap-6'>
           {downloadUrl.map((file:any) => (
             <li key={file.path}>
              <img src={file.signedUrl} style={{ width:"300px", height:"150px"}} />
-             <a href={file.signedUrl} rel="noopener noreferrer">
+             {userRole === "Admin" && (
+              <a href={file.signedUrl} rel="noopener noreferrer">
         Download
       </a>
+             )}   
            </li>
           ))}
         </ul>
-    // <ul>
-    //   {files.map((file) => (
-    //     <li key={file.name}>
-    //       <img src={getFileUrl(studentInfo?.id,file.name)} />
-    //       {getFileUrl(studentInfo?.id,file.name)}
-    //         {/* {file.name} */}
-    //     </li>
-    //   ))}
-    // </ul>
+        </div>
   ) : (
     <p>No files available</p>
   )}

@@ -173,7 +173,7 @@ const AdminDashboard: React.FC = () => {
       }
       const fileId = fileDetailsData[0].id;
       console.log('file Dataaaaaaaaaaaaaaaaa',fileDetailsData)
-      setFileData(fileDetailsData)
+      setFileData(fileDetailsData[0])
       getStudentInfo(student_id, fileId);
       console.log('file iddddddddd',fileId)
       

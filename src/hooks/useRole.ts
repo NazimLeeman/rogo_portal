@@ -13,7 +13,7 @@ export const useRole = () => {
 
     const localRoleSession = localStorage.getItem('supabase.auth.role');
     const sessionRoleData = localRoleSession && JSON.parse(localRoleSession);
-    const userRoleFromStorage = sessionRoleData?.role || null;
+    const userRoleFromStorage = sessionRoleData?.currentRole || null;
     const localAuthSession = localStorage.getItem('supabase.auth.token');
     const sessionAuthData = localAuthSession && JSON.parse(localAuthSession);
     const userIdFromStorage = sessionAuthData?.currentSession?.user?.id || null;
