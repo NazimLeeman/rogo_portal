@@ -30,12 +30,12 @@ const steps = [
 // let description = 'This is a description.';
 const Step: React.FC<StepProps> = ({ statusType }) => {
   const { fileId } = useParams();
-  const { fileData, setFileData, currentStatus, setCurrentStatus } = useFile();
+  const { fileData, setFileData, currentStatus, setCurrentStatus, step, setStep } = useFile();
   const { token } = theme.useToken();
   // const [currentStatus, setCurrentStatus] = useState(0);
 
   useEffect(() => {
-    console.log('fileData', fileData);
+    console.log('setStep', step);
   });
 
   const formattedDate = formatDate(fileData.created_at);

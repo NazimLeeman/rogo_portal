@@ -26,6 +26,8 @@ interface FileContextType {
   setFileData: any;
   currentStatus: any;
   setCurrentStatus: any;
+  step: any;
+  setStep: any;
 }
 
 const FileContext = createContext<FileContextType | undefined>(undefined);
@@ -50,6 +52,7 @@ export const FileProvider = ({ children }: FileProviderProps) => {
   const [studentFiles, setStudentFiles] = useState<StudentFile | null>(null);
   const [fileData, setFileData] = useState<any[]>();
   const [currentStatus, setCurrentStatus] = useState<any>(0);
+  const [step, setStep] = useState<any>()
 
   return (
     <FileContext.Provider
@@ -67,7 +70,9 @@ export const FileProvider = ({ children }: FileProviderProps) => {
         fileData,
         setFileData,
         currentStatus,
-        setCurrentStatus
+        setCurrentStatus,
+        step,
+        setStep
       }}
     >
       {children}

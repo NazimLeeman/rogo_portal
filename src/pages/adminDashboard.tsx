@@ -26,7 +26,19 @@ const AdminDashboard: React.FC = () => {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  const { students, setStudents, selectedNav, setSelectedNav, fileData, setFileData, studentInfo, setStudentInfo, setCurrentStatus } = useFile();
+  const { 
+    students, 
+    setStudents, 
+    selectedNav, 
+    setSelectedNav, 
+    fileData, 
+    setFileData, 
+    studentInfo, 
+    setStudentInfo, 
+    setCurrentStatus,
+    step,
+    setStep
+  } = useFile();
 
   const navigate = useNavigate();
 
@@ -95,6 +107,22 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const getFileStep = async (fileId: string) => {
+    try {
+      console.log('from getStudentInfo fileId',fileId)
+      const { data, error } = await publicSupabase
+        .from('steps')
+        .select('*')
+        .eq('filedetailsid', fileId);
+      if (error) throw error;
+      console.log(data)
+      setStep(data);
+    } catch (error) {
+      console.error('ERROR: ', error);
+      setLoading(false);
+    }
+  };
+
   const filterOption: SelectProps<string>['filterOption'] = (input, option) => {
     return (
       (option?.children as unknown as string)
@@ -133,13 +161,14 @@ const AdminDashboard: React.FC = () => {
       const fileId = fileDetailsData[0].id;
       console.log('file Dataaaaaaaaaaaaaaaaa',fileDetailsData)
       setFileData(fileDetailsData[0])
-      if(fileDetailsData[0].fileStatus === "Pending") {
-        setCurrentStatus(0)
-      } else if (fileDetailsData[0].fileStatus === "In Progress") {
-        setCurrentStatus(1)
-      } else {
-        setCurrentStatus(2)
-      }
+      // if(fileDetailsData[0].fileStatus === "Pending") {
+      //   setCurrentStatus(0)
+      // } else if (fileDetailsData[0].fileStatus === "In Progress") {
+      //   setCurrentStatus(1)
+      // } else {
+      //   setCurrentStatus(2)
+      // }
+      getFileStep(fileId);
       getStudentInfo(student_id, fileId);
       console.log('file iddddddddd',fileId)
       
