@@ -26,7 +26,7 @@ const AdminDashboard: React.FC = () => {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  const { students, setStudents, selectedNav, setSelectedNav, fileData, setFileData, studentInfo, setStudentInfo } = useFile();
+  const { students, setStudents, selectedNav, setSelectedNav, fileData, setFileData, studentInfo, setStudentInfo, setCurrentStatus } = useFile();
 
   const navigate = useNavigate();
 
@@ -133,6 +133,13 @@ const AdminDashboard: React.FC = () => {
       const fileId = fileDetailsData[0].id;
       console.log('file Dataaaaaaaaaaaaaaaaa',fileDetailsData)
       setFileData(fileDetailsData[0])
+      if(fileDetailsData[0].fileStatus === "Pending") {
+        setCurrentStatus(0)
+      } else if (fileDetailsData[0].fileStatus === "In Progress") {
+        setCurrentStatus(1)
+      } else {
+        setCurrentStatus(2)
+      }
       getStudentInfo(student_id, fileId);
       console.log('file iddddddddd',fileId)
       

@@ -87,7 +87,7 @@ const signedUrls = async(resultData:any) => {
         Back
       </Button>
       <div className='flex flex-row justify-between px-12'>
-      <div className="space-y-6">       
+      <div className="space-y-6 w-2/4">       
       <div className="space-y-6">
         <p className="text-xl">Status Timeline</p>
         <Step statusType="fileStatus" />
