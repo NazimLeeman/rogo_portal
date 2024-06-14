@@ -1,15 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { UploadOutlined } from '@ant-design/icons';
 import { Button, message, Tooltip, Upload } from 'antd';
 import { publicSupabase } from '../../api/SupabaseClient';
 import { useFile } from '../../context/FileContext';
-import { UploadFile as AntdUploadFile } from 'antd/lib/upload/interface';
 import type { UploadProps } from 'antd';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 interface UploadFile extends File {
-  uid: string; // Optional field to store a unique identifier for the file
+  uid: string; 
 }
 
 const UploadFeature = () => {
@@ -55,7 +54,7 @@ const UploadFeature = () => {
     }
 
     const { data, error } = await publicSupabase.storage
-      .from('avatars') // replace with your bucket name
+      .from('avatars') 
       .upload(`${studentId}/${file.name}`, file);
 
     if (error) {

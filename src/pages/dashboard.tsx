@@ -6,7 +6,7 @@ import { useRole } from '../hooks/useRole';
 
 
 const Dashboard: React.FC = () => {
-  const { userRole, userEmail } = useRole();
+  const { userRole } = useRole();
 
   return (
     <>{userRole === 'Admin' ? <AdminDashboard /> : <StudentDashboard />}</>

@@ -8,7 +8,7 @@ import {
 import { routes } from './routes';
 import { useAuth } from './hooks/useAuth';
 import { useRole } from './hooks/useRole';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   UploadOutlined,
   UserOutlined,

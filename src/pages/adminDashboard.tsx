@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  UploadOutlined,
-  UserOutlined,
-  VideoCameraOutlined,
-  LogoutOutlined,
-} from '@ant-design/icons';
-import { Button, Card, Layout, Menu, Modal, theme } from 'antd';
+import { Button, Card, theme } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import StudentForm from '../component/StudentForm/studentForm';
 import { publicSupabase } from '../api/SupabaseClient';
@@ -19,30 +13,7 @@ import toast from 'react-hot-toast';
 
 const { Option } = Select;
 
-const navLabels = ['Student Info', 'Student File', 'Status', 'Payment'];
-
-const logoutLabel = [
-  {
-    key: '5',
-    icon: React.createElement(LogoutOutlined),
-    label: 'Logout',
-  },
-];
-
-const items = [
-  UserOutlined,
-  VideoCameraOutlined,
-  UploadOutlined,
-  UserOutlined,
-].map((icon, index) => ({
-  key: String(index + 1),
-  icon: React.createElement(icon),
-  label: navLabels[index],
-}));
-
 const AdminDashboard: React.FC = () => {
-  // const [selectedNav, setSelectedNav] = useState<string | null>('1');
-  // const [students, setStudents] = useState<StudentInfo[] | null>([]);
   const [open, setOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedStudent, setSelectedStudent] = useState<StudentInfo | null>(
@@ -113,19 +84,11 @@ const AdminDashboard: React.FC = () => {
       if (error) throw error;
       console.log(data)
       if (data && data.length > 0) {
-        setStudentInfo(data[0]); // Set the student info
-        navigate(`/file-details/${fileId}`); // Navigate to the details page
+        setStudentInfo(data[0]);
+        navigate(`/file-details/${fileId}`);
       } else {
         console.error('No student info found');
-        // Optionally, handle the case when no student info is found
       }
-      // setStudentInfo((prevStudent) => {
-      //   //A single StudentInfo object
-      //   setStudentInfo(data[0])
-      //   return data[0];
-      //   });
-      // navigate(`/file-details/${fileId}`);
-      // setLoading(false);
     } catch (error) {
       console.error('ERROR: ', error);
       setLoading(false);
@@ -133,7 +96,6 @@ const AdminDashboard: React.FC = () => {
   };
 
   const filterOption: SelectProps<string>['filterOption'] = (input, option) => {
-    // Ensure option and option.children are defined
     return (
       (option?.children as unknown as string)
         .toLowerCase()
@@ -147,15 +109,12 @@ const AdminDashboard: React.FC = () => {
         .from('studentFile')
         .select('*')
         .eq('student_id', id);
-      // setStudents(StudentInfo);
-      // setLoading(false);
       if (error) throw error;
       console.log(StudentFile);
       setSelectedStudentFile(StudentFile);
       setOpen(true);
     } catch (error) {
       console.error('ERROR: ', error);
-      // setLoading(false);
     }
   };
 
@@ -178,6 +137,7 @@ const AdminDashboard: React.FC = () => {
       console.log('file iddddddddd',fileId)
       
     } catch (error) {
+      toast.error("This file hasn't been submitted by the Student")
       console.log(error);
     }
   };
@@ -253,66 +213,7 @@ const AdminDashboard: React.FC = () => {
                       </Button>
                     </Card>
                     )}
-                {/* <Card
-                  title={studentFiles.university_name}
-                  // extra={<a href="#">More</a>}
-                  style={{ width: 400 }}
-                  >
-                  <p>Program: {studentFiles.program}</p>
-                  <p>Subject: {studentFiles.subject}</p>
-                  <p>Budget: {studentFiles.budget}</p>
-                  <>
-                    <Button
-                      style={{
-                        color: 'white',
-                        background: 'purple',
-                        border: 'none',
-                        }}
-                        className="mt-2"
-                        onClick={() => handleSudentFile(studentFiles.student_id)}
-                        >
-                      Click here to proceed
-                    </Button>
-                  </>
-                </Card> */}
               </div>
-                {/* <Card
-                  title={selectedStudent.email}
-                  // extra={<a href="#">More</a>}
-                  style={{ width: 400 }}
-                >
-                  <p>
-                    Currently {selectedStudent.first_name} has{' '}
-                    {selectedStudent.student_files.length > 0
-                      ? selectedStudent.student_files.length
-                      : 'no'}{' '}
-                    student file ongoing.
-                  </p>
-                  {selectedStudent.student_files.length > 0 && (
-                    <>
-                      <button
-                        className="mt-2 hover:text-[#0000FF]"
-                        onClick={() => handleSudentFile(selectedStudent.id)}
-                      >
-                        Click here to see in details.
-                      </button>
-                      {selectedStudentFile !== null && (
-                        <Modal
-                          title={
-                            <p>{selectedStudentFile[0].university_name}</p>
-                          }
-                          open={open}
-                          onCancel={() => setOpen(false)}
-                          onOk={() => setOpen(false)}
-                        >
-                          <p>Program: {selectedStudentFile[0].program}</p>
-                          <p>Subject: {selectedStudentFile[0].subject}</p>
-                          <p>Budget: {selectedStudentFile[0].budget}</p>
-                        </Modal>
-                      )}
-                    </>
-                  )}
-                </Card> */}
               </div>
             )}
             <div className="p-8">
@@ -321,10 +222,6 @@ const AdminDashboard: React.FC = () => {
             <div>
               <StudentForm />
             </div>
-            {/* <div style={{ padding: '2rem'}}>
-                  Upload your necessary documents here:
-                </div>
-                <div style={{ alignItems: 'center', marginLeft: '2rem'}}><UploadFeature/></div> */}
           </div>
         </div>
       )}
