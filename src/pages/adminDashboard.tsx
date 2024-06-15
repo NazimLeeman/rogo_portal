@@ -38,7 +38,11 @@ const AdminDashboard: React.FC = () => {
     currentStatus, 
     setCurrentStatus,
     step,
-    setStep
+    setStep,
+    paymentStep,
+    setPaymentStep,
+    currentPaymentStatus,
+    setPaymentCurrentStatus
   } = useFile();
 
   const navigate = useNavigate();
@@ -126,6 +130,23 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const getPaymentStep = async (fileId: string) => {
+    try {
+      console.log('from getStudentInfo fileId',fileId)
+      const { data, error } = await publicSupabase
+        .from('paymentSteps')
+        .select('*')
+        .eq('filedetailsid', fileId);
+      if (error) throw error;
+      console.log(data)
+      setPaymentCurrentStatus(data[0].state)
+      console.log('Payment step', currentStatus)
+      setPaymentStep(data);
+    } catch (error) {
+      console.error('ERROR: ', error);
+    }
+  };
+
   const filterOption: SelectProps<string>['filterOption'] = (input, option) => {
     return (
       (option?.children as unknown as string)
@@ -164,15 +185,9 @@ const AdminDashboard: React.FC = () => {
       const fileId = fileDetailsData[0].id;
       console.log('file Dataaaaaaaaaaaaaaaaa',fileDetailsData)
       setFileData(fileDetailsData[0])
-      // if(fileDetailsData[0].fileStatus === "Pending") {
-      //   setCurrentStatus(0)
-      // } else if (fileDetailsData[0].fileStatus === "In Progress") {
-      //   setCurrentStatus(1)
-      // } else {
-      //   setCurrentStatus(2)
-      // }
-      getFileStep(fileId);
-      getStudentInfo(student_id, fileId);
+      await getFileStep(fileId);
+      await getPaymentStep(fileId)
+      await getStudentInfo(student_id, fileId);
       console.log('file iddddddddd',fileId)
       
     } catch (error) {
