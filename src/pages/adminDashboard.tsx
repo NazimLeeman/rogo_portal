@@ -34,7 +34,8 @@ const AdminDashboard: React.FC = () => {
     fileData, 
     setFileData, 
     studentInfo, 
-    setStudentInfo, 
+    setStudentInfo,
+    currentStatus, 
     setCurrentStatus,
     step,
     setStep
@@ -116,6 +117,8 @@ const AdminDashboard: React.FC = () => {
         .eq('filedetailsid', fileId);
       if (error) throw error;
       console.log(data)
+      setCurrentStatus(data[0].state)
+      console.log('file step', currentStatus)
       setStep(data);
     } catch (error) {
       console.error('ERROR: ', error);

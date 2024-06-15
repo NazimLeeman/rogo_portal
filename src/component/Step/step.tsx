@@ -9,23 +9,6 @@ interface StepProps {
   statusType: 'payment' | 'fileStatus'; // Define the possible values for statusType
 }
 
-const steps = [
-  {
-    title: 'Submitted',
-    description: 'This is a description.',
-    content: 'First-content',
-  },
-  {
-    title: 'In Progress',
-    description: 'This is a description.',
-    content: 'Second-content',
-  },
-  {
-    title: 'Completed',
-    description: 'This is a description.',
-    content: 'Last-content',
-  },
-];
 
 // let description = 'This is a description.';
 const Step: React.FC<StepProps> = ({ statusType }) => {
@@ -33,12 +16,60 @@ const Step: React.FC<StepProps> = ({ statusType }) => {
   const { fileData, setFileData, currentStatus, setCurrentStatus, step, setStep } = useFile();
   const { token } = theme.useToken();
   // const [currentStatus, setCurrentStatus] = useState(0);
-
+  
   useEffect(() => {
     console.log('setStep', step);
-  });
+    console.log('satteeeeeee', currentStatus)
+    });
 
-  const formattedDate = formatDate(fileData.created_at);
+    useEffect(() => {
+      stepsData()
+    })
+
+    const formattedDate = formatDate(step[0].description);
+    const title = step[0].title;
+    const content = step[0].content;
+    
+      const steps = [
+        {
+          title: "",
+          description: "",
+          content: 'First-content',
+          state: 0
+        },
+        {
+          title: 'In Progress',
+          description: 'Not Started',
+          content: 'Second-content',
+          state: 1
+        },
+        {
+          title: 'Completed',
+          description: 'Not Started',
+          content: 'Last-content',
+          state: 2
+        },
+      ];
+
+      const stepsData = () => {
+        console.log('updated states',updatedSteps)
+      }
+
+      const updatedSteps = steps.map(stepItem => {
+        const matchingItem = step.find((item:any) => item.state === stepItem.state);
+
+        if (matchingItem) {
+          return {
+            ...stepItem,
+            title: matchingItem.title,
+            description: matchingItem.description
+          };
+        }
+        
+        return stepItem;
+      });
+    
+
 
 
   const next = () => {
@@ -49,7 +80,7 @@ const Step: React.FC<StepProps> = ({ statusType }) => {
     setCurrentStatus(currentStatus - 1);
   };
 
-  const items = steps.map((item) => ({ key: item.title, title: item.title, description: item.description }));
+  const items = updatedSteps.map((item) => ({ key: item.title, title: item.title, description: item.description }));
 
   const contentStyle: React.CSSProperties = {
     lineHeight: '100px',
