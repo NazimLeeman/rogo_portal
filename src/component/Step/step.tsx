@@ -1,23 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import { Button, message, Modal, Steps, theme, Form, Select, Input, Upload, UploadProps, UploadFile  } from 'antd';
+import { Button, message, Modal, Steps, theme, Form, Select, Input, Upload, UploadProps, UploadFile, Spin  } from 'antd';
 import { useFile } from '../../context/FileContext';
 import { publicSupabase } from '../../api/SupabaseClient';
 import { useParams } from 'react-router-dom';
-import { formatDate } from '../../utils/helper';
+import { formatDate, highestState } from '../../utils/helper';
 import { UploadOutlined } from '@ant-design/icons';
 import { CheckOutlined } from '@ant-design/icons';
 import toast from 'react-hot-toast';
 
 interface StepProps {
-  statusType: 'payment' | 'fileStatus'; // Define the possible values for statusType
+  statusType: 'payment' | 'fileStatus';
+  fileId: string;
+  // step:any
 }
 
 
 // let description = 'This is a description.';
-const Step: React.FC<StepProps> = ({ statusType }) => {
-  const { fileId } = useParams();
-  const { fileData, setFileData, currentStatus, setCurrentStatus, step, setStep, currentPaymentStatus, setPaymentCurrentStatus,
-    paymentStep, setPaymentStep
+const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
+  // const { fileId } = useParams();
+  const { fileData, 
+    setFileData, 
+    currentStatus, 
+    setCurrentStatus, 
+    step, 
+    setStep, 
+    currentPaymentStatus, 
+    setPaymentCurrentStatus,
+    paymentStep, 
+    setPaymentStep
    } = useFile();
   const { token } = theme.useToken();
   // const [currentStatus, setCurrentStatus] = useState(0);
@@ -26,97 +36,48 @@ const { TextArea } = Input;
 
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
-  const [modalText, setModalText] = useState('Content of the modal');
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
-  
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    console.log('setStep', step);
-    console.log('satteeeeeee', currentStatus)
-    });
+    if(fileId) {
+      getFileStep(fileId)
+      getPaymentStep(fileId)
+    }
+  },[fileId])
 
-    useEffect(() => {
-      stepsData()
-    })
+  const getFileStep = async (fileId: string) => {
+    try {
+      const { data, error } = await publicSupabase
+        .from('statusSteps')
+        .select('*')
+        .eq('filedetailsid', fileId);
+      if (error) throw error;
+      const currentStatusState = highestState(data);
+      setCurrentStatus(currentStatusState)
+      setStep(data);
+    } catch (error) {
+      console.error('ERROR: ', error);
+    } finally {
+      setLoading(false); 
+    }
+  };
 
-    const formattedDate = formatDate(step[0].description);
-    const title = step[0].title;
-    const content = step[0].content;
-    
-      const steps = [
-        {
-          title: "Submitted",
-          description: "",
-          content: 'First-content',
-          state: 0
-        },
-        {
-          title: 'In Progress',
-          description: 'Not Started',
-          content: 'Second-content',
-          state: 1
-        },
-        {
-          title: 'Completed',
-          description: 'Not Started',
-          content: 'Last-content',
-          state: 2
-        },
-      ];
-
-      const paymentSteps = [
-        {
-          title: "1st Installment",
-          description: "",
-          content: 'First-content',
-          state: 0
-        },
-        {
-          title: '2nd Installment',
-          description: 'Not Started',
-          content: 'Second-content',
-          state: 1
-        },
-        {
-          title: '3rd Installment',
-          description: 'Not Started',
-          content: 'Last-content',
-          state: 2
-        },
-      ];
-
-      const stepsData = () => {
-        console.log('updated states',updatedSteps)
-        console.log('updated states',updatedPaymentSteps)
-      }
-
-      const updatedSteps = steps.map(stepItem => {
-        const matchingItem = step.find((item:any) => item.state === stepItem.state);
-
-        if (matchingItem) {
-          return {
-            ...stepItem,
-            title: matchingItem.title,
-            description: matchingItem.description
-          };
-        }
-        
-        return stepItem;
-      });
-
-      const updatedPaymentSteps = paymentSteps.map(stepItem => {
-        const matchingItem = paymentStep.find((item:any) => item.state === stepItem.state);
-
-        if (matchingItem) {
-          return {
-            ...stepItem,
-            title: matchingItem.title,
-            description: matchingItem.description
-          };
-        }
-        
-        return stepItem;
-      });
+  const getPaymentStep = async (fileId: string) => {
+    try {
+      const { data, error } = await publicSupabase
+        .from('paymentSteps')
+        .select('*')
+        .eq('filedetailsid', fileId);
+      if (error) throw error;
+      const currentPaymentState = highestState(data);
+      setPaymentCurrentStatus(currentPaymentState)
+      setPaymentStep(data);
+    } catch (error) {
+      console.error('ERROR: ', error);
+    }
+  };
     
     const updateStatus = async (values: any) => {
       const state = currentStatus + 1;
@@ -193,26 +154,6 @@ const { TextArea } = Input;
         toast.error("An unexpected error occurred");
       }
     };
-    
-
-    //   const updatePaymentStatus = async (direction:boolean) => {
-    //     const currentTimestamp = new Date().toISOString();
-    //     const state = direction ? currentPaymentStatus + 1 : currentPaymentStatus - 1 
-  
-    //     const { data, error } = await publicSupabase
-    //       .from('paymentSteps')
-    //       .update({ description: currentTimestamp, state: state })
-    //       .eq('id', paymentStep[0].id);
-
-    //     if(error) {
-    //       console.log(error)
-    //       toast.error("There was a error while updating Payment status")
-    //     }
-    //         toast.success("Status updated successfully")
-    // setPaymentCurrentStatus(state);
-
-    //   }
-
 
   const next = () => {
     // updateStatus(true);
@@ -224,9 +165,16 @@ const { TextArea } = Input;
     showModal()
   };
 
-  const items = step.map((item:any) => ({ key: item.title, title: item.title, description: formatDate(item.createdAt) }));
+  if (loading) {
+    return <div><Spin /> Loading...</div>; 
+  }
 
-  const paymentItems = paymentStep.map((item:any) => ({ key: item.title, title: item.title, description: formatDate(item.createdAt) }));
+  if (!step || !paymentStep) {
+    return <div>Loading...</div>;
+  }
+
+    const items = step.map((item:any) => ({ key: item.title, title: item.title, description: formatDate(item.createdAt) }));
+    const paymentItems = paymentStep.map((item:any) => ({ key: item.title, title: item.title, description: formatDate(item.createdAt) }));
 
   const contentStyle: React.CSSProperties = {
     lineHeight: '100px',
@@ -241,20 +189,6 @@ const { TextArea } = Input;
   const showModal = () => {
     setOpen(true);
   };
-
-  // const handleOk = async () => {
-  //   form.validateFields().then(values => {
-  //     setConfirmLoading(true);
-  //     console.log('Form values:', { ...values, upload: fileList });
-  //     await updateStatus(values)
-  //       setOpen(false);
-  //       setConfirmLoading(false);
-  //       form.resetFields();
-  //       setFileList([]);
-  //   }).catch(info => {
-  //     console.log('Validate Failed:', info);
-  //   });
-  // };
 
   const handleOk = async (type:string) => {
     try {
@@ -322,15 +256,6 @@ const { TextArea } = Input;
           />
         );
       })()}
-        {/* {(() => {
-      const reversedItems = [...items].reverse();
-      const reversedCurrentStatus = items.length - 1 - currentStatus;
-      return (
-        <Steps current={currentStatus} items={reversedItems} direction='vertical' />
-      );
-    })()} */}
-        {/* <Steps current={currentStatus} items={items} direction='vertical' /> */}
-        {/* <div style={contentStyle}>{steps[currentStatus].content}</div> */}
         <div style={{ marginTop: 24 }}>
             <Button type="primary" onClick={() => next()}>
               Add Status
@@ -371,36 +296,8 @@ const { TextArea } = Input;
           </Form.Item>
         </Form>
           </Modal>
-          {/* {currentStatus === steps.length - 1 && (
-            <Button type="primary" onClick={() => message.success('Processing complete!')}>
-              Done
-            </Button>
-          )}
-          {currentStatus > 0 && (
-            <Button style={{ margin: '0 8px' }} onClick={() => prev()}>
-              Previous
-            </Button>
-          )} */}
         </div>
         </>
-        // <Steps
-        //   direction="vertical"
-        //   current={1}
-        //   items={[
-        //     {
-        //       title: fileData.fileStatus,
-        //       description: `Submittted at ${formattedDate}`,
-        //     },
-        //     {
-        //       title: 'In progress',
-        //       description: 'Your document has been submitted.',
-        //     },
-        //     {
-        //       title: 'Finished',
-        //       description: 'File submission successfully done.',
-        //     },
-        //   ]}
-        // />
       )}
       {statusType === 'payment' && (
         <>
@@ -478,24 +375,6 @@ const { TextArea } = Input;
           </Modal>
         </div>
         </>
-        // <Steps
-        //   direction="vertical"
-        //   current={1}
-        //   items={[
-        //     {
-        //       title: 'First installment',
-        //       description: `Submittted at ${formattedDate}`,
-        //     },
-        //     {
-        //       title: 'Second installment',
-        //       description: 'Yet to be paid.',
-        //     },
-        //     {
-        //       title: 'Third installment',
-        //       description: 'Yet to be paid.',
-        //     },
-        //   ]}
-        // />
       )}
     </>
   );

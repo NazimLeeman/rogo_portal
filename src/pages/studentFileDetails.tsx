@@ -6,14 +6,18 @@ import {
   Form,
   Input,
   Modal,
+  Spin,
 } from 'antd';
 import { useFile } from '../context/FileContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { publicSupabase } from '../api/SupabaseClient';
 import { PlusOutlined } from '@ant-design/icons';
 import Step from '../component/Step/step';
+import { highestState } from '../utils/helper';
+import toast from 'react-hot-toast';
 
 const StudentFileDetails: React.FC = () => {
+  const { fileId } = useParams();
   const {
     selectedNav,
     setSelectedNav,
@@ -23,16 +27,19 @@ const StudentFileDetails: React.FC = () => {
     setStudentFiles,
     fileData,
     setFileData,
+    setStep,
+    step,
+    currentStatus,
+    setCurrentStatus
   } = useFile();
-  // const { fileId } = useParams();
   const [files, setFiles] = useState<any[]>([]);
   const [downloadUrl, setDownloadUrl] = useState<any[]>([]);
   const [ userRole, setUserRole] = useState<any>("")
   const [services, setServices] = useState(['Admission', 'Application']);
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
+  const [studentId, setStudentId] = useState("");
   const [form] = Form.useForm();
-  
   
   const navigate = useNavigate();
 
@@ -51,10 +58,31 @@ const StudentFileDetails: React.FC = () => {
     }
   };
 
+  // useEffect(() => {
+  //   getUserRole()
+  //   getFilesForStudent()
+  //   getStudentId()
+  // },[])
   useEffect(() => {
-    getUserRole()
-    getFilesForStudent()
-  },[])
+    const fetchData = async () => {
+      getUserRole();
+      await getStudentId();
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchFiles = async () => {
+      if (studentId) {
+        try {
+          await getFilesForStudent(studentId);
+        } catch (error) {
+          console.error('Error fetching files:', error);
+        }
+      }
+    };
+    fetchFiles();
+  }, [studentId]);
 
   const onChange: CheckboxProps['onChange'] = (e) => {
     console.log(`checked = ${e.target.checked}`);
@@ -69,10 +97,10 @@ const StudentFileDetails: React.FC = () => {
     setOpen(true);
   };
 
-  const getFilesForStudent = async () => {
+  const getFilesForStudent = async (studentId:string) => {
     const { data, error } = await publicSupabase.storage
         .from('avatars') // Replace 'avatars' with your bucket name
-        .list(`${studentInfo?.id}/`);
+        .list(`${studentId}/`);
 
     if (error) {
         throw error;
@@ -83,8 +111,12 @@ const StudentFileDetails: React.FC = () => {
 };
 
 const signedUrls = async(resultData:any) => {
+  if(resultData.length < 1) {
+    toast.error('No File Found')
+    throw new Error
+  }
   const name = resultData.map((item:any) => {
-    return `${studentInfo?.id}/${item.name}`
+    return `${studentId}/${item.name}`
   })
   const { data, error } = await publicSupabase
   .storage
@@ -97,6 +129,22 @@ const signedUrls = async(resultData:any) => {
   setDownloadUrl(data)
   console.log('signedddddd urls', data)
 } 
+
+const getStudentId = async() => {
+  try {
+  const {data, error} = await publicSupabase
+  .from('filedetails')
+  .select()
+  .eq('id',fileId);
+  if(error) {
+    console.log('error', error)
+  throw new Error
+  }
+  setStudentId(data[0].studentid)
+  } catch(error) {
+    console.log(error)
+  }
+}
 
 const handleCancel = () => {
   setOpen(false);
@@ -112,7 +160,11 @@ const handleCancel = () => {
       <div className="space-y-6 w-2/4">       
       <div className="space-y-6">
         <p className="text-xl">Status Timeline</p>
-        <Step statusType="fileStatus" />
+        { fileId && step !== undefined ? (
+        <Step fileId={fileId} statusType="fileStatus" />
+        ): (
+          <div></div>
+        )}
       </div>
       <div className="space-y-6">
         <div>
@@ -151,14 +203,11 @@ const handleCancel = () => {
         </Form>
           </Modal>
     </div>
-      {/* <div className="space-y-6">
-        <p className="text-xl">Services got from ROGO</p>
-        <Checkbox onChange={onChange}>Admission</Checkbox>
-        <Checkbox onChange={onChange}>Application</Checkbox>
-      </div> */}
       <div className="space-y-6">
         <p className="text-xl">Payment History</p>
-        <Step statusType="payment" />
+        { fileId && (
+        <Step fileId={fileId} statusType="payment" />
+        )}
       </div>
       </div>
       <div>
@@ -179,7 +228,7 @@ const handleCancel = () => {
         </ul>
         </div>
   ) : (
-    <p>No files available</p>
+    <div><Spin /> Please wait...</div>
   )}
       </div>
       </div>

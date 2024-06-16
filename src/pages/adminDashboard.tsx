@@ -58,11 +58,9 @@ const AdminDashboard: React.FC = () => {
 
 
   const onChange = (value: string) => {
-    console.log(value)
     const student = students?.find((student) => student.id === value) || null;
     setSelectedStudent(student);
     handleSudentFile(value)
-    console.log('selected', student);
   };
 
   const onBlur = () => {
@@ -93,14 +91,11 @@ const AdminDashboard: React.FC = () => {
 
   const getStudentInfo = async (id: string, fileId: string) => {
     try {
-      console.log('from getStudentInfo id',id)
-      console.log('from getStudentInfo fileId',fileId)
       const { data, error } = await publicSupabase
         .from('studentInfo')
         .select('*')
         .eq('id', id);
       if (error) throw error;
-      console.log(data)
       if (data && data.length > 0) {
         setStudentInfo(data[0]);
         navigate(`/file-details/${fileId}`);
@@ -113,42 +108,36 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-  const getFileStep = async (fileId: string) => {
-    try {
-      console.log('from getStudentInfo fileId',fileId)
-      const { data, error } = await publicSupabase
-        .from('statusSteps')
-        .select('*')
-        .eq('filedetailsid', fileId);
-      if (error) throw error;
-      console.log(data)
-      console.log('Status State', data)
-      const currentStatusState = highestState(data);
-      console.log('Current Status State', currentStatus)
-      setCurrentStatus(currentStatusState)
-      console.log('file step', currentStatus)
-      setStep(data);
-    } catch (error) {
-      console.error('ERROR: ', error);
-      setLoading(false);
-    }
-  };
+  // const getFileStep = async (fileId: string) => {
+  //   try {
+  //     const { data, error } = await publicSupabase
+  //       .from('statusSteps')
+  //       .select('*')
+  //       .eq('filedetailsid', fileId);
+  //     if (error) throw error;
+  //     const currentStatusState = highestState(data);
+  //     setCurrentStatus(currentStatusState)
+  //     setStep(data);
+  //   } catch (error) {
+  //     console.error('ERROR: ', error);
+  //     setLoading(false);
+  //   }
+  // };
 
-  const getPaymentStep = async (fileId: string) => {
-    try {
-      console.log('from getStudentInfo fileId',fileId)
-      const { data, error } = await publicSupabase
-        .from('paymentSteps')
-        .select('*')
-        .eq('filedetailsid', fileId);
-      if (error) throw error;
-      const currentPaymentState = highestState(data);
-      setPaymentCurrentStatus(currentPaymentState)
-      setPaymentStep(data);
-    } catch (error) {
-      console.error('ERROR: ', error);
-    }
-  };
+  // const getPaymentStep = async (fileId: string) => {
+  //   try {
+  //     const { data, error } = await publicSupabase
+  //       .from('paymentSteps')
+  //       .select('*')
+  //       .eq('filedetailsid', fileId);
+  //     if (error) throw error;
+  //     const currentPaymentState = highestState(data);
+  //     setPaymentCurrentStatus(currentPaymentState)
+  //     setPaymentStep(data);
+  //   } catch (error) {
+  //     console.error('ERROR: ', error);
+  //   }
+  // };
 
   const filterOption: SelectProps<string>['filterOption'] = (input, option) => {
     return (
@@ -165,7 +154,6 @@ const AdminDashboard: React.FC = () => {
         .select('*')
         .eq('student_id', id);
       if (error) throw error;
-      console.log(StudentFile);
       setSelectedStudentFile(StudentFile);
       setOpen(true);
     } catch (error) {
@@ -186,13 +174,10 @@ const AdminDashboard: React.FC = () => {
         throw fileDetailsError;
       }
       const fileId = fileDetailsData[0].id;
-      console.log('file Dataaaaaaaaaaaaaaaaa',fileDetailsData)
       setFileData(fileDetailsData[0])
-      await getFileStep(fileId);
-      await getPaymentStep(fileId)
+      // await getFileStep(fileId);
+      // await getPaymentStep(fileId)
       await getStudentInfo(student_id, fileId);
-      console.log('file iddddddddd',fileId)
-      
     } catch (error) {
       toast.error("This file hasn't been submitted by the Student")
       console.log(error);
