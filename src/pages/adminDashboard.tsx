@@ -10,6 +10,7 @@ import FileForm from '../component/StudentForm/fileForm';
 import { useFile } from '../context/FileContext';
 import SearchTable from '../component/Table/table';
 import toast from 'react-hot-toast';
+import { highestState } from '../utils/helper';
 
 const { Option } = Select;
 
@@ -116,12 +117,15 @@ const AdminDashboard: React.FC = () => {
     try {
       console.log('from getStudentInfo fileId',fileId)
       const { data, error } = await publicSupabase
-        .from('steps')
+        .from('statusSteps')
         .select('*')
         .eq('filedetailsid', fileId);
       if (error) throw error;
       console.log(data)
-      setCurrentStatus(data[0].state)
+      console.log('Status State', data)
+      const currentStatusState = highestState(data);
+      console.log('Current Status State', currentStatus)
+      setCurrentStatus(currentStatusState)
       console.log('file step', currentStatus)
       setStep(data);
     } catch (error) {
@@ -138,9 +142,8 @@ const AdminDashboard: React.FC = () => {
         .select('*')
         .eq('filedetailsid', fileId);
       if (error) throw error;
-      console.log(data)
-      setPaymentCurrentStatus(data[0].state)
-      console.log('Payment step', currentStatus)
+      const currentPaymentState = highestState(data);
+      setPaymentCurrentStatus(currentPaymentState)
       setPaymentStep(data);
     } catch (error) {
       console.error('ERROR: ', error);

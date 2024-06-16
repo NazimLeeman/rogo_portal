@@ -93,7 +93,7 @@ const signedUrls = async(resultData:any) => {
         <Step statusType="fileStatus" />
       </div>
       <div className="space-y-6">
-        <p className="text-xl">Serivces got from ROGO</p>
+        <p className="text-xl">Services got from ROGO</p>
         <Checkbox onChange={onChange}>Admission</Checkbox>
         <Checkbox onChange={onChange}>Application</Checkbox>
       </div>

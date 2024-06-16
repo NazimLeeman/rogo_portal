@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Button, message, Steps, theme  } from 'antd';
+import { Button, message, Modal, Steps, theme, Form, Select, Input, Upload, UploadProps, UploadFile  } from 'antd';
 import { useFile } from '../../context/FileContext';
 import { publicSupabase } from '../../api/SupabaseClient';
 import { useParams } from 'react-router-dom';
 import { formatDate } from '../../utils/helper';
+import { UploadOutlined } from '@ant-design/icons';
 import toast from 'react-hot-toast';
 
 interface StepProps {
@@ -19,6 +20,14 @@ const Step: React.FC<StepProps> = ({ statusType }) => {
    } = useFile();
   const { token } = theme.useToken();
   // const [currentStatus, setCurrentStatus] = useState(0);
+  const { Option } = Select;
+const { TextArea } = Input;
+
+  const [open, setOpen] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [modalText, setModalText] = useState('Content of the modal');
+  const [form] = Form.useForm();
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
   
   useEffect(() => {
     console.log('setStep', step);
@@ -108,63 +117,115 @@ const Step: React.FC<StepProps> = ({ statusType }) => {
         return stepItem;
       });
     
-
-      const updateStatus = async (direction:boolean) => {
-        const currentTimestamp = new Date().toISOString();
-        const state = direction ? currentStatus + 1 : currentStatus - 1 
-  
-        const { data, error } = await publicSupabase
-          .from('steps')
-          .update({ description: currentTimestamp, state: state })
-          .eq('id', step[0].id);
-
-        if(error) {
-          console.log(error)
-          toast.error("There was a error while updating status")
+    const updateStatus = async (values: any) => {
+      const state = currentStatus + 1;
+      
+      try {
+        // Insert the new row
+        const { data: insertData, error: insertError } = await publicSupabase
+          .from('statusSteps')
+          .insert({ title: values.status, description: values.note, state: state, filedetailsid: step[0].filedetailsid })
+          .select();
+    
+        if (insertError) {
+          console.log(insertError);
+          toast.error("There was an error while updating status");
+          return;
         }
-            toast.success("Status updated successfully")
-    setCurrentStatus(state);
-
+        
+        toast.success("Status updated successfully");
+        
+        // Retrieve rows that match the filedetailsid
+        const { data: selectData, error: selectError } = await publicSupabase
+          .from('statusSteps')
+          .select()
+          .eq('filedetailsid', step[0].filedetailsid);
+    
+        if (selectError) {
+          console.log(selectError);
+          toast.error("There was an error while fetching steps");
+          return;
+        }
+    
+        setCurrentStatus(state);
+        setStep(selectData);
+      } catch (error) {
+        console.error('Unexpected error:', error);
+        toast.error("An unexpected error occurred");
       }
+    };
 
-      const updatePaymentStatus = async (direction:boolean) => {
-        const currentTimestamp = new Date().toISOString();
-        const state = direction ? currentPaymentStatus + 1 : currentPaymentStatus - 1 
-  
-        const { data, error } = await publicSupabase
+    const updatePaymentStatus = async (values: any) => {
+      const state = currentStatus + 1;
+      
+      try {
+        // Insert the new row
+        const { data: insertData, error: insertError } = await publicSupabase
           .from('paymentSteps')
-          .update({ description: currentTimestamp, state: state })
-          .eq('id', paymentStep[0].id);
-
-        if(error) {
-          console.log(error)
-          toast.error("There was a error while updating Payment status")
+          .insert({ title: values.status, description: values.note, state: state, filedetailsid: step[0].filedetailsid })
+          .select();
+    
+        if (insertError) {
+          console.log(insertError);
+          toast.error("There was an error while updating status");
+          return;
         }
-            toast.success("Status updated successfully")
-    setPaymentCurrentStatus(state);
-
+        
+        toast.success("Status updated successfully");
+        
+        // Retrieve rows that match the filedetailsid
+        const { data: selectData, error: selectError } = await publicSupabase
+          .from('paymentSteps')
+          .select()
+          .eq('filedetailsid', step[0].filedetailsid);
+    
+        if (selectError) {
+          console.log(selectError);
+          toast.error("There was an error while fetching steps");
+          return;
+        }
+    
+        setPaymentCurrentStatus(state);
+        setPaymentStep(selectData);
+      } catch (error) {
+        console.error('Unexpected error:', error);
+        toast.error("An unexpected error occurred");
       }
+    };
+    
+
+    //   const updatePaymentStatus = async (direction:boolean) => {
+    //     const currentTimestamp = new Date().toISOString();
+    //     const state = direction ? currentPaymentStatus + 1 : currentPaymentStatus - 1 
+  
+    //     const { data, error } = await publicSupabase
+    //       .from('paymentSteps')
+    //       .update({ description: currentTimestamp, state: state })
+    //       .eq('id', paymentStep[0].id);
+
+    //     if(error) {
+    //       console.log(error)
+    //       toast.error("There was a error while updating Payment status")
+    //     }
+    //         toast.success("Status updated successfully")
+    // setPaymentCurrentStatus(state);
+
+    //   }
 
 
   const next = () => {
-    updateStatus(true);
-  };
-
-  const prev = () => {
-    updateStatus(false);
+    // updateStatus(true);
+    showModal()
   };
 
   const nextPayment = () => {
-    updatePaymentStatus(true);
+    // updatePaymentStatus(true);
+    showModal()
   };
 
-  const prevPayment = () => {
-    updatePaymentStatus(false);
-  };
+  const items = step.map((item:any) => ({ key: item.title, title: item.title, description: formatDate(item.createdAt) }));
 
-  const items = updatedSteps.map((item) => ({ key: item.title, title: item.title, description: item.description }));
-
-  const paymentItems = updatedPaymentSteps.map((item) => ({ key: item.title, title: item.title, description: item.description }));
+  const paymentItems = paymentStep.map((item:any) => ({ key: item.title, title: item.title, description: formatDate(item.createdAt) }));
 
   const contentStyle: React.CSSProperties = {
     lineHeight: '100px',
@@ -176,19 +237,108 @@ const Step: React.FC<StepProps> = ({ statusType }) => {
     marginTop: 16,
   };
 
+  const showModal = () => {
+    setOpen(true);
+  };
+
+  // const handleOk = async () => {
+  //   form.validateFields().then(values => {
+  //     setConfirmLoading(true);
+  //     console.log('Form values:', { ...values, upload: fileList });
+  //     await updateStatus(values)
+  //       setOpen(false);
+  //       setConfirmLoading(false);
+  //       form.resetFields();
+  //       setFileList([]);
+  //   }).catch(info => {
+  //     console.log('Validate Failed:', info);
+  //   });
+  // };
+
+  const handleOk = async (type:string) => {
+    try {
+        const values = await form.validateFields();
+        setConfirmLoading(true);
+        console.log('Form values:', { ...values, upload: fileList });
+        if(type === "fileStatus") {
+          await updateStatus(values);
+        } else {
+          await updatePaymentStatus(values);
+        }
+        
+        setOpen(false);
+        setConfirmLoading(false);
+        form.resetFields();
+        setFileList([]);
+    } catch (info) {
+        console.log('Validate Failed:', info);
+    }
+};
+
+  const handleCancel = () => {
+    setOpen(false);
+    form.resetFields();
+    setFileList([]);
+  };
+
+  const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
+    setFileList(newFileList);
+  };
+
   return (
     <>
       {statusType === 'fileStatus' && (
         <>
-        <Steps current={currentStatus} items={items} />
-        <div style={contentStyle}>{steps[currentStatus].content}</div>
+        {(() => {
+      const reversedItems = [...items].reverse();
+      const reversedCurrentStatus = items.length - 1 - currentStatus;
+      return (
+        <Steps current={currentStatus} items={items} direction='vertical' />
+      );
+    })()}
+        {/* <Steps current={currentStatus} items={items} direction='vertical' /> */}
+        {/* <div style={contentStyle}>{steps[currentStatus].content}</div> */}
         <div style={{ marginTop: 24 }}>
-          {currentStatus < steps.length - 1 && (
             <Button type="primary" onClick={() => next()}>
-              Next
+              Add Status
             </Button>
-          )}
-          {currentStatus === steps.length - 1 && (
+            <Modal
+            title="Title"
+            open={open}
+            onOk={() => {handleOk("fileStatus")}}
+            confirmLoading={confirmLoading}
+            onCancel={handleCancel}
+            >
+            {/* <p>{modalText}</p> */}
+            <Form form={form} layout="vertical">
+          <Form.Item
+            name="status"
+            label="Status"
+            rules={[{ required: true, message: 'Please select a status' }]}
+          >
+            <Select placeholder="Select a status">
+              <Option value="Submitted">Submitted</Option>
+              <Option value="In Progess">In Progress</Option>
+              <Option value="Completed">Completed</Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item name="notes" label="Notes">
+            <TextArea rows={4} placeholder="Optional notes" />
+          </Form.Item>
+
+          <Form.Item name="upload" label="Upload File">
+          <Upload 
+              fileList={fileList}
+              onChange={handleChange}
+              beforeUpload={() => false} // Prevent auto upload
+            >
+              <Button icon={<UploadOutlined />}>Click to Upload</Button>
+            </Upload>
+          </Form.Item>
+        </Form>
+          </Modal>
+          {/* {currentStatus === steps.length - 1 && (
             <Button type="primary" onClick={() => message.success('Processing complete!')}>
               Done
             </Button>
@@ -197,7 +347,7 @@ const Step: React.FC<StepProps> = ({ statusType }) => {
             <Button style={{ margin: '0 8px' }} onClick={() => prev()}>
               Previous
             </Button>
-          )}
+          )} */}
         </div>
         </>
         // <Steps
@@ -221,24 +371,53 @@ const Step: React.FC<StepProps> = ({ statusType }) => {
       )}
       {statusType === 'payment' && (
         <>
-        <Steps current={currentPaymentStatus} items={paymentItems} />
-        <div style={contentStyle}>{paymentSteps[currentPaymentStatus].content}</div>
+        {(() => {
+      const reversedItems = [...paymentItems].reverse();
+      const reversedCurrentStatus = paymentItems.length - 1 - currentPaymentStatus;
+      return (
+        <Steps current={reversedCurrentStatus} items={reversedItems} direction='vertical' />
+      );
+    })()}
         <div style={{ marginTop: 24 }}>
-          {currentPaymentStatus < steps.length - 1 && (
             <Button type="primary" onClick={() => nextPayment()}>
-              Next
+              Add Payment
             </Button>
-          )}
-          {currentPaymentStatus === steps.length - 1 && (
-            <Button type="primary" onClick={() => message.success('Processing complete!')}>
-              Done
-            </Button>
-          )}
-          {currentPaymentStatus > 0 && (
-            <Button style={{ margin: '0 8px' }} onClick={() => prevPayment()}>
-              Previous
-            </Button>
-          )}
+            <Modal
+            title="Title"
+            open={open}
+            onOk={() => {handleOk("payment")}}
+            confirmLoading={confirmLoading}
+            onCancel={handleCancel}
+            >
+            {/* <p>{modalText}</p> */}
+            <Form form={form} layout="vertical">
+          <Form.Item
+            name="status"
+            label="Status"
+            rules={[{ required: true, message: 'Please select a status' }]}
+          >
+            <Select placeholder="Select a status">
+              <Option value="1st Installment">1st Installment</Option>
+              <Option value="2nd Installment">2nd Installment</Option>
+              <Option value="3rd Installment">3rd Installment</Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item name="notes" label="Notes">
+            <TextArea rows={4} placeholder="Optional notes" />
+          </Form.Item>
+
+          <Form.Item name="upload" label="Upload File">
+          <Upload 
+              fileList={fileList}
+              onChange={handleChange}
+              beforeUpload={() => false} // Prevent auto upload
+            >
+              <Button icon={<UploadOutlined />}>Click to Upload</Button>
+            </Upload>
+          </Form.Item>
+        </Form>
+          </Modal>
         </div>
         </>
         // <Steps
