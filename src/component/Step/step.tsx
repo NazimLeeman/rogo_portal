@@ -5,6 +5,7 @@ import { publicSupabase } from '../../api/SupabaseClient';
 import { useParams } from 'react-router-dom';
 import { formatDate } from '../../utils/helper';
 import { UploadOutlined } from '@ant-design/icons';
+import { CheckOutlined } from '@ant-design/icons';
 import toast from 'react-hot-toast';
 
 interface StepProps {
@@ -290,12 +291,44 @@ const { TextArea } = Input;
       {statusType === 'fileStatus' && (
         <>
         {(() => {
+        const totalItems = items.length;
+        const reversedItems = [...items].reverse().map((item, index) => {
+          const stepNumber = totalItems - index;
+          const isCompleted = index > totalItems - 1 - currentStatus;
+
+          return {
+            ...item,
+            icon: isCompleted ? (
+              <div className="custom-step-icon completed">
+                <CheckOutlined />
+              </div>
+            ) : (
+              <div className="custom-step-icon">
+                <div className='ant-steps-item-icon'>
+                <h1 className='text-white text-md'>{stepNumber}</h1>
+                </div>
+              </div>
+            )
+          };
+        });
+
+        const reversedCurrentStatus = items.length - 1 - currentStatus;
+
+        return (
+          <Steps 
+            current={reversedCurrentStatus} 
+            items={reversedItems} 
+            direction="vertical"
+          />
+        );
+      })()}
+        {/* {(() => {
       const reversedItems = [...items].reverse();
       const reversedCurrentStatus = items.length - 1 - currentStatus;
       return (
-        <Steps current={currentStatus} items={items} direction='vertical' />
+        <Steps current={currentStatus} items={reversedItems} direction='vertical' />
       );
-    })()}
+    })()} */}
         {/* <Steps current={currentStatus} items={items} direction='vertical' /> */}
         {/* <div style={contentStyle}>{steps[currentStatus].content}</div> */}
         <div style={{ marginTop: 24 }}>
@@ -372,12 +405,37 @@ const { TextArea } = Input;
       {statusType === 'payment' && (
         <>
         {(() => {
-      const reversedItems = [...paymentItems].reverse();
-      const reversedCurrentStatus = paymentItems.length - 1 - currentPaymentStatus;
-      return (
-        <Steps current={reversedCurrentStatus} items={reversedItems} direction='vertical' />
-      );
-    })()}
+        const totalItems = paymentItems.length;
+        const reversedItems = [...paymentItems].reverse().map((item, index) => {
+          const stepNumber = totalItems - index;
+          const isCompleted = index > totalItems - 1 - currentPaymentStatus;
+
+          return {
+            ...item,
+            icon: isCompleted ? (
+              <div className="custom-step-icon completed">
+                <CheckOutlined />
+              </div>
+            ) : (
+              <div className="custom-step-icon">
+                <div className='ant-steps-item-icon'>
+                <h1 className='text-white text-md'>{stepNumber}</h1>
+                </div>
+              </div>
+            )
+          };
+        });
+
+        const reversedCurrentStatus = paymentItems.length - 1 - currentPaymentStatus;
+
+        return (
+          <Steps 
+            current={reversedCurrentStatus} 
+            items={reversedItems} 
+            direction="vertical"
+          />
+        );
+      })()}
         <div style={{ marginTop: 24 }}>
             <Button type="primary" onClick={() => nextPayment()}>
               Add Payment
