@@ -3,10 +3,14 @@ import {
   Button,
   Checkbox,
   CheckboxProps,
+  Form,
+  Input,
+  Modal,
 } from 'antd';
 import { useFile } from '../context/FileContext';
 import { useNavigate } from 'react-router-dom';
 import { publicSupabase } from '../api/SupabaseClient';
+import { PlusOutlined } from '@ant-design/icons';
 import Step from '../component/Step/step';
 
 const StudentFileDetails: React.FC = () => {
@@ -24,6 +28,10 @@ const StudentFileDetails: React.FC = () => {
   const [files, setFiles] = useState<any[]>([]);
   const [downloadUrl, setDownloadUrl] = useState<any[]>([]);
   const [ userRole, setUserRole] = useState<any>("")
+  const [services, setServices] = useState(['Admission', 'Application']);
+  const [open, setOpen] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [form] = Form.useForm();
   
   
   const navigate = useNavigate();
@@ -50,6 +58,15 @@ const StudentFileDetails: React.FC = () => {
 
   const onChange: CheckboxProps['onChange'] = (e) => {
     console.log(`checked = ${e.target.checked}`);
+  };
+
+  const addNewService = () => {
+    // setServices([...services, `New Service ${services.length + 1}`]);
+    showModal()
+  };
+
+  const showModal = () => {
+    setOpen(true);
   };
 
   const getFilesForStudent = async () => {
@@ -81,6 +98,11 @@ const signedUrls = async(resultData:any) => {
   console.log('signedddddd urls', data)
 } 
 
+const handleCancel = () => {
+  setOpen(false);
+  form.resetFields();
+};
+
   return (
     <>
       <Button className="mb-8" onClick={handleBack}>
@@ -93,10 +115,47 @@ const signedUrls = async(resultData:any) => {
         <Step statusType="fileStatus" />
       </div>
       <div className="space-y-6">
+        <div>
+      <p className="text-xl">Services got from ROGO</p>
+      {services.map((service, index) => (
+        <Checkbox className='mt-4' key={index} onChange={onChange}>
+          {service}
+        </Checkbox>
+      ))}
+    </div>
+      <Button 
+        type="dashed" 
+        style={{maxWidth: "300px"}}
+        onClick={addNewService} 
+        block 
+        icon={<PlusOutlined />}
+      >
+        Add Service
+      </Button>
+      <Modal
+            title="Add Service"
+            open={open}
+            onOk={() => {}}
+            confirmLoading={confirmLoading}
+            onCancel={handleCancel}
+            >
+            {/* <p>{modalText}</p> */}
+            <Form form={form} layout="vertical">
+          <Form.Item
+            name="service"
+            label="Serivce"
+            rules={[{ required: true, message: 'Please select a status' }]}
+          >
+            <Input/>
+          </Form.Item>
+        </Form>
+          </Modal>
+    </div>
+      {/* <div className="space-y-6">
         <p className="text-xl">Services got from ROGO</p>
         <Checkbox onChange={onChange}>Admission</Checkbox>
         <Checkbox onChange={onChange}>Application</Checkbox>
-      </div>
+      </div> */}
       <div className="space-y-6">
         <p className="text-xl">Payment History</p>
         <Step statusType="payment" />

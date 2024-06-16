@@ -157,7 +157,7 @@ const { TextArea } = Input;
     };
 
     const updatePaymentStatus = async (values: any) => {
-      const state = currentStatus + 1;
+      const state = currentPaymentStatus + 1;
       
       try {
         // Insert the new row
