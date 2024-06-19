@@ -13,24 +13,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { publicSupabase } from '../api/SupabaseClient';
 import { PlusOutlined } from '@ant-design/icons';
 import Step from '../component/Step/step';
-import { highestState } from '../utils/helper';
 import toast from 'react-hot-toast';
 
 const StudentFileDetails: React.FC = () => {
   const { fileId } = useParams();
   const {
-    selectedNav,
-    setSelectedNav,
-    studentInfo,
-    setStudentInfo,
-    studentFiles,
-    setStudentFiles,
-    fileData,
-    setFileData,
-    setStep,
     step,
-    currentStatus,
-    setCurrentStatus
   } = useFile();
   const [files, setFiles] = useState<any[]>([]);
   const [downloadUrl, setDownloadUrl] = useState<any[]>([]);
@@ -170,7 +158,7 @@ const handleCancel = () => {
         <div>
       <p className="text-xl">Services got from ROGO</p>
       {services.map((service, index) => (
-        <Checkbox className='mt-4' key={index} onChange={onChange}>
+        <Checkbox checked={true} className='mt-4' key={index} onChange={onChange}>
           {service}
         </Checkbox>
       ))}

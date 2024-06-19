@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Button, message, Modal, Steps, theme, Form, Select, Input, Upload, UploadProps, UploadFile, Spin  } from 'antd';
+import { Button, message, Modal, Steps, theme, Form, Select, Input, Upload, UploadProps, UploadFile, Spin, InputNumber  } from 'antd';
 import { useFile } from '../../context/FileContext';
 import { publicSupabase } from '../../api/SupabaseClient';
-import { useParams } from 'react-router-dom';
 import { formatDate, highestState } from '../../utils/helper';
 import { UploadOutlined } from '@ant-design/icons';
 import { CheckOutlined } from '@ant-design/icons';
@@ -17,9 +16,7 @@ interface StepProps {
 
 // let description = 'This is a description.';
 const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
-  // const { fileId } = useParams();
-  const { fileData, 
-    setFileData, 
+  const { 
     currentStatus, 
     setCurrentStatus, 
     step, 
@@ -30,7 +27,6 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
     setPaymentStep
    } = useFile();
   const { token } = theme.useToken();
-  // const [currentStatus, setCurrentStatus] = useState(0);
   const { Option } = Select;
 const { TextArea } = Input;
 
@@ -83,7 +79,6 @@ const { TextArea } = Input;
       const state = currentStatus + 1;
       
       try {
-        // Insert the new row
         const { data: insertData, error: insertError } = await publicSupabase
           .from('statusSteps')
           .insert({ title: values.status, description: values.note, state: state, filedetailsid: step[0].filedetailsid })
@@ -97,7 +92,6 @@ const { TextArea } = Input;
         
         toast.success("Status updated successfully");
         
-        // Retrieve rows that match the filedetailsid
         const { data: selectData, error: selectError } = await publicSupabase
           .from('statusSteps')
           .select()
@@ -121,7 +115,6 @@ const { TextArea } = Input;
       const state = currentPaymentStatus + 1;
       
       try {
-        // Insert the new row
         const { data: insertData, error: insertError } = await publicSupabase
           .from('paymentSteps')
           .insert({ title: values.status, description: values.note, state: state, filedetailsid: step[0].filedetailsid })
@@ -135,7 +128,6 @@ const { TextArea } = Input;
         
         toast.success("Status updated successfully");
         
-        // Retrieve rows that match the filedetailsid
         const { data: selectData, error: selectError } = await publicSupabase
           .from('paymentSteps')
           .select()
@@ -156,12 +148,10 @@ const { TextArea } = Input;
     };
 
   const next = () => {
-    // updateStatus(true);
     showModal()
   };
 
   const nextPayment = () => {
-    // updatePaymentStatus(true);
     showModal()
   };
 
@@ -290,6 +280,7 @@ const { TextArea } = Input;
               fileList={fileList}
               onChange={handleChange}
               beforeUpload={() => false} // Prevent auto upload
+              multiple={true}
             >
               <Button icon={<UploadOutlined />}>Click to Upload</Button>
             </Upload>
@@ -348,14 +339,10 @@ const { TextArea } = Input;
             <Form form={form} layout="vertical">
           <Form.Item
             name="status"
-            label="Status"
-            rules={[{ required: true, message: 'Please select a status' }]}
+            label="Payment"
+            rules={[{ required: true, message: 'Please enter an amount' }]}
           >
-            <Select placeholder="Select a status">
-              <Option value="1st Installment">1st Installment</Option>
-              <Option value="2nd Installment">2nd Installment</Option>
-              <Option value="3rd Installment">3rd Installment</Option>
-            </Select>
+            <InputNumber style={{ width: '100%' }}/>
           </Form.Item>
 
           <Form.Item name="notes" label="Notes">
@@ -366,7 +353,8 @@ const { TextArea } = Input;
           <Upload 
               fileList={fileList}
               onChange={handleChange}
-              beforeUpload={() => false} // Prevent auto upload
+              beforeUpload={() => false} 
+              multiple={true}
             >
               <Button icon={<UploadOutlined />}>Click to Upload</Button>
             </Upload>
