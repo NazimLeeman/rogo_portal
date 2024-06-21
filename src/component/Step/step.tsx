@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button, message, Modal, Steps, theme, Form, Select, Input, Upload, UploadProps, UploadFile, Spin, InputNumber  } from 'antd';
 import { useFile } from '../../context/FileContext';
 import { publicSupabase } from '../../api/SupabaseClient';
-import { formatDate, highestState } from '../../utils/helper';
+import { formatDate, generateRandomId, highestState } from '../../utils/helper';
 import { UploadOutlined } from '@ant-design/icons';
 import { CheckOutlined } from '@ant-design/icons';
 import toast from 'react-hot-toast';
@@ -36,12 +36,25 @@ const { TextArea } = Input;
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [downloadUrl, setDownloadUrl] = useState<any[]>([]);
+  const [downloadPaymentUrl, setDownloadPaymentUrl] = useState<any[]>([]);
+
   useEffect(() => {
-    if(fileId) {
-      getFileStep(fileId)
-      getPaymentStep(fileId)
+    if (fileId) {
+      const fetchData = async () => {
+        try {
+          await getFileStep(fileId),
+          await getPaymentStep(fileId),
+          await getStatusSteps(fileId)
+          await getPaymentSteps(fileId)
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
+      };
+
+      fetchData();
     }
-  },[fileId])
+  }, [fileId]);
 
   const getFileStep = async (fileId: string) => {
     try {
@@ -74,14 +87,82 @@ const { TextArea } = Input;
       console.error('ERROR: ', error);
     }
   };
+
+  const getStatusSteps = async (fileId:string) => {
+    console.log('fileId',fileId)
+    const { data, error } = await publicSupabase.storage
+        .from('statusSteps') // Replace 'avatars' with your bucket name
+        .list(`${fileId}/`);
+  
+    if (error) {
+        throw error;
+    }
+    signedStepsUrls(data)
+    // setFiles(data);
+    return data || [];
+  };
+
+  const getPaymentSteps = async (fileId:string) => {
+    console.log('fileId',fileId)
+    const { data, error } = await publicSupabase.storage
+        .from('paymentSteps') // Replace 'avatars' with your bucket name
+        .list(`${fileId}/`);
+  
+    if (error) {
+        throw error;
+    }
+    signedPaymentUrls(data)
+    // setFiles(data);
+    return data || [];
+  };
+
+  const signedStepsUrls = async(resultData:any) => {
+    if(resultData.length < 1) {
+      toast.error('No File Found')
+      throw new Error
+    }
+    const name = resultData.map((item:any) => {
+      return `${fileId}/${item.name}`
+    })
+    const { data, error } = await publicSupabase
+    .storage
+    .from('statusSteps')
+    .createSignedUrls(name, 60, { download: true}) 
+  
+    if(error) {
+      throw error;
+    }
+    setDownloadUrl(data)
+    console.log('signedddddd Stepsssssssss urls', data)
+  } 
+  
+  const signedPaymentUrls = async(resultData:any) => {
+    if(resultData.length < 1) {
+      // toast.error('No Payment Attachment File Found')
+      throw new Error
+    }
+    const name = resultData.map((item:any) => {
+      return `${fileId}/${item.name}`
+    })
+    const { data, error } = await publicSupabase
+    .storage
+    .from('paymentSteps')
+    .createSignedUrls(name, 60, { download: true}) 
+  
+    if(error) {
+      throw error;
+    }
+    setDownloadPaymentUrl(data)
+    console.log('signedddddd paymentttttttttt urls', data)
+  } 
     
     const updateStatus = async (values: any) => {
       const state = currentStatus + 1;
-      
+      console.log('values',values)
       try {
         const { data: insertData, error: insertError } = await publicSupabase
           .from('statusSteps')
-          .insert({ title: values.status, description: values.note, state: state, filedetailsid: step[0].filedetailsid })
+          .insert({ title: values.status, notes: values.notes, state: state, filedetailsid: step[0].filedetailsid })
           .select();
     
         if (insertError) {
@@ -117,7 +198,7 @@ const { TextArea } = Input;
       try {
         const { data: insertData, error: insertError } = await publicSupabase
           .from('paymentSteps')
-          .insert({ title: values.status, description: values.note, state: state, filedetailsid: step[0].filedetailsid })
+          .insert({ title: values.status, notes: values.notes, state: state, filedetailsid: step[0].filedetailsid })
           .select();
     
         if (insertError) {
@@ -163,17 +244,18 @@ const { TextArea } = Input;
     return <div>Loading...</div>;
   }
 
-    const items = step.map((item:any) => ({ key: item.title, title: item.title, description: formatDate(item.createdAt) }));
-    const paymentItems = paymentStep.map((item:any) => ({ key: item.title, title: item.title, description: formatDate(item.createdAt) }));
+    const items = step.map((item:any) => ({ key: item.title, title: item.title, subTitle:item.notes, description: formatDate(item.createdAt) }));
+    const paymentItems = paymentStep.map((item:any) => ({ key: item.title, title: item.title, subTitle:item.notes, description: formatDate(item.createdAt) }));
 
   const contentStyle: React.CSSProperties = {
     lineHeight: '100px',
     textAlign: 'center',
-    color: token.colorTextTertiary,
+    color: 'black',
     backgroundColor: token.colorFillAlter,
     borderRadius: token.borderRadiusLG,
     border: `1px dashed ${token.colorBorder}`,
     marginTop: 16,
+    width: 600
   };
 
   const showModal = () => {
@@ -182,6 +264,7 @@ const { TextArea } = Input;
 
   const handleOk = async (type:string) => {
     try {
+        let bucketName = type === "fileStatus" ? "statusSteps" : "paymentSteps";
         const values = await form.validateFields();
         setConfirmLoading(true);
         console.log('Form values:', { ...values, upload: fileList });
@@ -190,6 +273,19 @@ const { TextArea } = Input;
         } else {
           await updatePaymentStatus(values);
         }
+
+        const uploadPromises = fileList
+        .filter(file => file.originFileObj)
+        .map(file => 
+          uploadFileToSupabase(bucketName, file.originFileObj as File)
+      );
+      const uploadResults = await Promise.all(uploadPromises);
+
+      // Add the upload results to the form values
+      const updatedValues = {
+          ...values,
+          uploadedFiles: uploadResults.filter(result => result !== null),
+      };
         
         setOpen(false);
         setConfirmLoading(false);
@@ -210,10 +306,35 @@ const { TextArea } = Input;
     setFileList(newFileList);
   };
 
+  const uploadFileToSupabase = async (bucketName: string, file: File) => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${generateRandomId()}.${fileExt}`;
+    const filePath = `${fileId}/${fileName}`;
+
+    const { data, error } = await publicSupabase.storage
+        .from(bucketName)
+        .upload(filePath, file, {upsert: true});
+
+    if (error) {
+        console.error('Error uploading file:', error);
+        return null;
+    }
+
+    console.log('from upload file', data)
+
+    // Get public URL
+    // const { data: { publicUrl } } = publicSupabase.storage
+    //     .from(bucketName)
+    //     .getPublicUrl(filePath);
+
+    // return publicUrl;
+};
+
   return (
     <>
       {statusType === 'fileStatus' && (
         <>
+        <div className='flex'>
         {(() => {
         const totalItems = items.length;
         const reversedItems = [...items].reverse().map((item, index) => {
@@ -246,6 +367,30 @@ const { TextArea } = Input;
           />
         );
       })()}
+      <div style={contentStyle}>
+      <div>
+      <p className="text-xl">Attachments</p>
+      {downloadUrl.length > 0 ? (
+      <div >
+        <ul className='grid grid-cols-2 gap-6'>
+          {downloadUrl.map((file:any) => (
+            <li key={file.path}>
+             {/* <img src={file.signedUrl} style={{ width:"300px", height:"150px"}} /> */}
+             {/* {userRole === "Admin" && ( */}
+              <a href={file.signedUrl} rel="noopener noreferrer">
+        Download
+      </a>
+             {/* )}    */}
+           </li>
+          ))}
+        </ul>
+        </div>
+  ) : (
+    <div><Spin /> Please wait...</div>
+  )}
+      </div>
+      </div>
+      </div>
         <div style={{ marginTop: 24 }}>
             <Button type="primary" onClick={() => next()}>
               Add Status
@@ -292,6 +437,7 @@ const { TextArea } = Input;
       )}
       {statusType === 'payment' && (
         <>
+        <div className='flex'>
         {(() => {
         const totalItems = paymentItems.length;
         const reversedItems = [...paymentItems].reverse().map((item, index) => {
@@ -318,12 +464,36 @@ const { TextArea } = Input;
 
         return (
           <Steps 
-            current={reversedCurrentStatus} 
-            items={reversedItems} 
-            direction="vertical"
+          current={reversedCurrentStatus} 
+          items={reversedItems} 
+          direction="vertical"
           />
         );
       })()}
+      <div style={contentStyle}>
+      <div>
+      <p className="text-xl">Attachments</p>
+      {downloadPaymentUrl.length > 0 ? (
+      <div >
+        <ul className='grid grid-cols-2 gap-6'>
+          {downloadPaymentUrl.map((file:any) => (
+            <li key={file.path}>
+             {/* <img src={file.signedUrl} style={{ width:"300px", height:"150px"}} /> */}
+             {/* {userRole === "Admin" && ( */}
+              <a href={file.signedUrl} rel="noopener noreferrer">
+        Download
+      </a>
+             {/* )}    */}
+           </li>
+          ))}
+        </ul>
+        </div>
+  ) : (
+    <div>No Attachments currently</div>
+  )}
+      </div>
+      </div>
+      </div>
         <div style={{ marginTop: 24 }}>
             <Button type="primary" onClick={() => nextPayment()}>
               Add Payment

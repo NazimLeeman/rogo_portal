@@ -3,7 +3,6 @@ import { Button, Form, Input, Layout, Select, Upload, theme } from 'antd';
 import { useFile } from '../context/FileContext';
 import { useNavigate } from 'react-router-dom';
 import { UploadOutlined } from '@ant-design/icons';
-import props from '../component/Upload/upload';
 import UploadFeature from '../component/Upload/supabaseUpload';
 import { publicSupabase } from '../api/SupabaseClient';
 import toast from 'react-hot-toast';

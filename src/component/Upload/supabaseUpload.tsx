@@ -6,6 +6,7 @@ import { useFile } from '../../context/FileContext';
 import type { UploadProps } from 'antd';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import { generateUniqueFileName } from '../../utils/helper';
 
 interface UploadFile extends File {
   uid: string; 
@@ -25,6 +26,15 @@ const UploadFeature = () => {
 
   const isMasters = studentFiles?.program === 'masters';
 
+  const fileNames = {
+    fileList1: 'SSC Certificate',
+    fileList2: 'SSC Marksheet',
+    fileList3: 'HSC Certificate',
+    fileList4: 'HSC Marksheet',
+    fileList5: 'Bachelor Certificate',
+    fileList6: 'Bachelor Marksheet',
+  };
+
   const isDisabled = isMasters
     ? fileList1.length === 0 ||
       fileList2.length === 0 ||
@@ -39,8 +49,10 @@ const UploadFeature = () => {
 
   const handleBeforeUpload = (
     file: UploadFile,
-    setFileList: React.Dispatch<React.SetStateAction<UploadFile[]>>,
+    setFileList: React.Dispatch<React.SetStateAction<UploadFile[]>>
   ) => {
+    // const fileWithDisplayName = file as UploadFile & { displayName: string };
+    // fileWithDisplayName.displayName = newName;
     setFileList((prevFileList) => [...prevFileList, file]);
     return false; // Prevent default upload behavior
   };
@@ -53,13 +65,19 @@ const UploadFeature = () => {
       throw new Error('Student ID is required');
     }
 
+    const uniqueFileName = generateUniqueFileName(file.name);
+    console.log('uniquefile',uniqueFileName)
+
     const { data, error } = await publicSupabase.storage
       .from('avatars') 
-      .upload(`${studentId}/${file.name}`, file);
+      .upload(`${studentId}/${uniqueFileName}`, file, {upsert: true});
 
-    if (error) {
-      throw error;
-    }
+      if (error) {
+        console.error(`Attempt Error uploading ${uniqueFileName}:`, error);
+        throw error;
+      }
+  
+      console.log(`Attempt Successfully uploaded ${uniqueFileName}`);
 
     return data;
   };
@@ -143,6 +161,23 @@ const UploadFeature = () => {
       }
       const fileId = fileDetailsData[0].id;
       setFileData(fileDetailsData[0]);
+      // Insert into statusSteps table
+      const { data: statusStepsData, error: statusStepsError } =
+        await publicSupabase
+          .from('statusSteps')
+          .insert([
+            {
+              filedetailsid: fileId,
+              title: 'Submitted to Rogo',
+              state: 0,
+            },
+          ])
+          .select();
+  
+      if (statusStepsError) {
+        toast.error('Error while updating status.');
+        throw statusStepsError;
+      }
       toast.success('File submitted successfully');
       navigate(`/file-details/${fileId}`);
     } catch (error) {

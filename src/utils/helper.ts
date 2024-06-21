@@ -22,3 +22,22 @@ export const formatDate = (dataString: any) => {
   
     return highest;
   }
+
+  export const generateUniqueFileName = (originalName: string) => {
+    const timestamp = new Date().getTime();
+    const randomString = Math.random().toString(36).substring(2, 15);
+    const extension = originalName.split('.').pop();
+    return `${timestamp}-${randomString}.${extension}`;
+  };
+
+  export  const generateRandomId = () => {
+    const characters =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let randomPart = "";
+    for (let i = 0; i < 4; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      randomPart += characters[randomIndex];
+    }
+    const timestamp = Date.now().toString();
+    return `t_id_${randomPart}${timestamp}`;
+  };
