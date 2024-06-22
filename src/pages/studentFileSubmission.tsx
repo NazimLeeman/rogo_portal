@@ -53,6 +53,7 @@ const StudentFileSubmission: React.FC = () => {
             {
               studentid: studentInfo?.id,
               studentfileid: studentFiles?.id,
+              budget: studentFiles?.budget
             },
           ])
           .select();

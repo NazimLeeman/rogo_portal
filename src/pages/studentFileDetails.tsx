@@ -23,7 +23,7 @@ const StudentFileDetails: React.FC = () => {
   const [files, setFiles] = useState<any[]>([]);
   const [downloadUrl, setDownloadUrl] = useState<any[]>([]);
   const [ userRole, setUserRole] = useState<any>("")
-  const [services, setServices] = useState(['Admission', 'Application']);
+  const [services, setServices] = useState<any>([]);
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [studentId, setStudentId] = useState("");
@@ -128,10 +128,31 @@ const getStudentId = async() => {
     console.log('error', error)
   throw new Error
   }
+  console.log('from file detailssssssss',data[0])
+  setServices(data[0].services)
   setStudentId(data[0].studentid)
   } catch(error) {
     console.log(error)
   }
+}
+
+const updateServices = async() => {
+  const values = await form.validateFields();
+  const updatedServices = [...services, values.service];
+  console.log('valuesssssssssssssssssssssssssssssssssss', updatedServices)
+  const {data, error} = await publicSupabase
+    .from('filedetails')
+    .update({services: updatedServices})
+    .eq('id',fileId)
+    .select();
+
+    if(error) {
+      console.log('error',error)
+      throw new Error
+    }
+    console.log('servicesssssssssssssssssss',data)
+    setServices(updatedServices)
+    setOpen(false)
 }
 
 const handleCancel = () => {
@@ -157,7 +178,7 @@ const handleCancel = () => {
       <div className="space-y-6">
         <div>
       <p className="text-xl">Services got from ROGO</p>
-      {services.map((service, index) => (
+      {services.map((service:any, index:any) => (
         <Checkbox checked={true} className='mt-4' key={index} onChange={onChange}>
           {service}
         </Checkbox>
@@ -175,11 +196,10 @@ const handleCancel = () => {
       <Modal
             title="Add Service"
             open={open}
-            onOk={() => {}}
+            onOk={updateServices}
             confirmLoading={confirmLoading}
             onCancel={handleCancel}
             >
-            {/* <p>{modalText}</p> */}
             <Form form={form} layout="vertical">
           <Form.Item
             name="service"

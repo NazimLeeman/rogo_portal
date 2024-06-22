@@ -38,6 +38,7 @@ const { TextArea } = Input;
 
   const [downloadUrl, setDownloadUrl] = useState<any[]>([]);
   const [downloadPaymentUrl, setDownloadPaymentUrl] = useState<any[]>([]);
+  const [budget, setBudget] = useState<any>({});
 
   useEffect(() => {
     if (fileId) {
@@ -47,6 +48,7 @@ const { TextArea } = Input;
           await getPaymentStep(fileId),
           await getStatusSteps(fileId)
           await getPaymentSteps(fileId)
+          await getBudget(fileId)
         } catch (error) {
           console.error('Error fetching data:', error);
         }
@@ -222,17 +224,47 @@ const { TextArea } = Input;
     
         setPaymentCurrentStatus(state);
         setPaymentStep(selectData);
+        updateBudget(values.status)
       } catch (error) {
         console.error('Unexpected error:', error);
         toast.error("An unexpected error occurred");
       }
     };
 
+    const getBudget = async(fileId:string) => {
+      const {data, error} = await publicSupabase
+        .from('filedetails')
+        .select("budget")
+        .eq('id',fileId);
+      if(error) {
+        console.log('error', error)
+        throw new Error
+      }
+      console.log('budgetttttttttttt',data[0])
+      setBudget(data[0])
+    }
+
+    const updateBudget = async(payment:any) => {
+      const newRemainingBalance = budget.budget - payment
+      console.log('newRemainingBalance', newRemainingBalance)
+      const {data, error} = await publicSupabase
+        .from('filedetails')
+        .update({ budget: newRemainingBalance }) 
+        .eq('id',fileId)
+        .select();
+      if(error) {
+        console.log('error', error)
+        throw new Error
+      }
+      console.log('budgetttttttttttt',data[0])
+      setBudget(data[0])
+    }
+
   const next = () => {
     showModal()
   };
 
-  const nextPayment = () => {
+  const nextPayment = async() => {
     showModal()
   };
 
@@ -509,7 +541,7 @@ const { TextArea } = Input;
             <Form form={form} layout="vertical">
           <Form.Item
             name="status"
-            label="Payment"
+            label={`${budget.budget} BDT stills needs to cleared`}
             rules={[{ required: true, message: 'Please enter an amount' }]}
           >
             <InputNumber style={{ width: '100%' }}/>
