@@ -26,6 +26,7 @@ const StudentDashboard: React.FC= () => {
 
   const {userEmail } = useRole();
   const [isUserEmailAvailable, setIsUserEmailAvailable] = useState(false);
+  const [studentFilesArr, setStudentFilesArr] = useState<any>([]);
 
   // const { userEmail, setUserEmail } = useSupabase();
   const {
@@ -87,13 +88,37 @@ const StudentDashboard: React.FC= () => {
         .select('*')
         .eq('student_id', id);
       if (error) throw error;
-      setStudentFiles(data[0]);
+      console.log('student file', data)
+      setStudentFilesArr(data)
+      // setStudentFiles(data[0]);
       // console.log('data', data[0]);
       // console.log('userEmail', userEmail);
     } catch (error) {
       console.error('ERROR: ', error);
     }
   };
+
+  const checkFileStatus = async(id:string) => {
+    try {
+      const {data, error} = await publicSupabase
+      .from('filedetails')
+      .select('*')
+      .eq('studentfileid',id);
+
+      if(error) {
+        console.log('error',error)
+      }
+      console.log('data', data)
+      if(data && data?.length > 0) {
+        navigate(`/file-details/${data[0].id}`);
+      } else {
+        navigate('/agreement');
+      }
+    } catch(error) {
+      console.log(error)
+      throw new Error
+    }
+  }
 
   const filterOption: SelectProps<string>['filterOption'] = (input, option) => {
     // Ensure option and option.children are defined
@@ -104,8 +129,10 @@ const StudentDashboard: React.FC= () => {
     );
   };
 
-  const handleSudentFile = async (id: string) => {
-    navigate('/agreement');
+  const handleSudentFile = async (files:any) => {
+    checkFileStatus(files.id)
+    setStudentFiles(files)
+    // navigate('/agreement');
   };
 
   return (
@@ -129,8 +156,8 @@ const StudentDashboard: React.FC= () => {
           </div>
           <div className="flex flex-col">
             {studentInfo !== null && <div className="p-2 ml-8"></div>}
-            {studentFiles && (
-              <div className="pl-10 pt-2">
+            {studentFilesArr && studentFilesArr.map((studentFiles:any, index:any) => (
+              <div key={index} className="pl-10 pt-2">
                 <Card
                   title={studentFiles.university_name}
                   // extra={<a href="#">More</a>}
@@ -147,14 +174,14 @@ const StudentDashboard: React.FC= () => {
                         border: 'none',
                       }}
                       className="mt-2"
-                      onClick={() => handleSudentFile(studentFiles.student_id)}
+                      onClick={() => handleSudentFile(studentFiles)}
                     >
                       Click here to proceed
                     </Button>
                   </>
                 </Card>
               </div>
-            )}
+            ))}
             {/* <div className="p-8">
                     <p className="text-xl">Create a New Student Account</p>
                   </div>

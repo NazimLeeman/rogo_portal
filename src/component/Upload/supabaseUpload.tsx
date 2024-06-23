@@ -151,6 +151,7 @@ const UploadFeature = () => {
             {
               studentid: studentInfo?.id,
               studentfileid: studentFiles?.id,
+              budget: studentFiles?.budget
             },
           ])
           .select();

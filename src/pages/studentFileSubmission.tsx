@@ -45,26 +45,28 @@ const StudentFileSubmission: React.FC = () => {
 
   const onFinish = async (values: any) => {
     console.log('values', values);
+    console.log('student filessssssssssssssssss', studentFiles)
     try {
-      const { data: fileDetailsData, error: fileDetailsError } =
-        await publicSupabase
-          .from('filedetails')
-          .insert([
-            {
-              studentid: studentInfo?.id,
-              studentfileid: studentFiles?.id,
-              budget: studentFiles?.budget
-            },
-          ])
-          .select();
+      // const { data: fileDetailsData, error: fileDetailsError } =
+      //   await publicSupabase
+      //     .from('filedetails')
+      //     .insert([
+      //       {
+      //         studentid: studentInfo?.id,
+      //         studentfileid: studentFiles?.id,
+      //         budget: studentFiles?.budget
+      //       },
+      //     ])
+      //     .select();
 
-      if (fileDetailsError) {
-        toast.error('Error while submitting file.');
-        throw fileDetailsError;
-      }
-      const fileId = fileDetailsData[0].id;
-      toast.success('File submitted successfully');
-      navigate(`/file-details/${fileId}`);
+      // if (fileDetailsError) {
+      //   toast.error('Error while submitting file.');
+      //   throw fileDetailsError;
+      // }
+      // console.log('file detailssssssssssssssssssssssssssssssssssssss', fileDetailsData[0])
+      // const fileId = fileDetailsData[0].id;
+      // toast.success('File submitted successfully');
+      // navigate(`/file-details/${fileId}`);
     } catch (error) {
       console.log(error);
     }

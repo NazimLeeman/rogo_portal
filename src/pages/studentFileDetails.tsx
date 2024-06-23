@@ -93,6 +93,7 @@ const StudentFileDetails: React.FC = () => {
     if (error) {
         throw error;
     }
+    console.log('data',data)
     signedUrls(data)
     setFiles(data);
     return data || [];
@@ -100,7 +101,7 @@ const StudentFileDetails: React.FC = () => {
 
 const signedUrls = async(resultData:any) => {
   if(resultData.length < 1) {
-    toast.error('No File Found')
+    // toast.error('No File Found')
     throw new Error
   }
   const name = resultData.map((item:any) => {
