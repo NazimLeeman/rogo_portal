@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button, message, Modal, Steps, theme, Form, Select, Input, Upload, UploadProps, UploadFile, Spin, InputNumber  } from 'antd';
 import { useFile } from '../../context/FileContext';
 import { publicSupabase } from '../../api/SupabaseClient';
-import { formatDate, generateRandomId, highestState } from '../../utils/helper';
+import { displaySubtitle, formatDate, generateRandomId, highestState } from '../../utils/helper';
 import { UploadOutlined } from '@ant-design/icons';
 import { CheckOutlined } from '@ant-design/icons';
 import toast from 'react-hot-toast';
@@ -158,13 +158,13 @@ const { TextArea } = Input;
     console.log('signedddddd paymentttttttttt urls', data)
   } 
     
-    const updateStatus = async (values: any) => {
+    const updateStatus = async (values: any, fileUrls:any) => {
       const state = currentStatus + 1;
       console.log('values',values)
       try {
         const { data: insertData, error: insertError } = await publicSupabase
           .from('statusSteps')
-          .insert({ title: values.status, notes: values.notes, state: state, filedetailsid: step[0].filedetailsid })
+          .insert({ title: values.status, content:fileUrls, notes: values.notes, state: state, filedetailsid: step[0].filedetailsid })
           .select();
     
         if (insertError) {
@@ -194,13 +194,14 @@ const { TextArea } = Input;
       }
     };
 
-    const updatePaymentStatus = async (values: any) => {
+    const updatePaymentStatus = async (values: any, fileUrls:any) => {
       const state = currentPaymentStatus + 1;
+      console.log('from updateeeeeeeeee',values)
       
       try {
         const { data: insertData, error: insertError } = await publicSupabase
           .from('paymentSteps')
-          .insert({ title: values.status, notes: values.notes, state: state, filedetailsid: step[0].filedetailsid })
+          .insert({ title: values.status, content:fileUrls, notes: values.notes, state: state, filedetailsid: step[0].filedetailsid })
           .select();
     
         if (insertError) {
@@ -276,9 +277,9 @@ const { TextArea } = Input;
     return <div>Loading...</div>;
   }
 
-    const items = step.map((item:any) => ({ key: item.title, title: item.title, subTitle:item.notes, description: formatDate(item.createdAt) }));
-    const paymentItems = paymentStep.map((item:any) => ({ key: item.title, title: item.title, subTitle:item.notes, description: formatDate(item.createdAt) }));
-
+    const items = step.map((item:any) => ({ key: item.title, title: item.title, content:item.content, subTitle:item.notes, description: formatDate(item.createdAt) }));
+    const paymentItems = paymentStep.map((item:any) => ({ key: item.title, title: item.title, content:item.content, subTitle: item.notes, description: formatDate(item.createdAt) }));
+    console.log('paymentItems',paymentItems)
   const contentStyle: React.CSSProperties = {
     lineHeight: '100px',
     textAlign: 'center',
@@ -300,25 +301,26 @@ const { TextArea } = Input;
         const values = await form.validateFields();
         setConfirmLoading(true);
         console.log('Form values:', { ...values, upload: fileList });
-        if(type === "fileStatus") {
-          await updateStatus(values);
-        } else {
-          await updatePaymentStatus(values);
-        }
-
+        
         const uploadPromises = fileList
         .filter(file => file.originFileObj)
         .map(file => 
           uploadFileToSupabase(bucketName, file.originFileObj as File)
-      );
-      const uploadResults = await Promise.all(uploadPromises);
-
-      // Add the upload results to the form values
-      const updatedValues = {
-          ...values,
-          uploadedFiles: uploadResults.filter(result => result !== null),
-      };
+        );
+        const uploadResults = await Promise.all(uploadPromises);
         
+        // // Add the upload results to the form values
+        // const updatedValues = {
+        //   ...values,
+        //   uploadedFiles: uploadResults.filter(result => result !== null),
+        // };
+        const fileUrls = uploadResults.filter(result => result !== null);
+        console.log('fileUrls',fileUrls)
+        if(type === "fileStatus") {
+          await updateStatus(values, fileUrls);
+        } else {
+          await updatePaymentStatus(values, fileUrls);
+        }
         setOpen(false);
         setConfirmLoading(false);
         form.resetFields();
@@ -352,14 +354,16 @@ const { TextArea } = Input;
         return null;
     }
 
-    console.log('from upload file', data)
+    const { data: publicUrlData } = publicSupabase.storage.from(bucketName).getPublicUrl(filePath);
+    const publicURL = publicUrlData?.publicUrl;
 
-    // Get public URL
-    // const { data: { publicUrl } } = publicSupabase.storage
-    //     .from(bucketName)
-    //     .getPublicUrl(filePath);
+    if (!publicURL) {
+        console.error('Error getting public URL');
+        return null;
+    }
+    console.log('File uploaded:', publicURL);
 
-    // return publicUrl;
+    return publicURL;
 };
 
   return (
@@ -385,6 +389,22 @@ const { TextArea } = Input;
                 <h1 className='text-white text-md'>{stepNumber}</h1>
                 </div>
               </div>
+            ),
+            description: (
+              <>
+                <div>{item.description}</div>
+                {item.content && item.content.length > 0 && (
+                  <div className="ant-steps-item-description">
+                    {item.content.map((contentItem:any, contentIndex:any) => (
+                      <div key={contentIndex}>
+                        <a href={contentItem} target="_blank" rel="noopener noreferrer">
+                          Download
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
             )
           };
         });
@@ -399,7 +419,7 @@ const { TextArea } = Input;
           />
         );
       })()}
-      <div style={contentStyle}>
+      {/* <div style={contentStyle}>
       <div>
       <p className="text-xl">Attachments</p>
       {downloadUrl.length > 0 ? (
@@ -407,12 +427,9 @@ const { TextArea } = Input;
         <ul className='grid grid-cols-2 gap-6'>
           {downloadUrl.map((file:any) => (
             <li key={file.path}>
-             {/* <img src={file.signedUrl} style={{ width:"300px", height:"150px"}} /> */}
-             {/* {userRole === "Admin" && ( */}
               <a href={file.signedUrl} rel="noopener noreferrer">
         Download
       </a>
-             {/* )}    */}
            </li>
           ))}
         </ul>
@@ -421,7 +438,7 @@ const { TextArea } = Input;
     <div><Spin /> Please wait...</div>
   )}
       </div>
-      </div>
+      </div> */}
       </div>
         <div style={{ marginTop: 24 }}>
             <Button type="primary" onClick={() => next()}>
@@ -469,6 +486,7 @@ const { TextArea } = Input;
       )}
       {statusType === 'payment' && (
         <>
+        <div>{budget.budget} BDT Still remainging</div>
         <div className='flex'>
         {(() => {
         const totalItems = paymentItems.length;
@@ -488,6 +506,22 @@ const { TextArea } = Input;
                 <h1 className='text-white text-md'>{stepNumber}</h1>
                 </div>
               </div>
+            ),
+            description: (
+              <>
+                <div>{item.description}</div>
+                {item.content && item.content.length > 0 && (
+                  <div className="ant-steps-item-description">
+                    {item.content.map((contentItem:any, contentIndex:any) => (
+                      <div key={contentIndex}>
+                        <a href={contentItem} target="_blank" rel="noopener noreferrer">
+                          Download
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
             )
           };
         });
@@ -502,20 +536,17 @@ const { TextArea } = Input;
           />
         );
       })()}
-      <div style={contentStyle}>
-      <div>
+      {/* <div style={contentStyle}> */}
+      {/* <div>
       <p className="text-xl">Attachments</p>
       {downloadPaymentUrl.length > 0 ? (
       <div >
         <ul className='grid grid-cols-2 gap-6'>
           {downloadPaymentUrl.map((file:any) => (
             <li key={file.path}>
-             {/* <img src={file.signedUrl} style={{ width:"300px", height:"150px"}} /> */}
-             {/* {userRole === "Admin" && ( */}
               <a href={file.signedUrl} rel="noopener noreferrer">
         Download
       </a>
-             {/* )}    */}
            </li>
           ))}
         </ul>
@@ -523,8 +554,8 @@ const { TextArea } = Input;
   ) : (
     <div>No Attachments currently</div>
   )}
-      </div>
-      </div>
+      </div> */}
+      {/* </div> */}
       </div>
         <div style={{ marginTop: 24 }}>
             <Button type="primary" onClick={() => nextPayment()}>

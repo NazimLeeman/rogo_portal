@@ -41,3 +41,14 @@ export const formatDate = (dataString: any) => {
     const timestamp = Date.now().toString();
     return `t_id_${randomPart}${timestamp}`;
   };
+
+  export function displaySubtitle(item:any) {
+    const notes = item.notes || '';
+    const content = item.content || [];
+    
+    const contentLinks = content.map((link:any) => 
+      link ? `<a href="${link}">${link}</a>` : ''
+    ).filter(Boolean).join('\n');
+    
+    return notes + (notes && contentLinks ? '\n' : '') + contentLinks;
+  }
