@@ -24,6 +24,7 @@ const StudentFileDetails: React.FC = () => {
   const [downloadUrl, setDownloadUrl] = useState<any[]>([]);
   const [ userRole, setUserRole] = useState<any>("")
   const [services, setServices] = useState<any>([]);
+  const [servicesObj, setServicesObj] = useState<any>({});
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [studentId, setStudentId] = useState("");
@@ -73,8 +74,38 @@ const StudentFileDetails: React.FC = () => {
   }, [studentId]);
 
   const onChange: CheckboxProps['onChange'] = (e) => {
-    console.log(`checked = ${e.target.checked}`);
+    const checkValue = e.target.checked
+    console.log(`checked = ${checkValue}`);
   };
+
+  const changeServiceCheck = (serviceCheck:any, check:boolean) => {
+    console.log('service',serviceCheck)
+    console.log('check',check)
+    console.log('services obj',servicesObj)
+    const newServicesObj = { ...servicesObj };
+  
+  if (serviceCheck in newServicesObj) {
+    newServicesObj[serviceCheck] = !check;
+  }
+
+  console.log('new services obj', newServicesObj);
+  updateServiceCheck(newServicesObj)
+  }
+
+  const updateServiceCheck = async(newServicesObj:any) => {
+    const {data,error} = await publicSupabase
+      .from('filedetails')
+      .update({ servicesobj: newServicesObj })
+      .eq('id',fileId)
+      .select();
+
+  if (error) {
+    console.error('Error updating service check:', error);
+    return null;
+  }
+  setServicesObj(data[0].servicesobj)
+  console.log('update service check',data) 
+  }
 
   const addNewService = () => {
     // setServices([...services, `New Service ${services.length + 1}`]);
@@ -130,6 +161,8 @@ const getStudentId = async() => {
   throw new Error
   }
   console.log('from file detailssssssss',data[0])
+  console.log('services obj',data[0].servicesobj)
+  setServicesObj(data[0].servicesobj)
   setServices(data[0].services)
   setStudentId(data[0].studentid)
   } catch(error) {
@@ -139,11 +172,12 @@ const getStudentId = async() => {
 
 const updateServices = async() => {
   const values = await form.validateFields();
-  const updatedServices = [...services, values.service];
+  // const newService = {[values.service]: false}
+  const updatedServices = {...servicesObj, [values.service]: false};
   console.log('valuesssssssssssssssssssssssssssssssssss', updatedServices)
   const {data, error} = await publicSupabase
     .from('filedetails')
-    .update({services: updatedServices})
+    .update({servicesobj: updatedServices})
     .eq('id',fileId)
     .select();
 
@@ -151,8 +185,8 @@ const updateServices = async() => {
       console.log('error',error)
       throw new Error
     }
-    console.log('servicesssssssssssssssssss',data)
-    setServices(updatedServices)
+    console.log('new servicesssssssssssssssssss',data)
+    setServicesObj(updatedServices)
     setOpen(false)
 }
 
@@ -179,11 +213,16 @@ const handleCancel = () => {
       <div className="space-y-6">
         <div>
       <p className="text-xl">Services got from ROGO</p>
-      {services.map((service:any, index:any) => (
+      {Object.keys(servicesObj).map((service:any,index:number) => (
+        <Checkbox className='mt-4' checked={servicesObj[service]} key={index} onChange={() => {changeServiceCheck(service, servicesObj[service])}}>
+        {service}
+      </Checkbox>
+      ))}
+      {/* {services.map((service:any, index:any) => (
         <Checkbox className='mt-4' key={index} onChange={onChange}>
           {service}
         </Checkbox>
-      ))}
+      ))} */}
     </div>
       <Button 
         type="dashed" 
