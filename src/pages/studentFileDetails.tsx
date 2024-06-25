@@ -180,7 +180,7 @@ const handleCancel = () => {
         <div>
       <p className="text-xl">Services got from ROGO</p>
       {services.map((service:any, index:any) => (
-        <Checkbox checked={true} className='mt-4' key={index} onChange={onChange}>
+        <Checkbox className='mt-4' key={index} onChange={onChange}>
           {service}
         </Checkbox>
       ))}
@@ -227,11 +227,11 @@ const handleCancel = () => {
           {downloadUrl.map((file:any) => (
             <li key={file.path}>
              <img src={file.signedUrl} style={{ width:"300px", height:"150px"}} />
-             {userRole === "Admin" && (
+             {/* {userRole === "Admin" && ( */}
               <a href={file.signedUrl} rel="noopener noreferrer">
         Download
       </a>
-             )}   
+            {/* )}    */}
            </li>
           ))}
         </ul>

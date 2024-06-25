@@ -6,6 +6,7 @@ import { displaySubtitle, formatDate, generateRandomId, highestState } from '../
 import { UploadOutlined } from '@ant-design/icons';
 import { CheckOutlined } from '@ant-design/icons';
 import toast from 'react-hot-toast';
+import { useRole } from '../../hooks/useRole';
 
 interface StepProps {
   statusType: 'payment' | 'fileStatus';
@@ -29,6 +30,7 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
   const { token } = theme.useToken();
   const { Option } = Select;
 const { TextArea } = Input;
+const { userRole } = useRole();
 
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
@@ -441,9 +443,16 @@ const { TextArea } = Input;
       </div> */}
       </div>
         <div style={{ marginTop: 24 }}>
-            <Button type="primary" onClick={() => next()}>
+            {/* <Button type="primary" onClick={() => next()}>
               Add Status
-            </Button>
+            </Button> */}
+            {userRole === 'Admin' ? (
+  <Button type="primary" onClick={() => next()}>
+    Add Status
+  </Button>
+) : (
+  <div></div>
+)}
             <Modal
             title="Title"
             open={open}
@@ -558,9 +567,12 @@ const { TextArea } = Input;
       {/* </div> */}
       </div>
         <div style={{ marginTop: 24 }}>
-            <Button type="primary" onClick={() => nextPayment()}>
+        {userRole === 'Admin' ? (  <Button type="primary" onClick={() => nextPayment()}>
               Add Payment
             </Button>
+          ) : (
+  <div></div>
+)}
             <Modal
             title="Title"
             open={open}
