@@ -281,7 +281,6 @@ const { userRole } = useRole();
 
     const items = step.map((item:any) => ({ key: item.title, title: item.title, content:item.content, subTitle:item.notes, description: formatDate(item.createdAt) }));
     const paymentItems = paymentStep.map((item:any) => ({ key: item.title, title: item.title, content:item.content, subTitle: item.notes, description: formatDate(item.createdAt) }));
-    console.log('paymentItems',paymentItems)
   const contentStyle: React.CSSProperties = {
     lineHeight: '100px',
     textAlign: 'center',

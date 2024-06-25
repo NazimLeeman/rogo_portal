@@ -82,14 +82,19 @@ const StudentFileDetails: React.FC = () => {
     console.log('service',serviceCheck)
     console.log('check',check)
     console.log('services obj',servicesObj)
-    const newServicesObj = { ...servicesObj };
   
-  if (serviceCheck in newServicesObj) {
-    newServicesObj[serviceCheck] = !check;
-  }
-
-  console.log('new services obj', newServicesObj);
-  updateServiceCheck(newServicesObj)
+    if (userRole === 'Admin') {
+      const newServicesObj = { ...servicesObj };
+  
+      if (serviceCheck in newServicesObj) {
+        newServicesObj[serviceCheck] = !check;
+      }
+  
+      console.log('new services obj', newServicesObj);
+      updateServiceCheck(newServicesObj);
+    } else {
+      console.log('User does not have permission to change service check');
+    }
   }
 
   const updateServiceCheck = async(newServicesObj:any) => {
@@ -224,7 +229,7 @@ const handleCancel = () => {
         </Checkbox>
       ))} */}
     </div>
-      <Button 
+    {userRole === 'Admin' ? (  <Button 
         type="dashed" 
         style={{maxWidth: "300px"}}
         onClick={addNewService} 
@@ -233,6 +238,9 @@ const handleCancel = () => {
       >
         Add Service
       </Button>
+    ) : (
+  <div></div>
+)}
       <Modal
             title="Add Service"
             open={open}
