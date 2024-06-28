@@ -14,14 +14,15 @@ const MagicLogin: React.FC = () => {
 
   // const handleRegisterClick = () => {
   //   navigate('/register');
-  // };
+  // }; 
 
   const onFinish = async (values: FieldType) => {
     try {
       const { data, error } = await publicSupabase.auth.signInWithOtp({
         email: values.email,
         options: {
-          emailRedirectTo: 'http://localhost:5173',
+          emailRedirectTo: 'https://rogo-portal-two.vercel.app/',
+          // emailRedirectTo: 'http://localhost:5173',
           shouldCreateUser: false,
         },
       });
