@@ -12,9 +12,9 @@ type FieldType = {
 const MagicLogin: React.FC = () => {
   const navigate = useNavigate();
 
-  const handleRegisterClick = () => {
-    navigate('/register');
-  };
+  // const handleRegisterClick = () => {
+  //   navigate('/register');
+  // };
 
   const onFinish = async (values: FieldType) => {
     try {

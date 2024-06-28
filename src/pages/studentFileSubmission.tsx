@@ -1,20 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Button, Form, Input, Layout, Select, Upload, theme } from 'antd';
+import React, { useRef } from 'react';
+import { Button, Form, Input} from 'antd';
 import { useFile } from '../context/FileContext';
 import { useNavigate } from 'react-router-dom';
-import { UploadOutlined } from '@ant-design/icons';
 import UploadFeature from '../component/Upload/supabaseUpload';
-import { publicSupabase } from '../api/SupabaseClient';
-import toast from 'react-hot-toast';
+
 
 const StudentFileSubmission: React.FC = () => {
   const {
-    selectedNav,
-    setSelectedNav,
     studentInfo,
-    setStudentInfo,
     studentFiles,
-    setStudentFiles,
   } = useFile();
 
   // useEffect(() => {
@@ -34,8 +28,6 @@ const StudentFileSubmission: React.FC = () => {
     subject: studentFiles?.subject,
     budget: studentFiles?.budget,
   };
-
-  const { Option } = Select;
 
   const navigate = useNavigate();
 

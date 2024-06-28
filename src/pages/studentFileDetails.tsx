@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import {
   Button,
   Checkbox,
-  CheckboxProps,
   Form,
   Input,
   Modal,
@@ -13,7 +12,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { publicSupabase } from '../api/SupabaseClient';
 import { PlusOutlined } from '@ant-design/icons';
 import Step from '../component/Step/step';
-import toast from 'react-hot-toast';
 
 const StudentFileDetails: React.FC = () => {
   const { fileId } = useParams();
@@ -23,7 +21,7 @@ const StudentFileDetails: React.FC = () => {
   const [files, setFiles] = useState<any[]>([]);
   const [downloadUrl, setDownloadUrl] = useState<any[]>([]);
   const [ userRole, setUserRole] = useState<any>("")
-  const [services, setServices] = useState<any>([]);
+  // const [services, setServices] = useState<any>([]);
   const [servicesObj, setServicesObj] = useState<any>({});
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
@@ -73,10 +71,10 @@ const StudentFileDetails: React.FC = () => {
     fetchFiles();
   }, [studentId]);
 
-  const onChange: CheckboxProps['onChange'] = (e) => {
-    const checkValue = e.target.checked
-    console.log(`checked = ${checkValue}`);
-  };
+  // const onChange: CheckboxProps['onChange'] = (e) => {
+  //   const checkValue = e.target.checked
+  //   console.log(`checked = ${checkValue}`);
+  // };
 
   const changeServiceCheck = (serviceCheck:any, check:boolean) => {
     console.log('service',serviceCheck)
@@ -168,7 +166,7 @@ const getStudentId = async() => {
   console.log('from file detailssssssss',data[0])
   console.log('services obj',data[0].servicesobj)
   setServicesObj(data[0].servicesobj)
-  setServices(data[0].services)
+  // setServices(data[0].services)
   setStudentId(data[0].studentid)
   } catch(error) {
     console.log(error)

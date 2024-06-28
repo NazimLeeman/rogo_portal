@@ -48,6 +48,7 @@ export const useAuth = () => {
 
     const { data: authListener } = publicSupabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('event',event)
         const currentUserId = session?.user?.id || null;
         if (currentUserId) {
           localStorage.setItem(

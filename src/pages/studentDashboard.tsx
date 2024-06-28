@@ -67,6 +67,7 @@ const StudentDashboard: React.FC= () => {
       if (error) throw error;
 
       setStudentInfo((prevStudent) => {
+        console.log('prev student',prevStudent)
         //A single StudentInfo object
         if (data[0]?.id) {
           getStudentFile(data[0].id);

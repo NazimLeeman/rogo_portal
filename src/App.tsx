@@ -16,7 +16,7 @@ import {
   LogoutOutlined,
 } from '@ant-design/icons';
 import Dashboard from './pages/dashboard';
-import { Layout, Menu, Select, theme } from 'antd';
+import { Layout, Menu, theme } from 'antd';
 import { publicSupabase } from './api/SupabaseClient';
 import { useFile } from './context/FileContext';
 import MagicLogin from './component/Login/magicLogin';
@@ -37,8 +37,6 @@ function App() {
   const location = useLocation();
   const currentPath = location.pathname;
   const navigate = useNavigate();
-
-  const { Option } = Select;
 
   const {
     token: { colorBgContainer, borderRadiusLG },
