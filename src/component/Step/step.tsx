@@ -526,6 +526,9 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
                     <Option value="Pending Docs Verfication by RoGo">
                       Pending Docs Verfication by RoGo
                     </Option>
+                    <Option value="Docs Accepted by RoGo">
+                      Docs Accepted by RoGo
+                    </Option>
                     <Option value="Docs Rejected by RoGo">
                       Docs Rejected by RoGo
                     </Option>

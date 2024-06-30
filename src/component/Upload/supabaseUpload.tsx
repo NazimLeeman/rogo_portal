@@ -172,6 +172,11 @@ const UploadFeature = () => {
               title: 'Docs Submitted to RoGo',
               state: 0,
             },
+            {
+              filedetailsid: fileId,
+              title: 'Pending Docs Verfication by RoGo',
+              state: 1,
+            },
           ])
           .select();
 
