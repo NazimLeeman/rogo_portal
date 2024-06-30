@@ -21,7 +21,7 @@ const MagicLogin: React.FC = () => {
       const { data, error } = await publicSupabase.auth.signInWithOtp({
         email: values.email,
         options: {
-          emailRedirectTo: 'https://rogo-portal-two.vercel.app/',
+          emailRedirectTo: 'https://lk.russianonthego.info',
           // emailRedirectTo: 'http://localhost:5173',
           shouldCreateUser: false,
         },

@@ -46,7 +46,7 @@ const StudentForm: React.FC = () => {
       const { data, error } = await publicSupabase.auth.signInWithOtp({
         email: email,
         options: {
-          emailRedirectTo: 'https://rogo-portal-two.vercel.app/dashboard',
+          emailRedirectTo: 'https://lk.russianonthego.info/dashboard',
           // emailRedirectTo: 'http://localhost:5173/dashboard',
         },
       });
