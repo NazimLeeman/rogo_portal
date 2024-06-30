@@ -23,7 +23,7 @@ const MagicLogin: React.FC = () => {
         options: {
           emailRedirectTo: 'https://rogo-portal-two.vercel.app/',
           // emailRedirectTo: 'http://localhost:5173',
-          // shouldCreateUser: false,
+          shouldCreateUser: false,
         },
       });
       if (error) {
