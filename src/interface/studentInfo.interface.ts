@@ -12,7 +12,7 @@ export interface StudentInfo {
 export interface StudentFile {
   id: string;
   university_name: string;
-  program: 'honors' | 'masters';
+  program: 'bachelors' | 'masters' | 'phd';
   subject: string;
   budget: number;
   student_id: string;
