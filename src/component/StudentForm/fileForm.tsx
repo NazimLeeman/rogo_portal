@@ -176,8 +176,17 @@ const FileForm: React.FC = () => {
         >
           {/* <Input /> */}
           <Select>
-            <Select.Option value="RSUH">RSUH</Select.Option>
-            <Select.Option value="OXFORD">OXFORD</Select.Option>
+            <Select.Option value="MSU">Mardovia State University</Select.Option>
+            <Select.Option value="RSUH">
+              Russian State University for the Humanities
+            </Select.Option>
+            <Select.Option value="MAI">Moscow Aviation Institue</Select.Option>
+            <Select.Option value="KSMU">
+              Kazan State Medical Universtiy
+            </Select.Option>
+            <Select.Option value="HSE">
+              Higher School of Economics
+            </Select.Option>
           </Select>
         </Form.Item>
         <Form.Item
@@ -200,8 +209,8 @@ const FileForm: React.FC = () => {
 
         <Form.Item
           name="budget"
-          label="Budget"
-          rules={[{ required: true, message: 'Please input budget!' }]}
+          label="Payment"
+          rules={[{ required: true, message: 'Please input payment amount!' }]}
         >
           <InputNumber style={{ width: '100%' }} />
         </Form.Item>

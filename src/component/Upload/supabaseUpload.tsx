@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { generateUniqueFileName } from '../../utils/helper';
 
 interface UploadFile extends File {
-  uid: string; 
+  uid: string;
 }
 
 const UploadFeature = () => {
@@ -49,7 +49,7 @@ const UploadFeature = () => {
 
   const handleBeforeUpload = (
     file: UploadFile,
-    setFileList: React.Dispatch<React.SetStateAction<UploadFile[]>>
+    setFileList: React.Dispatch<React.SetStateAction<UploadFile[]>>,
   ) => {
     // const fileWithDisplayName = file as UploadFile & { displayName: string };
     // fileWithDisplayName.displayName = newName;
@@ -66,18 +66,18 @@ const UploadFeature = () => {
     }
 
     const uniqueFileName = generateUniqueFileName(file.name);
-    console.log('uniquefile',uniqueFileName)
+    console.log('uniquefile', uniqueFileName);
 
     const { data, error } = await publicSupabase.storage
-      .from('avatars') 
-      .upload(`${studentId}/${uniqueFileName}`, file, {upsert: true});
+      .from('avatars')
+      .upload(`${studentId}/${uniqueFileName}`, file, { upsert: true });
 
-      if (error) {
-        console.error(`Attempt Error uploading ${uniqueFileName}:`, error);
-        throw error;
-      }
-  
-      console.log(`Attempt Successfully uploaded ${uniqueFileName}`);
+    if (error) {
+      console.error(`Attempt Error uploading ${uniqueFileName}:`, error);
+      throw error;
+    }
+
+    console.log(`Attempt Successfully uploaded ${uniqueFileName}`);
 
     return data;
   };
@@ -151,7 +151,7 @@ const UploadFeature = () => {
             {
               studentid: studentInfo?.id,
               studentfileid: studentFiles?.id,
-              budget: studentFiles?.budget
+              budget: studentFiles?.budget,
             },
           ])
           .select();
@@ -169,12 +169,12 @@ const UploadFeature = () => {
           .insert([
             {
               filedetailsid: fileId,
-              title: 'Submitted to Rogo',
+              title: 'Docs submitted to RoGo',
               state: 0,
             },
           ])
           .select();
-  
+
       if (statusStepsError) {
         toast.error('Error while updating status.');
         throw statusStepsError;
