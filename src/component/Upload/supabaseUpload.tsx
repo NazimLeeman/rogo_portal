@@ -169,7 +169,7 @@ const UploadFeature = () => {
           .insert([
             {
               filedetailsid: fileId,
-              title: 'Docs submitted to RoGo',
+              title: 'Docs Submitted to RoGo',
               state: 0,
             },
           ])
