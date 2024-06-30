@@ -58,9 +58,7 @@ function App() {
 
   const items = [
     UserOutlined,
-    VideoCameraOutlined,
-    UploadOutlined,
-    UserOutlined,
+    VideoCameraOutlined
   ].map((icon, index) => ({
     key: String(index + 1),
     icon: React.createElement(icon),
