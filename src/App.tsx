@@ -44,7 +44,7 @@ function App() {
 
   const { Header, Content, Footer, Sider } = Layout;
 
-  const navLabels = ['Student Info', 'Student File', 'Status', 'Payment'];
+  const navLabels = ['Student Info', 'Student File'];
 
   const studentNavLabels = ['Home']
 

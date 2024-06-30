@@ -203,7 +203,7 @@ const FileForm: React.FC = () => {
           label="Budget"
           rules={[{ required: true, message: 'Please input budget!' }]}
         >
-          <InputNumber addonAfter={suffixSelector} style={{ width: '100%' }} />
+          <InputNumber style={{ width: '100%' }} />
         </Form.Item>
         {/* <Form.Item
           label="Upload"
