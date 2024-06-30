@@ -523,44 +523,69 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
                   ]}
                 >
                   <Select placeholder="Select a status">
-                    <Option value="Rejected">
+                    <Option value="Pending Docs Verfication by RoGo">
                       Pending Docs Verfication by RoGo
                     </Option>
-                    <Option value="Rejected">Docs Accepted by RoGo</Option>
-                    <Option value="Rejected">Docs Rejected by RoGo</Option>
+                    <Option value="Docs Rejected by RoGo">
+                      Docs Rejected by RoGo
+                    </Option>
                     <Option value="Enrolled to the Adaptation Course">
                       Enrolled to the Adaptation Course
                     </Option>
                     <Option value="File Opened">File Opened</Option>
-                    <Option value="Rejected">Sent for Translation</Option>
-                    <Option value="Rejected">Document Translated</Option>
-                    <Option value="Rejected">Applied to the University</Option>
-                    <Option value="Rejected">Approved by the University</Option>
-                    <Option value="Rejected">Rejected by the University</Option>
-                    <Option value="Rejected">
+                    <Option value="Sent for Translation">
+                      Sent for Translation
+                    </Option>
+                    <Option value="Document Translated">
+                      Document Translated
+                    </Option>
+                    <Option value="Applied to the University">
+                      Applied to the University
+                    </Option>
+                    <Option value="Approved by the University">
+                      Approved by the University
+                    </Option>
+                    <Option value="Rejected by the University">
+                      Rejected by the University
+                    </Option>
+                    <Option value="University Agreement Signed">
                       University Agreement Signed
                     </Option>
-                    <Option value="Rejected">
+                    <Option value="Awaiting for Admission Test">
                       Awaiting for Admission Test
                     </Option>
-                    <Option value="Rejected">Awaiting for Admission</Option>
-                    <Option value="Rejected">Admission Test Passed</Option>
-                    <Option value="Rejected">Admission Test Failed</Option>
-                    <Option value="Rejected">Tuition Fee Paid</Option>
-                    <Option value="Rejected">Awaiting Invitation</Option>
-                    <Option value="Rejected">Invitation Received</Option>
-                    <Option value="Rejected">
+                    <Option value="Awaiting for Admission">
+                      Awaiting for Admission
+                    </Option>
+                    <Option value="Admission Test Passed">
+                      Admission Test Passed
+                    </Option>
+                    <Option value="Admission Test Failed">
+                      Admission Test Failed
+                    </Option>
+                    <Option value="Tuition Fee Paid">Tuition Fee Paid</Option>
+                    <Option value="Awaiting Invitation">
+                      Awaiting Invitation
+                    </Option>
+                    <Option value="Invitation Received">
+                      Invitation Received
+                    </Option>
+                    <Option value="Finalizating Docs for Visa Application">
                       Finalizating Docs for Visa Application
                     </Option>
-                    <Option value="Rejected">
+                    <Option value="Finalized Docs for Visa Application">
                       Finalized Docs for Visa Application
                     </Option>
-                    <Option value="Rejected">Applied for the Visa</Option>
-                    <Option value="Rejected">Awaiting for Visa Approval</Option>
-                    <Option value="Rejected">Visa Approved</Option>
-                    <Option value="Rejected">Visa Rejected</Option>
-                    <Option value="Rejected">Arrived in Russia</Option>
-                    <Option value="Rejected">Completed</Option>
+                    <Option value="Applied for the Visa">
+                      Applied for the Visa
+                    </Option>
+                    <Option value="Awaiting for Visa Approval">
+                      Awaiting for Visa Approval
+                    </Option>
+                    <Option value="Visa Approved">Visa Approved</Option>
+                    <Option value="Visa Rejected">Visa Rejected</Option>
+                    <Option value="Arrived in Russia">Arrived in Russia</Option>
+                    <Option value="Completed">Completed</Option>
                   </Select>
                 </Form.Item>
 
