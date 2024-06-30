@@ -151,7 +151,7 @@ const StudentForm: React.FC = () => {
           name="phone_number"
           rules={[{ required: true, message: 'Please input phone number!' }]}
         >
-          <Input addonBefore={prefixSelector} />
+         {/*  <Input addonBefore={prefixSelector} /> */}
         </Form.Item>
         {/* <Form.Item label="Program">
           <Select>
