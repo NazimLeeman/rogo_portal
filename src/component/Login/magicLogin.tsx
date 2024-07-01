@@ -1,76 +1,104 @@
-import React from 'react';
-// import './login.css';
-import { Button, Checkbox, Form, Input } from 'antd';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { CircleCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { z } from 'zod';
 import { publicSupabase } from '../../api/SupabaseClient';
-import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import { Button } from '../ui/button';
+import { Card } from '../ui/card';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '../ui/form';
+import { Input } from '../ui/input';
+import Text from '../ui/text';
 
-type FieldType = {
-  email: string;
-};
+const schema = z.object({
+  email: z
+    .string({
+      required_error: 'Email is required',
+    })
+    .email(),
+});
 
 const MagicLogin: React.FC = () => {
-  const navigate = useNavigate();
+  const [success, setSuccess] = useState(false);
 
-  // const handleRegisterClick = () => {
-  //   navigate('/register');
-  // }; 
+  const form = useForm<z.infer<typeof schema>>({
+    resolver: zodResolver(schema),
+  });
 
-  const onFinish = async (values: FieldType) => {
+  const onSubmit = form.handleSubmit(async (values) => {
     try {
-      const { data, error } = await publicSupabase.auth.signInWithOtp({
+      const { error } = await publicSupabase.auth.signInWithOtp({
         email: values.email,
         options: {
-          emailRedirectTo: 'https://lk.russianonthego.info',
-          // emailRedirectTo: 'http://localhost:5173',
+          emailRedirectTo: import.meta.env.VITE_REACT_APP_SIGN_IN_REDIRECT_URL,
           shouldCreateUser: false,
         },
       });
-      if (error) {
-        toast.error(error.message);
-        throw error;
-      }
-      toast.success('Email sent successfully');
-    } catch (error: any) {
-      console.error('Error inserting data:', error);
-    }
-  };
 
-  const onFinishFailed = (errorInfo: any) => {
-    console.log('Failed:', errorInfo);
-  };
+      if (error) {
+        return toast.error(error.message);
+      }
+
+      setSuccess(true);
+    } catch {
+      toast.error('Something went wrong');
+    }
+  });
 
   return (
-    <div className="flex flex-col justify-center items-center h-screen">
-      <div>
-        <h1 className="text-xl pl-16"> Welcome to ROGO</h1>
-      </div>
-      <div className="flex flex-col w-[40vw] p-8">
-        <Form
-          name="basic"
-          labelCol={{ span: 8 }}
-          wrapperCol={{ span: 16 }}
-          style={{ maxWidth: 600 }}
-          initialValues={{ remember: true }}
-          onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
-          autoComplete="off"
-        >
-          <Form.Item
-            label="Email"
-            name="email"
-            rules={[{ required: true, message: 'Please input your email!' }]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item wrapperCol={{ offset: 12, span: 16 }}>
-            <Button type="primary" htmlType="submit">
-              Login with a magic link
-            </Button>
-          </Form.Item>
-        </Form>
-      </div>
+    <div className="flex h-screen w-screen items-center justify-center px-5">
+      <Card className="max-w-4/5 mx-auto w-[500px] space-y-6 rounded-md bg-background px-8 py-12">
+        <div className="space-y-4 flex flex-col items-center">
+          <img
+            src="/logo-icon.svg"
+            alt="Russian On The Go"
+            className="h-10 w-auto"
+          />
+          <Text variant="heading-lg" className="text-center">
+            Log in to RoGo Personal Account
+          </Text>
+        </div>
+        {success ? (
+          <div className="flex items-center gap-2 justify-center  ">
+            <CircleCheck className="h-6 w-6 text-green-500 flex-shrink-0" />
+            <Text>A magic link has been sent to your email address.</Text>
+          </div>
+        ) : (
+          <Form {...form}>
+            <form className="space-y-4" onSubmit={onSubmit}>
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                className="w-full"
+                type="submit"
+                isLoading={form.formState.isSubmitting}
+                disabled={form.formState.isSubmitting}
+              >
+                Login
+              </Button>
+            </form>
+          </Form>
+        )}
+      </Card>
     </div>
   );
 };

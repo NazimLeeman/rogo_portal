@@ -1,33 +1,30 @@
 import {
-  Routes,
-  Route,
+  LogoutOutlined,
+  UserOutlined,
+  VideoCameraOutlined,
+} from '@ant-design/icons';
+import { Layout, Menu, theme } from 'antd';
+import { Loader } from 'lucide-react';
+import React from 'react';
+import {
   Navigate,
+  Route,
+  Routes,
   useLocation,
   useNavigate,
 } from 'react-router-dom';
-import { routes } from './routes';
+import { publicSupabase } from './api/SupabaseClient';
+import MagicLogin from './component/Login/magicLogin';
+import { useFile } from './context/FileContext';
 import { useAuth } from './hooks/useAuth';
 import { useRole } from './hooks/useRole';
-import React from 'react';
-import {
-  UploadOutlined,
-  UserOutlined,
-  VideoCameraOutlined,
-  LogoutOutlined,
-} from '@ant-design/icons';
 import Dashboard from './pages/dashboard';
-import { Layout, Menu, theme } from 'antd';
-import { publicSupabase } from './api/SupabaseClient';
-import { useFile } from './context/FileContext';
-import MagicLogin from './component/Login/magicLogin';
-// import { privateSupabase } from "./api/SupabaseClient";
-// import { useSupabase } from "./context/supabaseContext";
-// import { useOnboarding } from './context/onboardingContext';
+import { routes } from './routes';
 
 function App() {
   const { userId, loading } = useAuth();
   // const [selectedNav, setSelectedNav] = useState<any>('1');
-  const {selectedNav, setSelectedNav} = useFile();
+  const { selectedNav, setSelectedNav } = useFile();
   const { userRole } = useRole();
   // const { userIdPrivate } = useSupabase();
   // const { onboardingSaved } = useOnboarding();
@@ -42,11 +39,11 @@ function App() {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  const { Header, Content, Footer, Sider } = Layout;
+  const { Header, Content, Sider } = Layout;
 
   const navLabels = ['Student Info', 'Student File'];
 
-  const studentNavLabels = ['Home']
+  const studentNavLabels = ['Home'];
 
   const logoutLabel = [
     {
@@ -56,18 +53,13 @@ function App() {
     },
   ];
 
-  const items = [
-    UserOutlined,
-    VideoCameraOutlined
-  ].map((icon, index) => ({
+  const items = [UserOutlined, VideoCameraOutlined].map((icon, index) => ({
     key: String(index + 1),
     icon: React.createElement(icon),
     label: navLabels[index],
   }));
 
-  const studentItems =[
-    UserOutlined
-  ].map((icon, index) => ({
+  const studentItems = [UserOutlined].map((icon, index) => ({
     key: String(index + 1),
     icon: React.createElement(icon),
     label: studentNavLabels[index],
@@ -97,7 +89,11 @@ function App() {
   );
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="w-screen h-screen flex items-center justify-center">
+        <Loader className="animate-spin h-6 w-6" />
+      </div>
+    );
   }
 
   if (!userId && !isPathExcluded) {
@@ -162,10 +158,6 @@ function App() {
               </Routes>
             </div>
           </Content>
-          <Footer style={{ textAlign: 'center' }}>
-            Rogo Portal ©{new Date().getFullYear()} Created by Runtime Terror
-            Squad
-          </Footer>
         </Layout>
       </Layout>
     </>
