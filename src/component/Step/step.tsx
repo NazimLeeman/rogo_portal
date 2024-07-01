@@ -659,7 +659,7 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
                     beforeUpload={() => false}
                     multiple={true}
                   >
-                    <Button icon={<UploadOutlined />}>Click to Upload</Button>
+                    <Button>Click to Upload</Button>
                   </Upload>
                 </Form.Item>
               </Form>
