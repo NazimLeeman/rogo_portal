@@ -199,9 +199,9 @@ const FileForm: React.FC = () => {
           rules={[{ required: true, message: 'Please input program!' }]}
         >
           <Select>
-            <Select.Option value="bachelors">Bachelors</Select.Option>
-            <Select.Option value="masters">Masters</Select.Option>
-            <Select.Option value="phd">PhD</Select.Option>
+            <Select.Option value="Bachelors">Bachelors</Select.Option>
+            <Select.Option value="Masters">Masters</Select.Option>
+            <Select.Option value="PhD">PhD</Select.Option>
           </Select>
         </Form.Item>
         <Form.Item

@@ -1,48 +1,38 @@
+import { Button } from '@/component/ui/button';
+import { Checkbox } from '@/component/ui/checkbox';
+import Text from '@/component/ui/text';
+import { Form, Input, Modal } from 'antd';
+import { ChevronLeft, DownloadIcon, FileIcon, Loader } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import {
-  Button,
-  Checkbox,
-  Form,
-  Input,
-  Modal,
-  Spin,
-} from 'antd';
-import { useFile } from '../context/FileContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import { publicSupabase } from '../api/SupabaseClient';
-import { PlusOutlined } from '@ant-design/icons';
 import Step from '../component/Step/step';
+import { useFile } from '../context/FileContext';
 
 const StudentFileDetails: React.FC = () => {
   const { fileId } = useParams();
-  const {
-    step,
-  } = useFile();
+  const { step } = useFile();
   const [files, setFiles] = useState<any[]>([]);
   const [downloadUrl, setDownloadUrl] = useState<any[]>([]);
-  const [ userRole, setUserRole] = useState<any>("")
+  const [userRole, setUserRole] = useState<any>('');
   // const [services, setServices] = useState<any>([]);
   const [servicesObj, setServicesObj] = useState<any>({});
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
-  const [studentId, setStudentId] = useState("");
+  const [studentId, setStudentId] = useState('');
   const [form] = Form.useForm();
-  
+
   const navigate = useNavigate();
 
   const getUserRole = () => {
     const localRoleSession = localStorage.getItem('supabase.auth.role');
     const sessionRoleData = localRoleSession && JSON.parse(localRoleSession);
     const userRoleFromStorage = sessionRoleData?.currentRole || null;
-    setUserRole(userRoleFromStorage)
-  }
+    setUserRole(userRoleFromStorage);
+  };
 
   const handleBack = () => {
-    if(userRole === 'Admin') {
-      navigate('/dashboard')
-    } else {
-      navigate('/file-submission');
-    }
+    navigate('/dashboard');
   };
 
   // useEffect(() => {
@@ -76,218 +66,259 @@ const StudentFileDetails: React.FC = () => {
   //   console.log(`checked = ${checkValue}`);
   // };
 
-  const changeServiceCheck = (serviceCheck:any, check:boolean) => {
-    console.log('service',serviceCheck)
-    console.log('check',check)
-    console.log('services obj',servicesObj)
-  
+  const changeServiceCheck = (serviceCheck: any, check: boolean) => {
+    console.log('service', serviceCheck);
+    console.log('check', check);
+    console.log('services obj', servicesObj);
+
     if (userRole === 'Admin') {
       const newServicesObj = { ...servicesObj };
-  
+
       if (serviceCheck in newServicesObj) {
         newServicesObj[serviceCheck] = !check;
       }
-  
+
       console.log('new services obj', newServicesObj);
       updateServiceCheck(newServicesObj);
     } else {
       console.log('User does not have permission to change service check');
     }
-  }
+  };
 
-  const updateServiceCheck = async(newServicesObj:any) => {
-    const {data,error} = await publicSupabase
+  const updateServiceCheck = async (newServicesObj: any) => {
+    const { data, error } = await publicSupabase
       .from('filedetails')
       .update({ servicesobj: newServicesObj })
-      .eq('id',fileId)
+      .eq('id', fileId)
       .select();
 
-  if (error) {
-    console.error('Error updating service check:', error);
-    return null;
-  }
-  setServicesObj(data[0].servicesobj)
-  console.log('update service check',data) 
-  }
+    if (error) {
+      console.error('Error updating service check:', error);
+      return null;
+    }
+    setServicesObj(data[0].servicesobj);
+    console.log('update service check', data);
+  };
 
   const addNewService = () => {
     // setServices([...services, `New Service ${services.length + 1}`]);
-    showModal()
+    showModal();
   };
 
   const showModal = () => {
     setOpen(true);
   };
 
-  const getFilesForStudent = async (studentId:string) => {
+  const getFilesForStudent = async (studentId: string) => {
     const { data, error } = await publicSupabase.storage
-        .from('avatars') // Replace 'avatars' with your bucket name
-        .list(`${studentId}/`);
+      .from('avatars') // Replace 'avatars' with your bucket name
+      .list(`${studentId}/`);
 
     if (error) {
-        throw error;
+      throw error;
     }
-    console.log('data',data)
-    signedUrls(data)
+    console.log('data', data);
+    signedUrls(data);
     setFiles(data);
     return data || [];
-};
+  };
 
-const signedUrls = async(resultData:any) => {
-  if(resultData.length < 1) {
-    // toast.error('No File Found')
-    throw new Error
-  }
-  const name = resultData.map((item:any) => {
-    return `${studentId}/${item.name}`
-  })
-  const { data, error } = await publicSupabase
-  .storage
-  .from('avatars')
-  .createSignedUrls(name, 60, { download: true}) 
-
-  if(error) {
-    throw error;
-  }
-  setDownloadUrl(data)
-  console.log('signedddddd urls', data)
-} 
-
-const getStudentId = async() => {
-  try {
-  const {data, error} = await publicSupabase
-  .from('filedetails')
-  .select()
-  .eq('id',fileId);
-  if(error) {
-    console.log('error', error)
-  throw new Error
-  }
-  console.log('from file detailssssssss',data[0])
-  console.log('services obj',data[0].servicesobj)
-  setServicesObj(data[0].servicesobj)
-  // setServices(data[0].services)
-  setStudentId(data[0].studentid)
-  } catch(error) {
-    console.log(error)
-  }
-}
-
-const updateServices = async() => {
-  const values = await form.validateFields();
-  // const newService = {[values.service]: false}
-  const updatedServices = {...servicesObj, [values.service]: false};
-  console.log('valuesssssssssssssssssssssssssssssssssss', updatedServices)
-  const {data, error} = await publicSupabase
-    .from('filedetails')
-    .update({servicesobj: updatedServices})
-    .eq('id',fileId)
-    .select();
-
-    if(error) {
-      console.log('error',error)
-      throw new Error
+  const signedUrls = async (resultData: any) => {
+    if (resultData.length < 1) {
+      // toast.error('No File Found')
+      throw new Error();
     }
-    console.log('new servicesssssssssssssssssss',data)
-    setServicesObj(updatedServices)
-    setOpen(false)
-}
+    const name = resultData.map((item: any) => {
+      return `${studentId}/${item.name}`;
+    });
+    const { data, error } = await publicSupabase.storage
+      .from('avatars')
+      .createSignedUrls(name, 60, { download: true });
 
-const handleCancel = () => {
-  setOpen(false);
-  form.resetFields();
-};
+    if (error) {
+      throw error;
+    }
+    setDownloadUrl(data);
+    console.log('signedddddd urls', data);
+  };
+
+  const getStudentId = async () => {
+    try {
+      const { data, error } = await publicSupabase
+        .from('filedetails')
+        .select()
+        .eq('id', fileId);
+      if (error) {
+        console.log('error', error);
+        throw new Error();
+      }
+      console.log('from file detailssssssss', data[0]);
+      console.log('services obj', data[0].servicesobj);
+      setServicesObj(data[0].servicesobj);
+      // setServices(data[0].services)
+      setStudentId(data[0].studentid);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const updateServices = async () => {
+    const values = await form.validateFields();
+    // const newService = {[values.service]: false}
+    const updatedServices = { ...servicesObj, [values.service]: false };
+    console.log('valuesssssssssssssssssssssssssssssssssss', updatedServices);
+    const { data, error } = await publicSupabase
+      .from('filedetails')
+      .update({ servicesobj: updatedServices })
+      .eq('id', fileId)
+      .select();
+
+    if (error) {
+      console.log('error', error);
+      throw new Error();
+    }
+    console.log('new servicesssssssssssssssssss', data);
+    setServicesObj(updatedServices);
+    setOpen(false);
+  };
+
+  const handleCancel = () => {
+    setOpen(false);
+    form.resetFields();
+  };
 
   return (
-    <>
-      <Button className="mb-8" onClick={handleBack}>
-        Back
-      </Button>
-      <div className='flex flex-row justify-between px-12'>
-      <div className="space-y-6 w-2/4">       
-      <div className="space-y-6">
-        <p className="text-xl">Status Timeline</p>
-        { fileId && step !== undefined ? (
-        <Step fileId={fileId} statusType="fileStatus" />
-        ): (
-          <div></div>
-        )}
+    <div className="flex max-w-screen-md mx-auto flex-col space-y-6 px-8 py-14 md:py-8">
+      <div className="space-y-4">
+        <Button
+          variant="outline"
+          className="w-max"
+          onClick={handleBack}
+          size="sm"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </Button>
       </div>
-      <div className="space-y-6">
-        <div>
-      <p className="text-xl">Services got from ROGO</p>
-      {Object.keys(servicesObj).map((service:any,index:number) => (
-        <Checkbox className='mt-4' checked={servicesObj[service]} key={index} onChange={() => {changeServiceCheck(service, servicesObj[service])}}>
-        {service}
-      </Checkbox>
-      ))}
-      {/* {services.map((service:any, index:any) => (
-        <Checkbox className='mt-4' key={index} onChange={onChange}>
-          {service}
-        </Checkbox>
-      ))} */}
-    </div>
-    {userRole === 'Admin' ? (  <Button 
-        type="dashed" 
-        style={{maxWidth: "300px"}}
-        onClick={addNewService} 
-        block 
-        icon={<PlusOutlined />}
-      >
-        Add Service
-      </Button>
-    ) : (
-  <div></div>
-)}
-      <Modal
-            title="Add Service"
-            open={open}
-            onOk={updateServices}
-            confirmLoading={confirmLoading}
-            onCancel={handleCancel}
+      <div className="flex flex-col gap-12">
+        <div className="space-y-12">
+          <div className="space-y-6">
+            <Text variant="heading-lg">Process timeline</Text>
+            {fileId && step !== undefined ? (
+              <Step fileId={fileId} statusType="fileStatus" />
+            ) : null}
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <Text variant="heading-lg" className="mb-6">
+                Received services
+              </Text>
+              <div className="grid grid-cols-2 gap-4">
+                {Object.keys(servicesObj).map((service: any, index: number) => (
+                  <div className="flex items-center space-x-2" key={index}>
+                    <Checkbox
+                      id={service}
+                      checked={servicesObj[service]}
+                      onCheckedChange={() => {
+                        changeServiceCheck(service, servicesObj[service]);
+                      }}
+                    />
+                    <label
+                      htmlFor="terms"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      {service}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {userRole === 'Admin' ? (
+              <Button onClick={addNewService}>Add service</Button>
+            ) : null}
+
+            <Modal
+              title="Add Service"
+              open={open}
+              onOk={updateServices}
+              confirmLoading={confirmLoading}
+              onCancel={handleCancel}
             >
-            <Form form={form} layout="vertical">
-          <Form.Item
-            name="service"
-            label="Serivce"
-            rules={[{ required: true, message: 'Please select a status' }]}
-          >
-            <Input/>
-          </Form.Item>
-        </Form>
-          </Modal>
-    </div>
-      <div className="space-y-6">
-        <p className="text-xl">Payment History</p>
-        { fileId && (
-        <Step fileId={fileId} statusType="payment" />
-        )}
-      </div>
-      </div>
-      <div>
-      <p className="text-xl">Documents</p>
-      {downloadUrl.length > 0 ? (
-      <div >
-        <ul className='grid grid-cols-2 gap-6'>
-          {downloadUrl.map((file:any) => (
-            <li key={file.path}>
-             <img src={file.signedUrl} style={{ width:"300px", height:"150px"}} />
-             {/* {userRole === "Admin" && ( */}
-              <a href={file.signedUrl} rel="noopener noreferrer">
-        Download
-      </a>
-            {/* )}    */}
-           </li>
-          ))}
-        </ul>
+              <Form form={form} layout="vertical">
+                <Form.Item
+                  name="service"
+                  label="Serivce"
+                  rules={[
+                    { required: true, message: 'Please select a status' },
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
+              </Form>
+            </Modal>
+          </div>
+          <div className="space-y-6">
+            <Text variant="heading-lg" className="mb-4">
+              Payment history
+            </Text>
+            {fileId && <Step fileId={fileId} statusType="payment" />}
+          </div>
         </div>
-  ) : (
-    <div><Spin /> Please wait...</div>
-  )}
+        <div className="space-y-6">
+          <Text variant="heading-lg" className="mb-4">
+            Documents
+          </Text>
+          {downloadUrl.length > 0 ? (
+            <div className="grid grid-cols-2 gap-6">
+              {downloadUrl.map((file: any) => (
+                <div key={file.path} className="space-y-2">
+                  <div className="w-full h-60 border rounded-md">
+                    <Image src={file.signedUrl} />
+                  </div>
+                  <a
+                    href={file.signedUrl}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                    className="block"
+                  >
+                    <Button size="sm" variant="ghost">
+                      <DownloadIcon className="h-4 w-4 mr-2" />
+                      Dowload
+                    </Button>
+                  </a>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <Loader className="h-6 w-6 animate-spin" />
+          )}
+        </div>
       </div>
-      </div>
-    </>
+    </div>
   );
 };
+
+function Image({ src }: { src: string }) {
+  const [isImage, setIsImage] = useState(true);
+
+  if (!isImage) {
+    return (
+      <div className="w-full h-full bg-gray-200 rounded-md flex justify-center items-center">
+        <FileIcon />
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      className="h-full w-full object-contain object-center"
+      onError={() => {
+        setIsImage(false);
+      }}
+    />
+  );
+}
 
 export default StudentFileDetails;

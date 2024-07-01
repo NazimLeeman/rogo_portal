@@ -1,33 +1,15 @@
-import React, { useRef } from 'react';
-import { Button, Form, Input} from 'antd';
-import { useFile } from '../context/FileContext';
+import { Button } from '@/component/ui/button';
+import { Input } from '@/component/ui/input';
+import { Label } from '@/component/ui/label';
+import Text from '@/component/ui/text';
+import { ChevronLeft } from 'lucide-react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import UploadFeature from '../component/Upload/supabaseUpload';
-
+import { useFile } from '../context/FileContext';
 
 const StudentFileSubmission: React.FC = () => {
-  const {
-    studentInfo,
-    studentFiles,
-  } = useFile();
-
-  // useEffect(() => {
-  //   // This will log the updated studentInfo value whenever it changes
-  //   console.log('studentInfo:', studentInfo);
-  // }, [studentInfo]);
-
-  const formRef = useRef<any>(null);
-
-  const initialValue = {
-    first_name: studentInfo?.first_name,
-    last_name: studentInfo?.last_name,
-    email: studentInfo?.email,
-    phone_number: studentInfo?.phone_number,
-    university_name: studentFiles?.university_name,
-    program: studentFiles?.program,
-    subject: studentFiles?.subject,
-    budget: studentFiles?.budget,
-  };
+  const { studentInfo, studentFiles } = useFile();
 
   const navigate = useNavigate();
 
@@ -35,150 +17,67 @@ const StudentFileSubmission: React.FC = () => {
     navigate('/agreement');
   };
 
-  const onFinish = async (values: any) => {
-    console.log('values', values);
-    console.log('student filessssssssssssssssss', studentFiles)
-    try {
-      // const { data: fileDetailsData, error: fileDetailsError } =
-      //   await publicSupabase
-      //     .from('filedetails')
-      //     .insert([
-      //       {
-      //         studentid: studentInfo?.id,
-      //         studentfileid: studentFiles?.id,
-      //         budget: studentFiles?.budget
-      //       },
-      //     ])
-      //     .select();
-
-      // if (fileDetailsError) {
-      //   toast.error('Error while submitting file.');
-      //   throw fileDetailsError;
-      // }
-      // console.log('file detailssssssssssssssssssssssssssssssssssssss', fileDetailsData[0])
-      // const fileId = fileDetailsData[0].id;
-      // toast.success('File submitted successfully');
-      // navigate(`/file-details/${fileId}`);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const onFinishFailed = (errorInfo: any) => {
-    console.log('Failed:', errorInfo);
-  };
-
   return (
-    <>
-      <Button className="mb-8" onClick={handleBack}>
-        Back
-      </Button>
-      <Form
-        ref={formRef}
-        labelCol={{ span: 6 }}
-        wrapperCol={{ span: 14 }}
-        layout="horizontal"
-        onFinish={onFinish}
-        onFinishFailed={onFinishFailed}
-        initialValues={{
-          first_name: initialValue.first_name,
-          last_name: initialValue.last_name,
-          email: initialValue.email,
-          phone_number: initialValue.phone_number,
-          university_name: studentFiles?.university_name,
-          program: studentFiles?.program,
-          subject: studentFiles?.subject,
-          budget: studentFiles?.budget,
-        }}
-      >
-        <h1>Info section</h1>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '16px',
-          }}
+    <div className="max-w-screen-md mx-auto px-8 py-14 md:py-8 space-y-10">
+      <div className="space-y-4">
+        <Button
+          variant="outline"
+          className="w-max"
+          onClick={handleBack}
+          size="sm"
         >
-          <Form.Item
-            label="First Name"
-            name="first_name"
-            rules={[{ required: true, message: 'Please input first name!' }]}
-          >
-            <Input disabled />
-          </Form.Item>
-          <Form.Item
-            label="Last Name"
-            name="last_name"
-            rules={[{ required: true, message: 'Please input last name!' }]}
-          >
-            <Input disabled />
-          </Form.Item>
-          <Form.Item
-            label="Email"
-            name="email"
-            rules={[{ required: true, message: 'Please input email!' }]}
-          >
-            <Input disabled />
-          </Form.Item>
-          <Form.Item
-            label="Phone Number"
-            name="phone_number"
-            rules={[{ required: true, message: 'Please input phone number!' }]}
-          >
-            <Input disabled />
-          </Form.Item>
+          <ChevronLeft className="h-5 w-5" />
+        </Button>
+        <Text variant="heading-lg" className="mt-6">
+          Review your information and upload your documents
+        </Text>
+      </div>
+
+      <div className="space-y-6">
+        <div className="grid grid-cols-2 gap-6">
+          <div className="grid gap-1.5">
+            <Label>First Name</Label>
+            <Input defaultValue={studentInfo?.first_name} disabled />
+          </div>
+          <div className="grid gap-1.5">
+            <Label>Last Name</Label>
+            <Input defaultValue={studentInfo?.last_name} disabled />
+          </div>
         </div>
-        <h1>File section</h1>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '16px',
-          }}
-        >
-          <Form.Item
-            label="Universtiy Name"
-            name="university_name"
-            rules={[{ required: true, message: 'Please input first name!' }]}
-          >
-            <Input disabled />
-          </Form.Item>
-          <Form.Item
-            label="Program"
-            name="program"
-            rules={[{ required: true, message: 'Please input last name!' }]}
-          >
-            <Input disabled />
-          </Form.Item>
-          <Form.Item
-            label="Subject"
-            name="subject"
-            rules={[{ required: true, message: 'Please input email!' }]}
-          >
-            <Input disabled />
-          </Form.Item>
-          <Form.Item
-            label="Budget"
-            name="budget"
-            rules={[{ required: true, message: 'Please input phone number!' }]}
-          >
-            <Input disabled />
-          </Form.Item>
+        <div className="grid grid-cols-2 gap-6">
+          <div className="grid gap-1.5">
+            <Label>Email</Label>
+            <Input defaultValue={studentInfo?.email} disabled />
+          </div>
+          <div className="grid gap-1.5">
+            <Label>Phone</Label>
+            <Input defaultValue={studentInfo?.phone_number ?? ''} disabled />
+          </div>
         </div>
-        <h1>Upload section</h1>
-        <div
-          style={{
-            display: 'grid',
-            paddingLeft: '200px',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '12px',
-            rowGap: '32px',
-          }}
-        >
-          <UploadFeature />
+        <div className="grid grid-cols-2 gap-6">
+          <div className="grid gap-1.5">
+            <Label>University</Label>
+            <Input defaultValue={studentFiles?.university_name} disabled />
+          </div>
+          <div className="grid gap-1.5">
+            <Label>Program</Label>
+            <Input defaultValue={studentFiles?.program} disabled />
+          </div>
         </div>
-      </Form>
-    </>
+        <div className="grid grid-cols-2 gap-6">
+          <div className="grid gap-1.5">
+            <Label>Subject</Label>
+            <Input defaultValue={studentFiles?.subject} disabled />
+          </div>
+          <div className="grid gap-1.5">
+            <Label>Payment</Label>
+            <Input defaultValue={studentFiles?.budget} disabled />
+          </div>
+        </div>
+      </div>
+
+      <UploadFeature />
+    </div>
   );
 };
 

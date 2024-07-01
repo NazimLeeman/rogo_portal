@@ -1,39 +1,33 @@
-import React, { useEffect, useState } from 'react';
-import {
-  Button,
-  message,
-  Modal,
-  Steps,
-  theme,
-  Form,
-  Select,
-  Input,
-  Upload,
-  UploadProps,
-  UploadFile,
-  Spin,
-  InputNumber,
-} from 'antd';
-import { useFile } from '../../context/FileContext';
-import { publicSupabase } from '../../api/SupabaseClient';
-import {
-  displaySubtitle,
-  formatDate,
-  generateRandomId,
-  highestState,
-} from '../../utils/helper';
+import { cn, formatCurrency } from '@/utils';
 import { UploadOutlined } from '@ant-design/icons';
-import { CheckOutlined } from '@ant-design/icons';
-import toast from 'react-hot-toast';
+import {
+  Form,
+  Input,
+  InputNumber,
+  Modal,
+  Select,
+  Spin,
+  Upload,
+  UploadFile,
+  UploadProps,
+} from 'antd';
+import { CircleCheckIcon, Loader } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { publicSupabase } from '../../api/SupabaseClient';
+import { useFile } from '../../context/FileContext';
 import { useRole } from '../../hooks/useRole';
+import { formatDate, generateRandomId, highestState } from '../../utils/helper';
+import { Alert, AlertTitle } from '../ui/alert';
+import { Skeleton } from '../ui/skeleton';
+import Text from '../ui/text';
+import { toast } from 'sonner';
+import { Button } from '../ui/button';
 
 interface StepProps {
   statusType: 'payment' | 'fileStatus';
   fileId: string;
-  // step:any
 }
 
-// let description = 'This is a description.';
 const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
   const {
     currentStatus,
@@ -45,7 +39,6 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
     paymentStep,
     setPaymentStep,
   } = useFile();
-  const { token } = theme.useToken();
   const { Option } = Select;
   const { TextArea } = Input;
   const { userRole } = useRole();
@@ -56,8 +49,8 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [downloadUrl, setDownloadUrl] = useState<any[]>([]);
-  const [downloadPaymentUrl, setDownloadPaymentUrl] = useState<any[]>([]);
+  const [, setDownloadUrl] = useState<any[]>([]);
+  const [, setDownloadPaymentUrl] = useState<any[]>([]);
   const [budget, setBudget] = useState<any>({});
 
   useEffect(() => {
@@ -76,6 +69,7 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
 
       fetchData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fileId]);
 
   const getFileStep = async (fileId: string) => {
@@ -180,7 +174,7 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
     const state = currentStatus + 1;
     console.log('values', values);
     try {
-      const { data: insertData, error: insertError } = await publicSupabase
+      const { error: insertError } = await publicSupabase
         .from('statusSteps')
         .insert({
           title: values.status,
@@ -223,7 +217,7 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
     console.log('from updateeeeeeeeee', values);
 
     try {
-      const { data: insertData, error: insertError } = await publicSupabase
+      const { error: insertError } = await publicSupabase
         .from('paymentSteps')
         .insert({
           title: values.status,
@@ -300,15 +294,11 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
   };
 
   if (loading) {
-    return (
-      <div>
-        <Spin /> Loading...
-      </div>
-    );
+    return <Loader className="h-6 w-6 animate-spin" />;
   }
 
   if (!step || !paymentStep) {
-    return <div>Loading...</div>;
+    return <Loader className="h-6 w-6 animate-spin" />;
   }
 
   const items = step.map((item: any) => ({
@@ -318,6 +308,7 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
     subTitle: item.notes,
     description: formatDate(item.createdAt),
   }));
+
   const paymentItems = paymentStep.map((item: any) => ({
     key: item.title,
     title: item.title,
@@ -325,16 +316,6 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
     subTitle: item.notes,
     description: formatDate(item.createdAt),
   }));
-  const contentStyle: React.CSSProperties = {
-    lineHeight: '100px',
-    textAlign: 'center',
-    color: 'black',
-    backgroundColor: token.colorFillAlter,
-    borderRadius: token.borderRadiusLG,
-    border: `1px dashed ${token.colorBorder}`,
-    marginTop: 16,
-    width: 600,
-  };
 
   const showModal = () => {
     setOpen(true);
@@ -354,18 +335,14 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
         );
       const uploadResults = await Promise.all(uploadPromises);
 
-      // // Add the upload results to the form values
-      // const updatedValues = {
-      //   ...values,
-      //   uploadedFiles: uploadResults.filter(result => result !== null),
-      // };
       const fileUrls = uploadResults.filter((result) => result !== null);
-      console.log('fileUrls', fileUrls);
+
       if (type === 'fileStatus') {
         await updateStatus(values, fileUrls);
       } else {
         await updatePaymentStatus(values, fileUrls);
       }
+
       setOpen(false);
       setConfirmLoading(false);
       form.resetFields();
@@ -390,7 +367,7 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
     const fileName = `${generateRandomId()}.${fileExt}`;
     const filePath = `${fileId}/${fileName}`;
 
-    const { data, error } = await publicSupabase.storage
+    const { error } = await publicSupabase.storage
       .from(bucketName)
       .upload(filePath, file, { upsert: true });
 
@@ -417,31 +394,37 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
     <>
       {statusType === 'fileStatus' && (
         <>
-          <div className="flex">
+          <div className="relative mt-6 flex flex-col gap-6">
             {(() => {
               const totalItems = items.length;
               const reversedItems = [...items].reverse().map((item, index) => {
-                const stepNumber = totalItems - index;
                 const isCompleted = index > totalItems - 1 - currentStatus;
-
-                return {
-                  ...item,
-                  icon: isCompleted ? (
-                    <div className="custom-step-icon completed">
-                      <CheckOutlined />
+                return (
+                  <div className="flex gap-4 items-start" key={index}>
+                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border bg-muted text-2xl text-muted-foreground">
+                      <CircleCheckIcon
+                        className={cn('h-4 w-4 z-10', {
+                          'text-primary': !isCompleted,
+                        })}
+                      />
                     </div>
-                  ) : (
-                    <div className="custom-step-icon">
-                      <div className="ant-steps-item-icon">
-                        <h1 className="text-white text-md">{stepNumber}</h1>
+                    <div className="-mt-0.5 space-y-2">
+                      <div>
+                        <Text variant="heading-md" as="h3">
+                          {item?.title}
+                        </Text>
+                        <Text
+                          className="text-muted-foreground"
+                          variant="body-sm"
+                        >
+                          {item?.description}
+                        </Text>
                       </div>
-                    </div>
-                  ),
-                  description: (
-                    <>
-                      <div>{item.description}</div>
+                      <Text className="text-muted-foreground">
+                        {item?.subTitle}
+                      </Text>
                       {item.content && item.content.length > 0 && (
-                        <div className="ant-steps-item-description">
+                        <div>
                           {item.content.map(
                             (contentItem: any, contentIndex: any) => (
                               <div key={contentIndex}>
@@ -449,6 +432,7 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
                                   href={contentItem}
                                   target="_blank"
                                   rel="noopener noreferrer"
+                                  className="text-sm"
                                 >
                                   Download
                                 </a>
@@ -457,53 +441,18 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
                           )}
                         </div>
                       )}
-                    </>
-                  ),
-                };
+                    </div>
+                  </div>
+                );
               });
-
-              const reversedCurrentStatus = items.length - 1 - currentStatus;
-
-              return (
-                <Steps
-                  current={reversedCurrentStatus}
-                  items={reversedItems}
-                  direction="vertical"
-                />
-              );
+              return reversedItems;
             })()}
-            {/* <div style={contentStyle}>
-      <div>
-      <p className="text-xl">Attachments</p>
-      {downloadUrl.length > 0 ? (
-      <div >
-        <ul className='grid grid-cols-2 gap-6'>
-          {downloadUrl.map((file:any) => (
-            <li key={file.path}>
-              <a href={file.signedUrl} rel="noopener noreferrer">
-        Download
-      </a>
-           </li>
-          ))}
-        </ul>
-        </div>
-  ) : (
-    <div><Spin /> Please wait...</div>
-  )}
-      </div>
-      </div> */}
+            <div className="absolute left-3 top-0 h-full w-0.5 bg-gray-100" />
           </div>
           <div style={{ marginTop: 24 }}>
-            {/* <Button type="primary" onClick={() => next()}>
-              Add Status
-            </Button> */}
             {userRole === 'Admin' ? (
-              <Button type="primary" onClick={() => next()}>
-                Add Status
-              </Button>
-            ) : (
-              <div></div>
-            )}
+              <Button onClick={() => next()}>Add status</Button>
+            ) : null}
             <Modal
               title="Title"
               open={open}
@@ -513,7 +462,6 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
               confirmLoading={confirmLoading}
               onCancel={handleCancel}
             >
-              {/* <p>{modalText}</p> */}
               <Form form={form} layout="vertical">
                 <Form.Item
                   name="status"
@@ -523,70 +471,70 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
                   ]}
                 >
                   <Select placeholder="Select a status">
-                    <Option value="Pending Docs Verfication by RoGo">
-                      Pending Docs Verfication by RoGo
+                    <Option value="Pending docuemnts verfication by RoGo">
+                      Pending docuemnts verfication by RoGo
                     </Option>
-                    <Option value="Docs Accepted by RoGo">
-                      Docs Accepted by RoGo
+                    <Option value="Documents accepted by RoGo">
+                      Documents accepted by RoGo
                     </Option>
-                    <Option value="Docs Rejected by RoGo">
-                      Docs Rejected by RoGo
+                    <Option value="Documents rejected by RoGo">
+                      Documents rejected by RoGo
                     </Option>
-                    <Option value="Enrolled to the Adaptation Course">
-                      Enrolled to the Adaptation Course
+                    <Option value="Enrolled to the adaptation course">
+                      Enrolled to the adaptation course
                     </Option>
-                    <Option value="File Opened">File Opened</Option>
-                    <Option value="Sent for Translation">
-                      Sent for Translation
+                    <Option value="File opened">File opened</Option>
+                    <Option value="Sent for translation">
+                      Sent for translation
                     </Option>
-                    <Option value="Document Translated">
-                      Document Translated
+                    <Option value="Document translated">
+                      Document translated
                     </Option>
-                    <Option value="Applied to the University">
-                      Applied to the University
+                    <Option value="Applied to the university">
+                      Applied to the university
                     </Option>
-                    <Option value="Approved by the University">
-                      Approved by the University
+                    <Option value="Approved by the university">
+                      Approved by the university
                     </Option>
-                    <Option value="Rejected by the University">
-                      Rejected by the University
+                    <Option value="Rejected by the university">
+                      Rejected by the university
                     </Option>
-                    <Option value="University Agreement Signed">
-                      University Agreement Signed
+                    <Option value="University agreement signed">
+                      University agreement signed
                     </Option>
-                    <Option value="Awaiting for Admission Test">
-                      Awaiting for Admission Test
+                    <Option value="Awaiting for admission test">
+                      Awaiting for admission test
                     </Option>
-                    <Option value="Awaiting for Admission">
-                      Awaiting for Admission
+                    <Option value="Awaiting for admission">
+                      Awaiting for admission
                     </Option>
-                    <Option value="Admission Test Passed">
-                      Admission Test Passed
+                    <Option value="Admission test passed">
+                      Admission test passed
                     </Option>
-                    <Option value="Admission Test Failed">
-                      Admission Test Failed
+                    <Option value="Admission test failed">
+                      Admission test failed
                     </Option>
-                    <Option value="Tuition Fee Paid">Tuition Fee Paid</Option>
-                    <Option value="Awaiting Invitation">
-                      Awaiting Invitation
+                    <Option value="Tuition fee paid">Tuition fee paid</Option>
+                    <Option value="Awaiting invitation">
+                      Awaiting invitation
                     </Option>
-                    <Option value="Invitation Received">
-                      Invitation Received
+                    <Option value="Invitation received">
+                      Invitation received
                     </Option>
-                    <Option value="Finalizating Docs for Visa Application">
-                      Finalizating Docs for Visa Application
+                    <Option value="Finalizating documents for visa application">
+                      Finalizating documents for visa application
                     </Option>
-                    <Option value="Finalized Docs for Visa Application">
-                      Finalized Docs for Visa Application
+                    <Option value="Finalized documents for visa application">
+                      Finalized documents for visa application
                     </Option>
-                    <Option value="Applied for the Visa">
-                      Applied for the Visa
+                    <Option value="Applied for the visa">
+                      Applied for the visa
                     </Option>
-                    <Option value="Awaiting for Visa Approval">
-                      Awaiting for Visa Approval
+                    <Option value="Awaiting for visa approval">
+                      Awaiting for visa approval
                     </Option>
-                    <Option value="Visa Approved">Visa Approved</Option>
-                    <Option value="Visa Rejected">Visa Rejected</Option>
+                    <Option value="Visa approved">Visa approved</Option>
+                    <Option value="Visa rejected">Visa rejected</Option>
                     <Option value="Arrived in Russia">Arrived in Russia</Option>
                     <Option value="Completed">Completed</Option>
                   </Select>
@@ -603,7 +551,7 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
                     beforeUpload={() => false} // Prevent auto upload
                     multiple={true}
                   >
-                    <Button icon={<UploadOutlined />}>Click to Upload</Button>
+                    <Button>Click to Upload</Button>
                   </Upload>
                 </Form.Item>
               </Form>
@@ -613,35 +561,42 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
       )}
       {statusType === 'payment' && (
         <>
-          <div>{budget.budget} BDT Still remainging</div>
-          <div className="flex">
+          {budget?.budget ? (
+            <Alert>
+              <AlertTitle>
+                {formatCurrency(budget.budget)} yet to be paid
+              </AlertTitle>
+            </Alert>
+          ) : (
+            <Skeleton className="w-full h-[44px]" />
+          )}
+          <div className="relative mt-6 flex flex-col gap-6">
             {(() => {
-              const totalItems = paymentItems.length;
               const reversedItems = [...paymentItems]
                 .reverse()
                 .map((item, index) => {
-                  const stepNumber = totalItems - index;
-                  const isCompleted =
-                    index > totalItems - 1 - currentPaymentStatus;
-
-                  return {
-                    ...item,
-                    icon: isCompleted ? (
-                      <div className="custom-step-icon completed">
-                        <CheckOutlined />
+                  return (
+                    <div className="flex gap-4 items-start" key={index}>
+                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border bg-muted text-2xl">
+                        <CircleCheckIcon className="h-4 w-4 z-10" />
                       </div>
-                    ) : (
-                      <div className="custom-step-icon">
-                        <div className="ant-steps-item-icon">
-                          <h1 className="text-white text-md">{stepNumber}</h1>
+                      <div className="-mt-0.5 space-y-2">
+                        <div>
+                          <Text variant="heading-md" as="h3">
+                            {formatCurrency(item?.title)}
+                          </Text>
+                          <Text
+                            className="text-muted-foreground"
+                            variant="body-sm"
+                          >
+                            {item?.description}
+                          </Text>
                         </div>
-                      </div>
-                    ),
-                    description: (
-                      <>
-                        <div>{item.description}</div>
+                        <Text className="text-muted-foreground">
+                          {item?.subTitle}
+                        </Text>
                         {item.content && item.content.length > 0 && (
-                          <div className="ant-steps-item-description">
+                          <div>
                             {item.content.map(
                               (contentItem: any, contentIndex: any) => (
                                 <div key={contentIndex}>
@@ -649,6 +604,7 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
                                     href={contentItem}
                                     target="_blank"
                                     rel="noopener noreferrer"
+                                    className="text-sm"
                                   >
                                     Download
                                   </a>
@@ -657,51 +613,21 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
                             )}
                           </div>
                         )}
-                      </>
-                    ),
-                  };
+                      </div>
+                    </div>
+                  );
                 });
 
-              const reversedCurrentStatus =
-                paymentItems.length - 1 - currentPaymentStatus;
-
-              return (
-                <Steps
-                  current={reversedCurrentStatus}
-                  items={reversedItems}
-                  direction="vertical"
-                />
-              );
+              return reversedItems;
             })()}
-            {/* <div style={contentStyle}> */}
-            {/* <div>
-      <p className="text-xl">Attachments</p>
-      {downloadPaymentUrl.length > 0 ? (
-      <div >
-        <ul className='grid grid-cols-2 gap-6'>
-          {downloadPaymentUrl.map((file:any) => (
-            <li key={file.path}>
-              <a href={file.signedUrl} rel="noopener noreferrer">
-        Download
-      </a>
-           </li>
-          ))}
-        </ul>
-        </div>
-  ) : (
-    <div>No Attachments currently</div>
-  )}
-      </div> */}
-            {/* </div> */}
+            <div className="absolute left-3 top-0 h-full w-0.5 bg-gray-100" />
           </div>
+
           <div style={{ marginTop: 24 }}>
             {userRole === 'Admin' ? (
-              <Button type="primary" onClick={() => nextPayment()}>
-                Add Payment
-              </Button>
-            ) : (
-              <div></div>
-            )}
+              <Button onClick={() => nextPayment()}>Add payment</Button>
+            ) : null}
+
             <Modal
               title="Title"
               open={open}
@@ -711,7 +637,6 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
               confirmLoading={confirmLoading}
               onCancel={handleCancel}
             >
-              {/* <p>{modalText}</p> */}
               <Form form={form} layout="vertical">
                 <Form.Item
                   name="status"

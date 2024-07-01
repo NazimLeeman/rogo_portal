@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Card, theme } from 'antd';
+import { theme } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { publicSupabase } from '../api/SupabaseClient';
 import type { SelectProps } from 'antd';
@@ -8,9 +8,14 @@ import FileForm from '../component/StudentForm/fileForm';
 import { useFile } from '../context/FileContext';
 import SearchTable from '../component/Table/table';
 import { useRole } from '../hooks/useRole';
+import Text from '@/component/ui/text';
+import { Loader } from 'lucide-react';
+import { Card } from '@/component/ui/card';
+import { Button } from '@/component/ui/button';
+import { formatCurrency } from '@/utils';
+import { Skeleton } from '@/component/ui/skeleton';
 
-
-const StudentDashboard: React.FC= () => {
+const StudentDashboard: React.FC = () => {
   const [open, setOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedStudent, setSelectedStudent] = useState<StudentInfo | null>(
@@ -24,7 +29,7 @@ const StudentDashboard: React.FC= () => {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  const {userEmail } = useRole();
+  const { userEmail } = useRole();
   const [isUserEmailAvailable, setIsUserEmailAvailable] = useState(false);
   const [studentFilesArr, setStudentFilesArr] = useState<any>([]);
 
@@ -67,13 +72,13 @@ const StudentDashboard: React.FC= () => {
       if (error) throw error;
 
       setStudentInfo((prevStudent) => {
-        console.log('prev student',prevStudent)
+        console.log('prev student', prevStudent);
         //A single StudentInfo object
         if (data[0]?.id) {
           getStudentFile(data[0].id);
         }
         return data[0];
-        });
+      });
       setLoading(false);
     } catch (error) {
       console.error('ERROR: ', error);
@@ -89,8 +94,8 @@ const StudentDashboard: React.FC= () => {
         .select('*')
         .eq('student_id', id);
       if (error) throw error;
-      console.log('student file', data)
-      setStudentFilesArr(data)
+      console.log('student file', data);
+      setStudentFilesArr(data);
       // setStudentFiles(data[0]);
       // console.log('data', data[0]);
       // console.log('userEmail', userEmail);
@@ -99,122 +104,72 @@ const StudentDashboard: React.FC= () => {
     }
   };
 
-  const checkFileStatus = async(id:string) => {
+  const checkFileStatus = async (id: string) => {
     try {
-      const {data, error} = await publicSupabase
-      .from('filedetails')
-      .select('*')
-      .eq('studentfileid',id);
+      const { data, error } = await publicSupabase
+        .from('filedetails')
+        .select('*')
+        .eq('studentfileid', id);
 
-      if(error) {
-        console.log('error',error)
+      if (error) {
+        console.log('error', error);
       }
-      console.log('data', data)
-      if(data && data?.length > 0) {
+      console.log('data', data);
+      if (data && data?.length > 0) {
         navigate(`/file-details/${data[0].id}`);
       } else {
         navigate('/agreement');
       }
-    } catch(error) {
-      console.log(error)
-      throw new Error
+    } catch (error) {
+      console.log(error);
+      throw new Error();
     }
-  }
-
-  const filterOption: SelectProps<string>['filterOption'] = (input, option) => {
-    // Ensure option and option.children are defined
-    return (
-      (option?.children as unknown as string)
-        .toLowerCase()
-        .indexOf(input.toLowerCase()) >= 0
-    );
   };
 
-  const handleSudentFile = async (files:any) => {
-    checkFileStatus(files.id)
-    setStudentFiles(files)
+  const handleSudentFile = async (files: any) => {
+    checkFileStatus(files.id);
+    setStudentFiles(files);
     // navigate('/agreement');
   };
 
   return (
-    <div
-      style={{
-        padding: 24,
-        minHeight: '80vh',
-        background: colorBgContainer,
-        borderRadius: borderRadiusLG,
-      }}
-    >
-      {selectedNav === '1' && (
-        <div>
-          <div className="text-xl">
-            <h1> Welcome to ROGO</h1>
-            {studentInfo && studentInfo.student_files.length > 0 ? (
-              <p>You have currently these files going on.</p>
-            ) : (
-              <p>You have currently no files going on.</p>
-            )}
-          </div>
-          <div className="flex flex-col">
-            {studentInfo !== null && <div className="p-2 ml-8"></div>}
-            {studentFilesArr && studentFilesArr.map((studentFiles:any, index:any) => (
-              <div key={index} className="pl-10 pt-2">
-                <Card
-                  title={studentFiles.university_name}
-                  // extra={<a href="#">More</a>}
-                  style={{ width: 400 }}
-                >
-                  <p>Program: {studentFiles.program}</p>
-                  <p>Subject: {studentFiles.subject}</p>
-                  <p>Budget: {studentFiles.budget}</p>
-                  <>
-                    <Button
-                      style={{
-                        color: 'white',
-                        background: 'purple',
-                        border: 'none',
-                      }}
-                      className="mt-2"
-                      onClick={() => handleSudentFile(studentFiles)}
-                    >
-                      Click here to proceed
-                    </Button>
-                  </>
-                </Card>
-              </div>
-            ))}
-            {/* <div className="p-8">
-                    <p className="text-xl">Create a New Student Account</p>
-                  </div>
-                  <div>
-                    <StudentForm />
-                  </div> */}
-            {/* <div style={{ padding: '2rem'}}>
-                  Upload your necessary documents here:
+    <div className="flex max-w-screen-xl flex-col space-y-12 px-8 py-14 md:py-8">
+      <Text variant="heading-2xl">RoGo Dashboard</Text>
+      <div className="space-y-4">
+        <Text variant="heading-lg">Your files</Text>
+        {studentFilesArr && studentFilesArr.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {studentFilesArr.map((studentFiles: any, index: any) => (
+              <Card
+                title={studentFiles.university_name}
+                className="p-4 space-y-4"
+                key={index}
+              >
+                <Text variant="heading-md" className="mb-2">
+                  {studentFiles.university_name}
+                </Text>
+                <div>
+                  <Text>Program: {studentFiles.program}</Text>
+                  <Text>Subject: {studentFiles.subject}</Text>
+                  <Text>Payment: {formatCurrency(studentFiles.budget)} </Text>
                 </div>
-                <div style={{ alignItems: 'center', marginLeft: '2rem'}}><UploadFeature/></div> */}
+                <Button
+                  onClick={() => handleSudentFile(studentFiles)}
+                  size="sm"
+                >
+                  View File
+                </Button>
+              </Card>
+            ))}
           </div>
-        </div>
-      )}
-      {selectedNav === '2' && (
-        <div>
-          <div>
-            <div>
-              <p className="text-xl">Search Student File</p>
-            </div>
-            <SearchTable />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Skeleton className="h-[198px]" />
+            <Skeleton className="h-[198px]" />
+            <Skeleton className="h-[198px]" />
           </div>
-          <div className="p-5">
-            <p className="text-xl">Create a New Student File</p>
-            <span>
-              You need to create a student account before creating a file.
-            </span>
-          </div>
-          <FileForm />
-        </div>
-      )}
-      {selectedNav === '3' && <div>Content for Nav 3</div>}
-      {selectedNav === '4' && <div>Content for Nav 4</div>}
+        )}
+      </div>
     </div>
   );
 };

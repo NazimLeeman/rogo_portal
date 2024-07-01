@@ -1,12 +1,14 @@
+import type { UploadProps } from 'antd';
+import { message, Upload } from 'antd';
+import { UploadIcon } from 'lucide-react';
 import React, { useState } from 'react';
-import { UploadOutlined } from '@ant-design/icons';
-import { Button, message, Tooltip, Upload } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { publicSupabase } from '../../api/SupabaseClient';
 import { useFile } from '../../context/FileContext';
-import type { UploadProps } from 'antd';
-import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
 import { generateUniqueFileName } from '../../utils/helper';
+import { Button } from '../ui/button';
+import Text from '../ui/text';
 
 interface UploadFile extends File {
   uid: string;
@@ -20,20 +22,11 @@ const UploadFeature = () => {
   const [fileList5, setFileList5] = useState<UploadFile[]>([]);
   const [fileList6, setFileList6] = useState<UploadFile[]>([]);
   const [uploading, setUploading] = useState(false);
-  const { studentInfo, studentFiles, fileData, setFileData } = useFile();
+  const { studentInfo, studentFiles, setFileData } = useFile();
 
   const navigate = useNavigate();
 
-  const isMasters = studentFiles?.program === 'masters';
-
-  const fileNames = {
-    fileList1: 'SSC Certificate',
-    fileList2: 'SSC Marksheet',
-    fileList3: 'HSC Certificate',
-    fileList4: 'HSC Marksheet',
-    fileList5: 'Bachelor Certificate',
-    fileList6: 'Bachelor Marksheet',
-  };
+  const isMasters = studentFiles?.program === 'Masters';
 
   const isDisabled = isMasters
     ? fileList1.length === 0 ||
@@ -101,15 +94,6 @@ const UploadFeature = () => {
 
       await Promise.all(uploadPromises);
 
-      setFileList1([]);
-      setFileList2([]);
-      setFileList3([]);
-      setFileList4([]);
-      if (isMasters) {
-        setFileList5([]);
-        setFileList6([]);
-      }
-      message.success('All files uploaded successfully.');
       onFinish();
     } catch (error) {
       console.error(error);
@@ -140,6 +124,7 @@ const UploadFeature = () => {
               : setFileList === setFileList5
                 ? fileList5
                 : fileList6,
+    maxCount: 1,
   });
 
   const onFinish = async () => {
@@ -163,82 +148,88 @@ const UploadFeature = () => {
       const fileId = fileDetailsData[0].id;
       setFileData(fileDetailsData[0]);
       // Insert into statusSteps table
-      const { data: statusStepsData, error: statusStepsError } =
-        await publicSupabase
-          .from('statusSteps')
-          .insert([
-            {
-              filedetailsid: fileId,
-              title: 'Docs Submitted to RoGo',
-              state: 0,
-            },
-            {
-              filedetailsid: fileId,
-              title: 'Pending Docs Verfication by RoGo',
-              state: 1,
-            },
-          ])
-          .select();
+      const { error: statusStepsError } = await publicSupabase
+        .from('statusSteps')
+        .insert([
+          {
+            filedetailsid: fileId,
+            title: 'Documents submitted to RoGo',
+            state: 0,
+          },
+          {
+            filedetailsid: fileId,
+            title: 'Pending documents verfication by RoGo',
+            state: 1,
+          },
+        ])
+        .select();
 
       if (statusStepsError) {
-        toast.error('Error while updating status.');
-        throw statusStepsError;
+        return toast.error('Something went wrong');
       }
-      toast.success('File submitted successfully');
+
       navigate(`/file-details/${fileId}`);
-    } catch (error) {
-      console.log(error);
+    } catch {
+      toast.error('Something went wrong');
     }
   };
 
   return (
-    <>
-      <div className="grid grid-cols-2 gap-16">
+    <div>
+      <Text variant="heading-md" className="mb-4">
+        Documents
+      </Text>
+      <div className="grid grid-cols-2 gap-4">
         <Upload {...uploadProps(setFileList1)}>
-          <Button icon={<UploadOutlined />}>SSC Certificate</Button>
+          <Button variant="outline">
+            <UploadIcon className="h-4 w-4 mr-2" />
+            SSC certificate
+          </Button>
         </Upload>
         <Upload {...uploadProps(setFileList2)}>
-          <Button icon={<UploadOutlined />}>SSC Marksheet</Button>
+          <Button variant="outline">
+            <UploadIcon className="h-4 w-4 mr-2" />
+            SSC marksheet
+          </Button>
         </Upload>
         <Upload {...uploadProps(setFileList3)}>
-          <Button icon={<UploadOutlined />}>HSC Certificate</Button>
+          <Button variant="outline">
+            <UploadIcon className="h-4 w-4 mr-2" />
+            HSC certificate
+          </Button>
         </Upload>
         <Upload {...uploadProps(setFileList4)}>
-          <Button icon={<UploadOutlined />}>HSC Marksheet</Button>
+          <Button variant="outline">
+            <UploadIcon className="h-4 w-4 mr-2" />
+            HSC marksheet
+          </Button>
         </Upload>
         {isMasters && (
           <>
             <Upload {...uploadProps(setFileList5)}>
-              <Button icon={<UploadOutlined />}>Bachelor Certificate</Button>
+              <Button variant="outline">
+                <UploadIcon className="h-4 w-4 mr-2" />
+                Bachelor certificate
+              </Button>
             </Upload>
             <Upload {...uploadProps(setFileList6)}>
-              <Button icon={<UploadOutlined />}>Bachelor Marksheet</Button>
+              <Button variant="outline">
+                <UploadIcon className="h-4 w-4 mr-2" />
+                Bachelor marksheet
+              </Button>
             </Upload>
           </>
         )}
-        {isDisabled ? (
-          <Tooltip title="Please upload all required files.">
-            <Button
-              type="primary"
-              onClick={handleUpload}
-              disabled={isDisabled}
-              style={{ marginTop: 16 }}
-            >
-              Submit
-            </Button>
-          </Tooltip>
-        ) : (
-          <Button
-            type="primary"
-            onClick={handleUpload}
-            disabled={isDisabled}
-            style={{ marginTop: 16 }}
-          >
-            Submit
-          </Button>
-        )}
       </div>
-    </>
+      <Button
+        onClick={handleUpload}
+        disabled={isDisabled || uploading}
+        isLoading={uploading}
+        className="mt-6"
+      >
+        Submit documents
+      </Button>
+    </div>
   );
 };
 
