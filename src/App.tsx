@@ -3,7 +3,7 @@ import {
   UserOutlined,
   VideoCameraOutlined,
 } from '@ant-design/icons';
-import { Layout, Menu, theme } from 'antd';
+import { Layout, theme } from 'antd';
 import { Loader } from 'lucide-react';
 import React from 'react';
 import {
@@ -15,10 +15,12 @@ import {
 } from 'react-router-dom';
 import { publicSupabase } from './api/SupabaseClient';
 import MagicLogin from './component/Login/magicLogin';
+import Sidebar from './component/ui/sidebar';
 import { useFile } from './context/FileContext';
 import { useAuth } from './hooks/useAuth';
 import { useRole } from './hooks/useRole';
 import Dashboard from './pages/dashboard';
+import StudentFiles from './pages/studentFiles';
 import { routes } from './routes';
 
 function App() {
@@ -105,62 +107,21 @@ function App() {
   }
 
   return (
-    <>
-      <Layout style={{ minHeight: '100vh' }}>
-        <Sider
-          breakpoint="lg"
-          collapsedWidth="0"
-          onBreakpoint={(broken) => {
-            console.log(broken);
-          }}
-          onCollapse={(collapsed, type) => {
-            console.log(collapsed, type);
-          }}
-        >
-          <div className="demo-logo-vertical" />
-          <Menu
-            theme="dark"
-            mode="inline"
-            selectedKeys={selectedNav ? [selectedNav] : []}
-            onClick={(info) => handleNavClick(info.key)}
-            items={menuItems}
-          />
-          <Menu
-            theme="dark"
-            mode="inline"
-            items={logoutLabel}
-            onClick={() => handleLogout()}
-            style={{ position: 'absolute', bottom: 0, width: '100%' }}
-          />
-        </Sider>
-        <Layout>
-          <Header style={{ padding: 0, background: colorBgContainer }} />
-          <Content style={{ margin: '24px 16px 0' }}>
-            <div
-              style={{
-                padding: 24,
-                minHeight: '80vh',
-                background: colorBgContainer,
-                borderRadius: borderRadiusLG,
-              }}
-            >
-              <Routes>
-                {routes
-                  .filter((route) => route.path !== '/login')
-                  .map(({ path, element }, key) => (
-                    <Route key={key} path={path} element={element} />
-                  ))}
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route
-                  path="*"
-                  element={<Navigate to="/dashboard" replace />}
-                />
-              </Routes>
-            </div>
-          </Content>
-        </Layout>
-      </Layout>
-    </>
+    <div className="flex min-h-screen flex-col bg-background font-sans antialiased">
+      <Sidebar />
+      <div className="min-h-screen sm:pl-60">
+        <Routes>
+          {routes
+            .filter((route) => route.path !== '/login')
+            .map(({ path, element }, key) => (
+              <Route key={key} path={path} element={element} />
+            ))}
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/student-files" element={<StudentFiles />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </div>
+    </div>
   );
 }
 
