@@ -1,7 +1,15 @@
-import { FileTextIcon, LayoutDashboard, Menu, TicketIcon } from 'lucide-react';
+import {
+  FileTextIcon,
+  LayoutDashboard,
+  Loader,
+  LogOut,
+  Menu,
+  TicketIcon,
+} from 'lucide-react';
 import { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import Protect from './protect';
+import { publicSupabase } from '@/api/SupabaseClient';
 
 const externalLinks = [
   {
@@ -13,8 +21,10 @@ const externalLinks = [
 
 export default function Sidebar() {
   // const pathname = usePathname();
+  const navigate = useNavigate();
 
   const [showSidebar, setShowSidebar] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const links = [
     {
@@ -30,6 +40,18 @@ export default function Sidebar() {
       role: 'Admin',
     },
   ] as const;
+
+  const handleLogout = () => {
+    setLoggingOut(true);
+    Promise.all([publicSupabase.auth.signOut()])
+      .then(() => {
+        localStorage.clear();
+        navigate('/');
+      })
+      .catch((error) => {
+        console.error('Error during sign out:', error);
+      });
+  };
 
   // useEffect(() => {
   //   // hide sidebar on path change
@@ -101,6 +123,18 @@ export default function Sidebar() {
               </a>
             ))}
           </div>
+          <div className="my-2 border-t border-stone-200 dark:border-stone-700" />
+          <button
+            className="rounded-lg flex items-center w-full space-x-3 px-2 py-1.5 transition-all duration-150 ease-in-out hover:bg-stone-200 active:bg-stone-300 dark:text-white dark:hover:bg-stone-700 dark:active:bg-stone-800"
+            onClick={handleLogout}
+          >
+            {loggingOut ? (
+              <Loader width={18} className="animate-spin" />
+            ) : (
+              <LogOut width={18} />
+            )}
+            <span className="text-sm font-medium">Logout</span>
+          </button>
         </div>
       </div>
     </>
