@@ -225,6 +225,7 @@ const UploadFeature = () => {
         onClick={handleUpload}
         disabled={isDisabled || uploading}
         isLoading={uploading}
+        loadingText="Uploading documents"
         className="mt-6"
       >
         Submit documents
