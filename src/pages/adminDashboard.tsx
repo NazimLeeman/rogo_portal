@@ -41,6 +41,7 @@ const AdminDashboard: React.FC = () => {
     setPaymentStep,
     currentPaymentStatus,
     setPaymentCurrentStatus,
+    setStudentFiles
   } = useFile();
 
   const navigate = useNavigate();
@@ -119,6 +120,7 @@ const AdminDashboard: React.FC = () => {
         .select('*')
         .eq('student_id', id);
       if (error) throw error;
+      console.log('from student file',StudentFile)
       setSelectedStudentFile(StudentFile);
       setOpen(true);
     } catch (error) {
@@ -138,16 +140,47 @@ const AdminDashboard: React.FC = () => {
         toast.error('Error while opening file.');
         throw fileDetailsError;
       }
-      const fileId = fileDetailsData[0].id;
-      setFileData(fileDetailsData[0]);
-      // await getFileStep(fileId);
-      // await getPaymentStep(fileId)
-      await getStudentInfo(student_id, fileId);
+      console.log('file id',fileDetailsData)
+      if(fileDetailsData && fileDetailsData?.length > 0) {
+        const fileId = fileDetailsData[0].id;
+        setFileData(fileDetailsData[0])
+        await getStudentInfo(student_id, fileId);
+      } else {
+        selectedStudentInfo(student_id, id);
+        // navigate('/agreement');
+      }
     } catch (error) {
       toast.error("This file hasn't been submitted by the Student");
       console.log(error);
     }
   };
+
+  const selectedStudentInfo = async(studentId:string, studentFileId:string) => {
+    try {
+      const {data: studentInfo, error: studentInfoError} = await publicSupabase
+        .from('studentInfo')
+        .select()
+        .eq('id', studentId);
+
+      if(studentInfoError) throw new Error;
+      
+      if(studentInfo) {
+        console.log('student info',studentInfo)
+        setStudentInfo(studentInfo[0])
+        const {data: studentFile, error: studentFileError} = await publicSupabase
+          .from('studentFile')
+          .select()
+          .eq('id', studentFileId);
+
+        if(studentFileError) throw new Error;
+        console.log('student file', studentFile)
+        setStudentFiles(studentFile[0])
+        navigate('/agreement');
+      }
+    } catch(error) {
+      console.log('error',error)
+    }
+  }
 
   return (
     <div className="flex max-w-screen-xl flex-col space-y-12 px-8 py-14 md:py-8">
