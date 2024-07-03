@@ -606,7 +606,7 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
                                     rel="noopener noreferrer"
                                     className="text-sm"
                                   >
-                                    Download
+                                     {extractFilenameFromUrl(contentItem)}
                                   </a>
                                 </div>
                               ),
