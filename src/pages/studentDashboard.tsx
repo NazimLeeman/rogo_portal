@@ -52,17 +52,6 @@ const StudentDashboard: React.FC = () => {
     }
   }, [userEmail]);
 
-  // useEffect(() => {
-  //   // This will log the updated studentInfo value whenever it changes
-  //   console.log('from dashboard studentInfo:', studentInfo);
-  // }, [studentInfo]);
-
-  // const onChange = (value: string) => {
-  //   const student = students?.find(student => student.id === value) || null;
-  //   setSelectedStudent(student);
-  //   console.log("selected", student);
-  // };
-
   const getStudentInfo = async () => {
     try {
       const { data, error } = await publicSupabase
@@ -73,7 +62,6 @@ const StudentDashboard: React.FC = () => {
 
       setStudentInfo((prevStudent) => {
         console.log('prev student', prevStudent);
-        //A single StudentInfo object
         if (data[0]?.id) {
           getStudentFile(data[0].id);
         }
@@ -96,9 +84,6 @@ const StudentDashboard: React.FC = () => {
       if (error) throw error;
       console.log('student file', data);
       setStudentFilesArr(data);
-      // setStudentFiles(data[0]);
-      // console.log('data', data[0]);
-      // console.log('userEmail', userEmail);
     } catch (error) {
       console.error('ERROR: ', error);
     }
@@ -129,7 +114,6 @@ const StudentDashboard: React.FC = () => {
   const handleSudentFile = async (files: any) => {
     checkFileStatus(files.id);
     setStudentFiles(files);
-    // navigate('/agreement');
   };
 
   return (

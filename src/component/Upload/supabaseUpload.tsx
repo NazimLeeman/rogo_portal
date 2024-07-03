@@ -21,12 +21,15 @@ const UploadFeature = () => {
   const [fileList4, setFileList4] = useState<UploadFile[]>([]);
   const [fileList5, setFileList5] = useState<UploadFile[]>([]);
   const [fileList6, setFileList6] = useState<UploadFile[]>([]);
+  const [fileList7, setFileList7] = useState<UploadFile[]>([]);
+  const [fileList8, setFileList8] = useState<UploadFile[]>([]);
   const [uploading, setUploading] = useState(false);
   const { studentInfo, studentFiles, setFileData } = useFile();
 
   const navigate = useNavigate();
 
   const isMasters = studentFiles?.program === 'Masters';
+  const isPhd = studentFiles?.program === 'PhD'
 
   const isDisabled = isMasters
     ? fileList1.length === 0 ||
@@ -35,6 +38,15 @@ const UploadFeature = () => {
       fileList4.length === 0 ||
       fileList5.length === 0 ||
       fileList6.length === 0
+    : isPhd
+    ? fileList1.length === 0 ||
+      fileList2.length === 0 ||
+      fileList3.length === 0 ||
+      fileList4.length === 0 ||
+      fileList5.length === 0 ||
+      fileList6.length === 0 ||
+      fileList7.length === 0 ||
+      fileList8.length === 0
     : fileList1.length === 0 ||
       fileList2.length === 0 ||
       fileList3.length === 0 ||
@@ -84,11 +96,17 @@ const UploadFeature = () => {
         ...fileList2.map((file) => uploadFile(file, studentInfo?.id)),
         ...fileList3.map((file) => uploadFile(file, studentInfo?.id)),
         ...fileList4.map((file) => uploadFile(file, studentInfo?.id)),
-        ...(isMasters
+        ...(isMasters || isPhd
           ? fileList5.map((file) => uploadFile(file, studentInfo?.id))
           : []),
-        ...(isMasters
+        ...(isMasters || isPhd
           ? fileList6.map((file) => uploadFile(file, studentInfo?.id))
+          : []),
+        ...(isPhd
+          ? fileList7.map((file) => uploadFile(file, studentInfo?.id))
+          : []),
+        ...(isPhd
+          ? fileList8.map((file) => uploadFile(file, studentInfo?.id))
           : []),
       ];
 
@@ -123,7 +141,11 @@ const UploadFeature = () => {
               ? fileList4
               : setFileList === setFileList5
                 ? fileList5
-                : fileList6,
+                : setFileList === setFileList6
+                ? fileList6
+                : setFileList === setFileList7
+                  ? fileList7
+                  : fileList8,
     maxCount: 1,
   });
 
@@ -147,7 +169,6 @@ const UploadFeature = () => {
       }
       const fileId = fileDetailsData[0].id;
       setFileData(fileDetailsData[0]);
-      // Insert into statusSteps table
       const { error: statusStepsError } = await publicSupabase
         .from('statusSteps')
         .insert([
@@ -220,6 +241,34 @@ const UploadFeature = () => {
             </Upload>
           </>
         )}
+        {isPhd && (
+  <>
+    <Upload {...uploadProps(setFileList5)}>
+      <Button variant="outline">
+        <UploadIcon className="h-4 w-4 mr-2" />
+        Bachelor certificate
+      </Button>
+    </Upload>
+    <Upload {...uploadProps(setFileList6)}>
+      <Button variant="outline">
+        <UploadIcon className="h-4 w-4 mr-2" />
+        Bachelor marksheet
+      </Button>
+    </Upload>
+    <Upload {...uploadProps(setFileList7)}>
+      <Button variant="outline">
+        <UploadIcon className="h-4 w-4 mr-2" />
+        Master's certificate
+      </Button>
+    </Upload>
+    <Upload {...uploadProps(setFileList8)}>
+      <Button variant="outline">
+        <UploadIcon className="h-4 w-4 mr-2" />
+        Master's marksheet
+      </Button>
+    </Upload>
+  </>
+)}
       </div>
       <Button
         onClick={handleUpload}

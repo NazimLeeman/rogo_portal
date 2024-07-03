@@ -153,30 +153,6 @@ const StudentForm: React.FC = () => {
         >
           <Input />
         </Form.Item>
-        {/* <Form.Item label="Program">
-          <Select>
-            <Select.Option value="honors">Honors</Select.Option>
-            <Select.Option value="masters">Masters</Select.Option>
-          </Select>
-        </Form.Item>
-        <Form.Item
-          name="budget"
-          label="Budget"
-        >
-          <InputNumber addonAfter={suffixSelector} style={{ width: '100%' }} />
-        </Form.Item>
-        <Form.Item
-          label="Upload"
-          valuePropName="fileList"
-          getValueFromEvent={normFile}
-        >
-          <Upload action="/upload.do" listType="picture-card">
-            <button style={{ border: 0, background: 'none' }} type="button">
-              <PlusOutlined />
-              <div style={{ marginTop: 8 }}>Upload</div>
-            </button>
-          </Upload>
-        </Form.Item> */}
         <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
           <Button type="primary" htmlType="submit">
             Create
