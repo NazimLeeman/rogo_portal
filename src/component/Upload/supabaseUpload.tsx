@@ -14,6 +14,17 @@ interface UploadFile extends File {
   uid: string;
 }
 
+const checkForDuplicateFileNames = (fileLists: UploadFile[][]) => {
+  const allFileNames = fileLists.flat().map(file => file.name);
+  const uniqueFileNames = new Set(allFileNames);
+  
+  if (allFileNames.length !== uniqueFileNames.size) {
+    const duplicates = allFileNames.filter((name, index) => allFileNames.indexOf(name) !== index);
+    toast.error(`Duplicate file names found: ${duplicates.join(', ')}. Please rename these files before uploading.`)
+    throw new Error(`Duplicate file names found: ${duplicates.join(', ')}. Please rename these files before uploading.`);
+  }
+};
+
 const UploadFeature = () => {
   const [fileList1, setFileList1] = useState<UploadFile[]>([]);
   const [fileList2, setFileList2] = useState<UploadFile[]>([]);
@@ -70,19 +81,19 @@ const UploadFeature = () => {
       throw new Error('Student ID is required');
     }
 
-    const uniqueFileName = generateUniqueFileName(file.name);
-    console.log('uniquefile', uniqueFileName);
+    // const uniqueFileName = generateUniqueFileName(file.name);
+    // console.log('uniquefile', uniqueFileName);
 
     const { data, error } = await publicSupabase.storage
       .from('avatars')
-      .upload(`${studentId}/${uniqueFileName}`, file, { upsert: true });
+      .upload(`${studentId}/${file.name}`, file, { upsert: true });
 
     if (error) {
-      console.error(`Attempt Error uploading ${uniqueFileName}:`, error);
+      console.error(`Attempt Error uploading ${file.name}:`, error);
       throw error;
     }
 
-    console.log(`Attempt Successfully uploaded ${uniqueFileName}`);
+    console.log(`Attempt Successfully uploaded ${file.name}`);
 
     return data;
   };
@@ -90,7 +101,16 @@ const UploadFeature = () => {
   const handleUpload = async () => {
     setUploading(true);
 
+    const allFileLists = [
+      fileList1, fileList2, fileList3, fileList4,
+      ...(isMasters || isPhd ? [fileList5, fileList6] : []),
+      ...(isPhd ? [fileList7, fileList8] : []),
+    ];
+
     try {
+
+      checkForDuplicateFileNames(allFileLists);
+
       const uploadPromises = [
         ...fileList1.map((file) => uploadFile(file, studentInfo?.id)),
         ...fileList2.map((file) => uploadFile(file, studentInfo?.id)),
