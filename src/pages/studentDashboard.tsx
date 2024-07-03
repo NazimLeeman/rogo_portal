@@ -133,6 +133,7 @@ const StudentDashboard: React.FC = () => {
                   {studentFiles.university_name}
                 </Text>
                 <div>
+                  <Text>Course: {studentFiles.course}</Text>
                   <Text>Program: {studentFiles.program}</Text>
                   <Text>Subject: {studentFiles.subject}</Text>
                   <Text>Payment: {formatCurrency(studentFiles.budget)} </Text>

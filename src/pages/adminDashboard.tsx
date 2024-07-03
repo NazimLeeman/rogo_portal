@@ -41,7 +41,7 @@ const AdminDashboard: React.FC = () => {
     setPaymentStep,
     currentPaymentStatus,
     setPaymentCurrentStatus,
-    setStudentFiles
+    setStudentFiles,
   } = useFile();
 
   const navigate = useNavigate();
@@ -120,7 +120,7 @@ const AdminDashboard: React.FC = () => {
         .select('*')
         .eq('student_id', id);
       if (error) throw error;
-      console.log('from student file',StudentFile)
+      console.log('from student file', StudentFile);
       setSelectedStudentFile(StudentFile);
       setOpen(true);
     } catch (error) {
@@ -140,10 +140,10 @@ const AdminDashboard: React.FC = () => {
         toast.error('Error while opening file.');
         throw fileDetailsError;
       }
-      console.log('file id',fileDetailsData)
-      if(fileDetailsData && fileDetailsData?.length > 0) {
+      console.log('file id', fileDetailsData);
+      if (fileDetailsData && fileDetailsData?.length > 0) {
         const fileId = fileDetailsData[0].id;
-        setFileData(fileDetailsData[0])
+        setFileData(fileDetailsData[0]);
         await getStudentInfo(student_id, fileId);
       } else {
         selectedStudentInfo(student_id, id);
@@ -155,32 +155,34 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-  const selectedStudentInfo = async(studentId:string, studentFileId:string) => {
+  const selectedStudentInfo = async (
+    studentId: string,
+    studentFileId: string,
+  ) => {
     try {
-      const {data: studentInfo, error: studentInfoError} = await publicSupabase
-        .from('studentInfo')
-        .select()
-        .eq('id', studentId);
+      const { data: studentInfo, error: studentInfoError } =
+        await publicSupabase.from('studentInfo').select().eq('id', studentId);
 
-      if(studentInfoError) throw new Error;
-      
-      if(studentInfo) {
-        console.log('student info',studentInfo)
-        setStudentInfo(studentInfo[0])
-        const {data: studentFile, error: studentFileError} = await publicSupabase
-          .from('studentFile')
-          .select()
-          .eq('id', studentFileId);
+      if (studentInfoError) throw new Error();
 
-        if(studentFileError) throw new Error;
-        console.log('student file', studentFile)
-        setStudentFiles(studentFile[0])
+      if (studentInfo) {
+        console.log('student info', studentInfo);
+        setStudentInfo(studentInfo[0]);
+        const { data: studentFile, error: studentFileError } =
+          await publicSupabase
+            .from('studentFile')
+            .select()
+            .eq('id', studentFileId);
+
+        if (studentFileError) throw new Error();
+        console.log('student file', studentFile);
+        setStudentFiles(studentFile[0]);
         navigate('/agreement');
       }
-    } catch(error) {
-      console.log('error',error)
+    } catch (error) {
+      console.log('error', error);
     }
-  }
+  };
 
   return (
     <div className="flex max-w-screen-xl flex-col space-y-12 px-8 py-14 md:py-8">
@@ -228,6 +230,7 @@ const AdminDashboard: React.FC = () => {
                     title={studentFile.university_name}
                     style={{ width: 400, margin: '10px 0' }}
                   >
+                    <p>Course: {studentFile.course}</p>
                     <p>Program: {studentFile.program}</p>
                     <p>Subject: {studentFile.subject}</p>
                     <p>Budget: {studentFile.budget}</p>

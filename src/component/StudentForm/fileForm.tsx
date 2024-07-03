@@ -57,6 +57,7 @@ const FileForm: React.FC = () => {
           subject: values.subject,
           budget: values.budget,
           student_id: values.student_id,
+          course: values.course,
         })
         .select('id')
         .single();
@@ -193,6 +194,21 @@ const FileForm: React.FC = () => {
             </Select.Option>
             <Select.Option value="MIREA — Russian Technological University">
               MIREA — Russian Technological University
+            </Select.Option>
+          </Select>
+        </Form.Item>
+        <Form.Item
+          name="course"
+          label="Course"
+          rules={[{ required: true, message: 'Please input course!' }]}
+        >
+          <Select>
+            <Select.Option value="Main Course">Main Course</Select.Option>
+            <Select.Option value="Preparatory Course">
+              Preparatory Course
+            </Select.Option>
+            <Select.Option value="Language Course">
+              Language Course
             </Select.Option>
           </Select>
         </Form.Item>

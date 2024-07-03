@@ -16,4 +16,5 @@ export interface StudentFile {
   subject: string;
   budget: number;
   student_id: string;
+  course: 'Main Course' | 'Preparatory Course' | 'Language Course';
 }
