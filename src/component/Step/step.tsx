@@ -16,7 +16,7 @@ import React, { useEffect, useState } from 'react';
 import { publicSupabase } from '../../api/SupabaseClient';
 import { useFile } from '../../context/FileContext';
 import { useRole } from '../../hooks/useRole';
-import { formatDate, generateRandomId, highestState } from '../../utils/helper';
+import { extractFilenameFromUrl, formatDate, generateRandomId, highestState } from '../../utils/helper';
 import { Alert, AlertTitle } from '../ui/alert';
 import { Skeleton } from '../ui/skeleton';
 import Text from '../ui/text';
@@ -434,7 +434,7 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
                                   rel="noopener noreferrer"
                                   className="text-sm"
                                 >
-                                  Download
+                                  {extractFilenameFromUrl(contentItem)}
                                 </a>
                               </div>
                             ),

@@ -52,3 +52,27 @@ export const formatDate = (dataString: any) => {
     
     return notes + (notes && contentLinks ? '\n' : '') + contentLinks;
   }
+
+  export function extractFilename(path:string) {
+    // Split the string by '/' and get the last part
+    const parts = path.split('/');
+    
+    // Return the last part, which should be the filename
+    return parts[parts.length - 1];
+  }
+
+  export function extractFilenameFromUrl(url:string) {
+    // Remove any surrounding quotes if present
+    url = url.replace(/^["']|["']$/g, '');
+    
+    // Split the URL by '/' and get the last part
+    const parts = url.split('/');
+    
+    // Get the last part (filename with possible query parameters)
+    const lastPart = parts[parts.length - 1];
+    
+    // Split by '?' to remove any query parameters and get the filename
+    const filename = lastPart.split('?')[0];
+    
+    return filename;
+  }

@@ -8,6 +8,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { publicSupabase } from '../api/SupabaseClient';
 import Step from '../component/Step/step';
 import { useFile } from '../context/FileContext';
+import { extractFilename } from '@/utils/helper';
 
 const StudentFileDetails: React.FC = () => {
   const { fileId } = useParams();
@@ -284,7 +285,7 @@ const StudentFileDetails: React.FC = () => {
                   >
                     <Button size="sm" variant="ghost">
                       <DownloadIcon className="h-4 w-4 mr-2" />
-                      Dowload
+                      {extractFilename(file.path)}
                     </Button>
                   </a>
                 </div>
