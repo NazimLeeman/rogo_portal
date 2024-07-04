@@ -28,6 +28,17 @@ interface StepProps {
   fileId: string;
 }
 
+const checkForDuplicateFileNames = (fileLists: UploadFile[][]) => {
+  const allFileNames = fileLists.flat().map(file => file.name);
+  const uniqueFileNames = new Set(allFileNames);
+  
+  if (allFileNames.length !== uniqueFileNames.size) {
+    const duplicates = allFileNames.filter((name, index) => allFileNames.indexOf(name) !== index);
+    toast.error(`Duplicate file names found: ${duplicates.join(', ')}. Please rename these files before uploading.`)
+    throw new Error(`Duplicate file names found: ${duplicates.join(', ')}. Please rename these files before uploading.`);
+  }
+};
+
 const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
   const {
     currentStatus,
@@ -44,6 +55,7 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
   const { userRole } = useRole();
 
   const [open, setOpen] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
@@ -105,7 +117,6 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
   };
 
   const getStatusSteps = async (fileId: string) => {
-    console.log('fileId', fileId);
     const { data, error } = await publicSupabase.storage
       .from('statusSteps') // Replace 'avatars' with your bucket name
       .list(`${fileId}/`);
@@ -119,7 +130,6 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
   };
 
   const getPaymentSteps = async (fileId: string) => {
-    console.log('fileId', fileId);
     const { data, error } = await publicSupabase.storage
       .from('paymentSteps') // Replace 'avatars' with your bucket name
       .list(`${fileId}/`);
@@ -148,7 +158,6 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
       throw error;
     }
     setDownloadUrl(data);
-    console.log('signedddddd Stepsssssssss urls', data);
   };
 
   const signedPaymentUrls = async (resultData: any) => {
@@ -167,7 +176,6 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
       throw error;
     }
     setDownloadPaymentUrl(data);
-    console.log('signedddddd paymentttttttttt urls', data);
   };
 
   const updateStatus = async (values: any, fileUrls: any) => {
@@ -215,6 +223,7 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
   const updatePaymentStatus = async (values: any, fileUrls: any) => {
     const state = currentPaymentStatus + 1;
     console.log('from updateeeeeeeeee', values);
+    const operation = 'debit';
 
     try {
       const { error: insertError } = await publicSupabase
@@ -249,7 +258,7 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
 
       setPaymentCurrentStatus(state);
       setPaymentStep(selectData);
-      updateBudget(values.status);
+      updateBudget(values.status, operation);
     } catch (error) {
       console.error('Unexpected error:', error);
       toast.error('An unexpected error occurred');
@@ -265,13 +274,16 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
       console.log('error', error);
       throw new Error();
     }
-    console.log('budgetttttttttttt', data[0]);
     setBudget(data[0]);
   };
 
-  const updateBudget = async (payment: any) => {
-    const newRemainingBalance = budget.budget - payment;
-    console.log('newRemainingBalance', newRemainingBalance);
+  const updateBudget = async (payment: any, operation:string) => {
+    let newRemainingBalance;
+    if (operation === 'debit') {
+      newRemainingBalance = budget.budget - payment;
+    } else {
+      newRemainingBalance = budget.budget + payment
+    }
     const { data, error } = await publicSupabase
       .from('filedetails')
       .update({ budget: newRemainingBalance })
@@ -281,7 +293,6 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
       console.log('error', error);
       throw new Error();
     }
-    console.log('budgetttttttttttt', data[0]);
     setBudget(data[0]);
   };
 
@@ -292,6 +303,10 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
   const nextPayment = async () => {
     showModal();
   };
+
+  const deletePayment = () => {
+    showDeleteModal()
+  }
 
   if (loading) {
     return <Loader className="h-6 w-6 animate-spin" />;
@@ -307,6 +322,7 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
     content: item.content,
     subTitle: item.notes,
     description: formatDate(item.createdAt),
+    id: item.id
   }));
 
   const paymentItems = paymentStep.map((item: any) => ({
@@ -315,11 +331,16 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
     content: item.content,
     subTitle: item.notes,
     description: formatDate(item.createdAt),
+    id: item.id
   }));
 
   const showModal = () => {
     setOpen(true);
   };
+
+  const showDeleteModal = () => {
+    setOpenDelete(true)
+  }
 
   const handleOk = async (type: string) => {
     try {
@@ -327,6 +348,15 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
       const values = await form.validateFields();
       setConfirmLoading(true);
       console.log('Form values:', { ...values, upload: fileList });
+
+      try {
+        checkForDuplicateFileNames([fileList]);
+      } catch (error) {
+        setConfirmLoading(false);
+        // The error message is already shown by the toast in checkForDuplicateFileNames
+        return; // Exit the function early if duplicates are found
+      }
+  
 
       const uploadPromises = fileList
         .filter((file) => file.originFileObj)
@@ -352,8 +382,51 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
     }
   };
 
+  const handleDelete = async (type: string) => {
+    console.log('type',type)
+    const tableName = type === 'status' ? 'statusSteps' : 'paymentSteps';
+    const values = await form.validateFields();
+    const id = values.status
+    console.log('values',values)
+    const {data, error} = await publicSupabase
+      .from(tableName)
+      .delete()
+      .eq('id',id)
+      .select();
+
+    if(error) {
+      toast.error('error while deleting')
+      console.log('error', error)
+    }
+
+    if(data && data?.length > 0) {
+      updateSteps(tableName,data,id)
+    } else {
+      toast.error('something went wrong')
+      setOpenDelete(false)
+    }
+  }
+
+  const updateSteps = (tableName:string,data:any, id:string) => {
+    if(tableName === 'statusSteps') {
+      toast.success('Successfully Deleted Status')
+      setOpenDelete(false)
+      const updatedStatusItems = step.filter((item:any) => item.id !== id)
+      setStep(updatedStatusItems)
+    } else {
+      toast.success('Successfully Deleted Payment')
+      setOpenDelete(false)
+      const payment = Number(data[0].title)
+      let operation = 'credit'
+      updateBudget(payment,operation)
+      const updatedPaymentItems = paymentStep.filter((item:any) => item.id !== id)
+      setPaymentStep(updatedPaymentItems)
+    }
+  }
+
   const handleCancel = () => {
     setOpen(false);
+    setOpenDelete(false)
     form.resetFields();
     setFileList([]);
   };
@@ -363,9 +436,10 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
   };
 
   const uploadFileToSupabase = async (bucketName: string, file: File) => {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${generateRandomId()}.${fileExt}`;
-    const filePath = `${fileId}/${fileName}`;
+    // const fileExt = file.name.split('.').pop();
+    // const fileName = `${generateRandomId()}.${fileExt}`;
+    // const filePath = `${fileId}/${fileName}`;
+    const filePath = `${fileId}/${file.name}`;
 
     const { error } = await publicSupabase.storage
       .from(bucketName)
@@ -451,8 +525,43 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
           </div>
           <div style={{ marginTop: 24 }}>
             {userRole === 'Admin' ? (
+              <div className='flex flex-row space-x-4'>
               <Button onClick={() => next()}>Add status</Button>
+              <Button onClick={() => deletePayment()}>Delete Status</Button>
+              </div>
             ) : null}
+
+            <Modal
+              title="Danger"
+              open={openDelete}
+              onOk={() => {
+                handleDelete('status');
+              }}
+              confirmLoading={confirmLoading}
+              onCancel={handleCancel}
+            >
+              <Form form={form} layout="vertical">
+              <Form.Item
+                  name="status"
+                  label={'Select the status you want to delete!'}
+                  rules={[
+                    { required: true, message: 'Please enter an amount' },
+                  ]}
+                >
+                  <Select style={{ width: '100%' }}>
+                  {[...items].reverse().map((item, index) => (
+                    <Select.Option key={index} value={item.id || index.toString()}>
+                      <div className="flex gap-4 items-center">
+                        <span>{item?.title}</span>
+                        <span>{item?.description}</span>
+                      </div>
+                    </Select.Option>
+                  ))}
+                </Select>
+                </Form.Item>
+              </Form>
+            </Modal>
+
             <Modal
               title="Title"
               open={open}
@@ -625,8 +734,42 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
 
           <div style={{ marginTop: 24 }}>
             {userRole === 'Admin' ? (
+              <div className='flex flex-row space-x-4'>
               <Button onClick={() => nextPayment()}>Add payment</Button>
+              <Button onClick={() => deletePayment()}>Delete payment</Button>
+              </div>
             ) : null}
+
+            <Modal
+              title="Danger"
+              open={openDelete}
+              onOk={() => {
+                handleDelete('payment');
+              }}
+              confirmLoading={confirmLoading}
+              onCancel={handleCancel}
+            >
+              <Form form={form} layout="vertical">
+              <Form.Item
+                  name="status"
+                  label={'Select the payment you want to delete!'}
+                  rules={[
+                    { required: true, message: 'Please enter an amount' },
+                  ]}
+                >
+                  <Select style={{ width: '100%' }}>
+                  {[...paymentItems].reverse().map((item, index) => (
+                    <Select.Option key={index} value={item.id || index.toString()}>
+                      <div className="flex gap-4 items-center">
+                        <span>{formatCurrency(item?.title)}</span>
+                        <span>{item?.description}</span>
+                      </div>
+                    </Select.Option>
+                  ))}
+                </Select>
+                </Form.Item>
+              </Form>
+            </Modal>
 
             <Modal
               title="Title"

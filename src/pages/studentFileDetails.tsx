@@ -62,15 +62,7 @@ const StudentFileDetails: React.FC = () => {
     fetchFiles();
   }, [studentId]);
 
-  // const onChange: CheckboxProps['onChange'] = (e) => {
-  //   const checkValue = e.target.checked
-  //   console.log(`checked = ${checkValue}`);
-  // };
-
   const changeServiceCheck = (serviceCheck: any, check: boolean) => {
-    console.log('service', serviceCheck);
-    console.log('check', check);
-    console.log('services obj', servicesObj);
 
     if (userRole === 'Admin') {
       const newServicesObj = { ...servicesObj };
@@ -102,7 +94,6 @@ const StudentFileDetails: React.FC = () => {
   };
 
   const addNewService = () => {
-    // setServices([...services, `New Service ${services.length + 1}`]);
     showModal();
   };
 
@@ -118,7 +109,6 @@ const StudentFileDetails: React.FC = () => {
     if (error) {
       throw error;
     }
-    console.log('data', data);
     signedUrls(data);
     setFiles(data);
     return data || [];
@@ -140,7 +130,6 @@ const StudentFileDetails: React.FC = () => {
       throw error;
     }
     setDownloadUrl(data);
-    console.log('signedddddd urls', data);
   };
 
   const getStudentId = async () => {
@@ -153,8 +142,6 @@ const StudentFileDetails: React.FC = () => {
         console.log('error', error);
         throw new Error();
       }
-      console.log('from file detailssssssss', data[0]);
-      console.log('services obj', data[0].servicesobj);
       setServicesObj(data[0].servicesobj);
       // setServices(data[0].services)
       setStudentId(data[0].studentid);
@@ -167,7 +154,6 @@ const StudentFileDetails: React.FC = () => {
     const values = await form.validateFields();
     // const newService = {[values.service]: false}
     const updatedServices = { ...servicesObj, [values.service]: false };
-    console.log('valuesssssssssssssssssssssssssssssssssss', updatedServices);
     const { data, error } = await publicSupabase
       .from('filedetails')
       .update({ servicesobj: updatedServices })
@@ -178,7 +164,6 @@ const StudentFileDetails: React.FC = () => {
       console.log('error', error);
       throw new Error();
     }
-    console.log('new servicesssssssssssssssssss', data);
     setServicesObj(updatedServices);
     setOpen(false);
   };

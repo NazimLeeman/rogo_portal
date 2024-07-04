@@ -1,3 +1,5 @@
+import toast from "react-hot-toast";
+
 export const formatDate = (dataString: any) => {
     const date = new Date(dataString);
 
@@ -61,18 +63,53 @@ export const formatDate = (dataString: any) => {
     return parts[parts.length - 1];
   }
 
-  export function extractFilenameFromUrl(url:string) {
+  // export function extractFilenameFromUrl(url:string) {
+  //   // Remove any surrounding quotes if present
+  //   url = url.replace(/^["']|["']$/g, '');
+    
+  //   // Split the URL by '/' and get the last part
+  //   const parts = url.split('/');
+    
+  //   // Get the last part (filename with possible query parameters)
+  //   const lastPart = parts[parts.length - 1];
+    
+  //   // Split by '?' to remove any query parameters and get the filename
+  //   const filename = lastPart.split('?')[0];
+    
+  //   return filename;
+  // }
+
+  export function extractFilenameFromUrl(url: string) {
     // Remove any surrounding quotes if present
     url = url.replace(/^["']|["']$/g, '');
     
-    // Split the URL by '/' and get the last part
-    const parts = url.split('/');
-    
-    // Get the last part (filename with possible query parameters)
-    const lastPart = parts[parts.length - 1];
-    
-    // Split by '?' to remove any query parameters and get the filename
-    const filename = lastPart.split('?')[0];
-    
-    return filename;
+    try {
+      // Create a URL object
+      const urlObject = new URL(url);
+      
+      // Get the pathname
+      let pathname = urlObject.pathname;
+      
+      // Remove '/storage/v1/object/public/' if present
+      pathname = pathname.replace('/storage/v1/object/public/', '');
+      
+      // Split the remaining path by '/'
+      const parts = pathname.split('/');
+      
+      // Get the last part (filename)
+      let filename = parts[parts.length - 1];
+      
+      // Decode the URL-encoded filename
+      filename = decodeURIComponent(filename);
+      
+      return filename;
+    } catch (error) {
+      console.error('Error parsing URL:', error);
+      
+      // Fallback to the old method if URL parsing fails
+      const parts = url.split('/');
+      let filename = parts[parts.length - 1];
+      filename = filename.split('?')[0]; // Remove query parameters
+      return decodeURIComponent(filename);
+    }
   }
