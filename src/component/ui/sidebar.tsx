@@ -28,7 +28,7 @@ export default function Sidebar() {
 
   const links = [
     {
-      name: 'Dashbaord',
+      name: 'Dashboard',
       href: '/dashboard',
       icon: <LayoutDashboard width={18} />,
       role: null,

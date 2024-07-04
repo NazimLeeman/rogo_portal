@@ -195,6 +195,21 @@ const FileForm: React.FC = () => {
             <Select.Option value="MIREA — Russian Technological University">
               MIREA — Russian Technological University
             </Select.Option>
+            <Select.Option value="RANEPA - The Presidential Academy">
+              RANEPA - The Presidential Academy
+            </Select.Option>
+            <Select.Option value="D. Mendeleev University of Chemical Technology">
+              D. Mendeleev University of Chemical Technology
+            </Select.Option>
+            <Select.Option value="FinU - Financial University">
+              FinU - Financial University
+            </Select.Option>
+            <Select.Option value="MPEI - Moscow Power Engineering Institute">
+              MPEI - Moscow Power Engineering Institute
+            </Select.Option>
+            <Select.Option value="MIET - National Research University of Electronic Technology">
+              MIET - National Research University of Electronic Technology
+            </Select.Option>
           </Select>
         </Form.Item>
         <Form.Item
