@@ -8,7 +8,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { publicSupabase } from '../api/SupabaseClient';
 import Step from '../component/Step/step';
 import { useFile } from '../context/FileContext';
-import { extractFilename } from '@/utils/helper';
+import { extractFilename, extractFilenameFromUrl } from '@/utils/helper';
 import { toast } from 'sonner';
 
 const StudentFileDetails: React.FC = () => {
@@ -16,6 +16,7 @@ const StudentFileDetails: React.FC = () => {
   const { step } = useFile();
   const [files, setFiles] = useState<any[]>([]);
   const [downloadUrl, setDownloadUrl] = useState<any[]>([]);
+  const [additionalFile, setAdditionalFile] = useState<any>({});
   const [userRole, setUserRole] = useState<any>('');
   // const [services, setServices] = useState<any>([]);
   const [servicesObj, setServicesObj] = useState<any>({});
@@ -24,6 +25,7 @@ const StudentFileDetails: React.FC = () => {
   const [studentId, setStudentId] = useState('');
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [openDelete, setOpenDelete] = useState(false);
+  const [openUpload, setOpenUpload] = useState(false);
   const [form] = Form.useForm();
 
   const navigate = useNavigate();
@@ -146,6 +148,10 @@ const StudentFileDetails: React.FC = () => {
         throw new Error();
       }
       setServicesObj(data[0].servicesobj);
+      console.log('dataaaaaaaaaaaaaaaaaa',data[0].additionalFile)
+      if(data[0].additionalFile) {
+        setAdditionalFile(data[0].additionalFile)
+      }
       // setServices(data[0].services)
       setStudentId(data[0].studentid);
     } catch (error) {
@@ -179,6 +185,60 @@ const StudentFileDetails: React.FC = () => {
   const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
     setFileList(newFileList);
   };
+
+  // const saveAddtionalFile = async (studentId:string) => {
+  //   console.log('student id',studentId)
+  //   const values = await form.validateFields();
+  //   console.log('values',values)
+  // }
+
+  const saveAddtionalFile = async (studentId: string) => {
+    console.log('student id', studentId)
+    
+    try {
+      const values = await form.validateFields();
+      console.log('values', values)
+  
+      const { upload, access } = values;
+      const fileName = upload?.file?.name
+      const additionalFile = upload
+  
+      if (additionalFile && additionalFile.file) {
+        // Upload file to Supabase Storage
+        const { data: uploadData, error: uploadError } = await publicSupabase.storage
+          .from('avatars')
+          .upload(`additionalFile/${studentId}/${additionalFile.file.name}`, additionalFile.file)
+  
+        if (uploadError) {
+          throw uploadError
+        }
+  
+        // Get public URL of the uploaded file
+        const { data: urlData } = publicSupabase.storage
+          .from('avatars')
+          .getPublicUrl(`additionalFile/${studentId}/${additionalFile.file.name}`)
+  
+        // Update the filedetails column in the database
+          const additionalFiles = [{[access]: urlData.publicUrl}];
+
+        const { data, error } = await publicSupabase
+          .from('filedetails')
+          .update({ 
+            additionalFile: additionalFiles
+          })
+          .eq('studentid', studentId)
+  
+        if (error) {
+          toast.error('something went wrong')
+          throw error
+        }
+  
+        toast.success('File uploaded and database updated successfully')
+      }
+    } catch (error) {
+      console.error('Error saving additional file:', error)
+    }
+  }
 
   const handleDocumentDelete = async (studentId: string) => {
     try {
@@ -362,10 +422,63 @@ const StudentFileDetails: React.FC = () => {
           <Text variant="heading-lg" className="mb-4">
             Additional Files
           </Text>
-          {downloadUrl.length > 0 ? (
+          <div>
+            {userRole === 'Admin' ? (
+              <div className='flex flex-row space-x-4'>
+              {/* <Button onClick={}>Add status</Button> */}
+              <Button onClick={() => setOpenUpload(!openUpload)}>Add File</Button>
+              </div>
+            ) : null}
+            {additionalFile.length > 0 ? (
+              additionalFile.map((item:any, index:number) => (
+                <div key={index} className="flex flex-col mt-2">
+                  <img src={item.true} className='w-[300px]' alt="" />
+                  <p>
+                  {extractFilenameFromUrl(item.true)}
+                  </p>
+                </div>
+              ))
+            
+          ) : (
+            <Loader className="h-6 w-6 animate-spin" />
+          )}
+            <Modal
+              title="Add Document"
+              open={openUpload}
+              onOk={() => {
+                saveAddtionalFile(studentId);
+              }}
+              confirmLoading={confirmLoading}
+              onCancel={() => setOpenUpload(!openUpload)}
+            >
+              <Form form={form} layout="vertical">
+              <Form.Item name="upload">
+                  <Upload
+                    fileList={fileList}
+                    onChange={handleChange}
+                    beforeUpload={() => false}
+                    multiple={true}
+                    >
+                    <Button>Click to Upload</Button>
+                  </Upload>
+                </Form.Item>
+                <Form.Item name="access">
+                  <div className='flex flex-row space-x-2 items-center'>
+                <Checkbox
+                value={"true"}
+                    />
+                    <p>
+                    Allow student to view this file
+                    </p>
+                  </div>
+                </Form.Item>
+              </Form>
+            </Modal>
+            </div>
+          {/* {downloadUrl.length > 0 ? (
             <div className="grid grid-cols-2 gap-6">
               <Form form={form} layout="vertical">
-              <Form.Item name="upload" label="Upload File">
+              <Form.Item name="upload">
                   <Upload
                     fileList={fileList}
                     onChange={handleChange}
@@ -377,9 +490,10 @@ const StudentFileDetails: React.FC = () => {
                 </Form.Item>
               </Form>
             </div>
+            
           ) : (
             <Loader className="h-6 w-6 animate-spin" />
-          )}
+          )} */}
         </div>
       </div>
     </div>
