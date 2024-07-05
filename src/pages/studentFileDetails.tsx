@@ -1,7 +1,7 @@
 import { Button } from '@/component/ui/button';
 import { Checkbox } from '@/component/ui/checkbox';
 import Text from '@/component/ui/text';
-import { Form, Input, Modal } from 'antd';
+import { Form, Input, Modal, Select, Upload, UploadFile, UploadProps } from 'antd';
 import { ChevronLeft, DownloadIcon, FileIcon, Loader } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -9,6 +9,7 @@ import { publicSupabase } from '../api/SupabaseClient';
 import Step from '../component/Step/step';
 import { useFile } from '../context/FileContext';
 import { extractFilename } from '@/utils/helper';
+import { toast } from 'sonner';
 
 const StudentFileDetails: React.FC = () => {
   const { fileId } = useParams();
@@ -21,6 +22,8 @@ const StudentFileDetails: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [studentId, setStudentId] = useState('');
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [openDelete, setOpenDelete] = useState(false);
   const [form] = Form.useForm();
 
   const navigate = useNavigate();
@@ -173,6 +176,42 @@ const StudentFileDetails: React.FC = () => {
     form.resetFields();
   };
 
+  const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
+    setFileList(newFileList);
+  };
+
+  const handleDocumentDelete = async (studentId: string) => {
+    try {
+      // List files in the student's folder
+      const values = await form.validateFields();
+      const fileName = values.status
+      const originalName = extractFilename(fileName);
+      // Delete the file
+      const { data: deleteData, error: deleteError } = await publicSupabase.storage
+        .from('avatars')
+        .remove([`${studentId}/${originalName}`]);
+  
+      if (deleteError) {
+        toast.error('error while deleting')
+        throw deleteError;
+      }
+
+      const remainingFiles = files.filter((item: any) => {
+        return item.name !== originalName; 
+      });
+
+      console.log('remaining files', remainingFiles);
+      toast.success('successfully deleted file')
+      setOpenDelete(false)
+      setFiles(remainingFiles)
+      signedUrls(remainingFiles)
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      throw error;
+    }
+  };
+  
+
   return (
     <div className="flex max-w-screen-md mx-auto flex-col space-y-6 px-8 py-14 md:py-8">
       <div className="space-y-4">
@@ -256,6 +295,7 @@ const StudentFileDetails: React.FC = () => {
             Documents
           </Text>
           {downloadUrl.length > 0 ? (
+            <>
             <div className="grid grid-cols-2 gap-6">
               {downloadUrl.map((file: any) => (
                 <div key={file.path} className="space-y-2">
@@ -275,6 +315,67 @@ const StudentFileDetails: React.FC = () => {
                   </a>
                 </div>
               ))}
+            </div>
+            <div>
+            {userRole === 'Admin' ? (
+              <div className='flex flex-row space-x-4'>
+              {/* <Button onClick={}>Add status</Button> */}
+              <Button onClick={() => setOpenDelete(!openDelete)}>Delete Document</Button>
+              </div>
+            ) : null}
+            <Modal
+              title="Danger"
+              open={openDelete}
+              onOk={() => {
+                handleDocumentDelete(studentId);
+              }}
+              confirmLoading={confirmLoading}
+              onCancel={() => setOpenDelete(!openDelete)}
+            >
+              <Form form={form} layout="vertical">
+              <Form.Item
+                  name="status"
+                  label={'Select the Document you want to delete!'}
+                  rules={[
+                    { required: true, message: 'Please enter an amount' },
+                  ]}
+                >
+                  <Select style={{ width: '100%' }}>
+                  {downloadUrl.map((item, index) => (
+                    <Select.Option key={index} value={item.path || index.toString()}>
+                      <div className="flex gap-4 items-center">
+                        <span>{extractFilename(item.path)}</span>
+                      </div>
+                    </Select.Option>
+                  ))}
+                </Select>
+                </Form.Item>
+              </Form>
+            </Modal>
+            </div>
+            </>
+          ) : (
+            <Loader className="h-6 w-6 animate-spin" />
+          )}
+        </div>
+        <div className="space-y-6">
+          <Text variant="heading-lg" className="mb-4">
+            Additional Files
+          </Text>
+          {downloadUrl.length > 0 ? (
+            <div className="grid grid-cols-2 gap-6">
+              <Form form={form} layout="vertical">
+              <Form.Item name="upload" label="Upload File">
+                  <Upload
+                    fileList={fileList}
+                    onChange={handleChange}
+                    beforeUpload={() => false}
+                    multiple={true}
+                    >
+                    <Button>Click to Upload</Button>
+                  </Upload>
+                </Form.Item>
+              </Form>
             </div>
           ) : (
             <Loader className="h-6 w-6 animate-spin" />
