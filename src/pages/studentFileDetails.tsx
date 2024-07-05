@@ -9,6 +9,7 @@ import { publicSupabase } from '../api/SupabaseClient';
 import Step from '../component/Step/step';
 import { useFile } from '../context/FileContext';
 import { extractFilename, extractFilenameFromUrl } from '@/utils/helper';
+import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const StudentFileDetails: React.FC = () => {
@@ -240,11 +241,11 @@ const StudentFileDetails: React.FC = () => {
     }
   }
 
-  const handleDocumentDelete = async (studentId: string) => {
+  const handleDocumentDelete = async (studentId: string,fileName:any) => {
     try {
       // List files in the student's folder
-      const values = await form.validateFields();
-      const fileName = values.status
+      // const values = await form.validateFields();
+      // const fileName = values.status
       const originalName = extractFilename(fileName);
       // Delete the file
       const { data: deleteData, error: deleteError } = await publicSupabase.storage
@@ -362,28 +363,34 @@ const StudentFileDetails: React.FC = () => {
                   <div className="w-full h-60 border rounded-md">
                     <Image src={file.signedUrl} />
                   </div>
+                  <div className='flex flex-row justify-between items-center'>
                   <a
                     href={file.signedUrl}
                     rel="noopener noreferrer"
                     target="_blank"
                     className="block"
-                  >
+                    >
                     <Button size="sm" variant="ghost">
                       <DownloadIcon className="h-4 w-4 mr-2" />
                       {extractFilename(file.path)}
                     </Button>
                   </a>
+                  {userRole === 'Admin' ? (
+                    <div className='flex flex-row space-x-4'>
+              <Trash2 className='cursor-pointer' onClick={() => handleDocumentDelete(studentId, file.path)} />
+              </div>
+            ) : null}
+            </div>
                 </div>
               ))}
             </div>
             <div>
-            {userRole === 'Admin' ? (
+            {/* {userRole === 'Admin' ? (
               <div className='flex flex-row space-x-4'>
-              {/* <Button onClick={}>Add status</Button> */}
               <Button onClick={() => setOpenDelete(!openDelete)}>Delete Document</Button>
               </div>
-            ) : null}
-            <Modal
+            ) : null} */}
+            {/* <Modal
               title="Danger"
               open={openDelete}
               onOk={() => {
@@ -411,7 +418,7 @@ const StudentFileDetails: React.FC = () => {
                 </Select>
                 </Form.Item>
               </Form>
-            </Modal>
+            </Modal> */}
             </div>
             </>
           ) : (
