@@ -34,6 +34,8 @@ const UploadFeature = ({changedValues}:any) => {
   const [fileList6, setFileList6] = useState<UploadFile[]>([]);
   const [fileList7, setFileList7] = useState<UploadFile[]>([]);
   const [fileList8, setFileList8] = useState<UploadFile[]>([]);
+  const [fileList9, setFileList9] = useState<UploadFile[]>([]);
+  const [fileList10, setFileList10] = useState<UploadFile[]>([]);
   const [uploading, setUploading] = useState(false);
   const { studentInfo, studentFiles, setFileData } = useFile();
 
@@ -48,7 +50,9 @@ const UploadFeature = ({changedValues}:any) => {
       fileList3.length === 0 ||
       fileList4.length === 0 ||
       fileList5.length === 0 ||
-      fileList6.length === 0
+      fileList6.length === 0 ||
+      fileList7.length === 0 ||
+      fileList8.length === 0
     : isPhd
     ? fileList1.length === 0 ||
       fileList2.length === 0 ||
@@ -57,18 +61,20 @@ const UploadFeature = ({changedValues}:any) => {
       fileList5.length === 0 ||
       fileList6.length === 0 ||
       fileList7.length === 0 ||
-      fileList8.length === 0
+      fileList8.length === 0 ||
+      fileList9.length === 0 ||
+      fileList10.length === 0
     : fileList1.length === 0 ||
       fileList2.length === 0 ||
       fileList3.length === 0 ||
-      fileList4.length === 0;
+      fileList4.length === 0 ||
+      fileList5.length === 0 ||
+      fileList6.length === 0;
 
   const handleBeforeUpload = (
     file: UploadFile,
     setFileList: React.Dispatch<React.SetStateAction<UploadFile[]>>,
   ) => {
-    // const fileWithDisplayName = file as UploadFile & { displayName: string };
-    // fileWithDisplayName.displayName = newName;
     setFileList((prevFileList) => [...prevFileList, file]);
     return false; // Prevent default upload behavior
   };
@@ -76,17 +82,22 @@ const UploadFeature = ({changedValues}:any) => {
   const uploadFile = async (
     file: UploadFile,
     studentId: string | undefined,
+    passport?: string,
+    photo?: string,
   ) => {
     if (!studentId) {
       throw new Error('Student ID is required');
     }
 
-    // const uniqueFileName = generateUniqueFileName(file.name);
-    // console.log('uniquefile', uniqueFileName);
+    const uploadPath = passport 
+      ? `${studentId}/${passport}/${file.name}` 
+      : photo 
+        ? `${studentId}/${photo}/${file.name}` 
+        : `${studentId}/${file.name}`;
 
     const { data, error } = await publicSupabase.storage
       .from('avatars')
-      .upload(`${studentId}/${file.name}`, file, { upsert: true });
+      .upload(uploadPath, file, { upsert: true });
 
     if (error) {
       console.error(`Attempt Error uploading ${file.name}:`, error);
@@ -102,31 +113,35 @@ const UploadFeature = ({changedValues}:any) => {
     setUploading(true);
 
     const allFileLists = [
-      fileList1, fileList2, fileList3, fileList4,
-      ...(isMasters || isPhd ? [fileList5, fileList6] : []),
-      ...(isPhd ? [fileList7, fileList8] : []),
+      fileList1, fileList2, fileList3, fileList4, fileList5, fileList6,
+      ...(isMasters || isPhd ? [fileList7, fileList8] : []),
+      ...(isPhd ? [fileList9, fileList10] : []),
     ];
 
     try {
 
       checkForDuplicateFileNames(allFileLists);
+      const passport = 'passport';
+      const photo = 'photo';
 
       const uploadPromises = [
-        ...fileList1.map((file) => uploadFile(file, studentInfo?.id)),
-        ...fileList2.map((file) => uploadFile(file, studentInfo?.id)),
+        ...fileList1.map((file) => uploadFile(file, studentInfo?.id, passport)),
+        ...fileList2.map((file) => uploadFile(file, studentInfo?.id, photo)),
         ...fileList3.map((file) => uploadFile(file, studentInfo?.id)),
         ...fileList4.map((file) => uploadFile(file, studentInfo?.id)),
+        ...fileList5.map((file) => uploadFile(file, studentInfo?.id)),
+        ...fileList6.map((file) => uploadFile(file, studentInfo?.id)),
         ...(isMasters || isPhd
-          ? fileList5.map((file) => uploadFile(file, studentInfo?.id))
-          : []),
-        ...(isMasters || isPhd
-          ? fileList6.map((file) => uploadFile(file, studentInfo?.id))
-          : []),
-        ...(isPhd
           ? fileList7.map((file) => uploadFile(file, studentInfo?.id))
           : []),
-        ...(isPhd
+        ...(isMasters || isPhd
           ? fileList8.map((file) => uploadFile(file, studentInfo?.id))
+          : []),
+        ...(isPhd
+          ? fileList9.map((file) => uploadFile(file, studentInfo?.id))
+          : []),
+        ...(isPhd
+          ? fileList10.map((file) => uploadFile(file, studentInfo?.id))
           : []),
       ];
 
@@ -166,7 +181,11 @@ const UploadFeature = ({changedValues}:any) => {
                 ? fileList6
                 : setFileList === setFileList7
                   ? fileList7
-                  : fileList8,
+                  : setFileList === setFileList8
+                  ? fileList8
+                    : setFileList === setFileList9
+                    ? fileList9
+                    : fileList10,
     maxCount: 1,
   });
 
@@ -271,30 +290,50 @@ const UploadFeature = ({changedValues}:any) => {
   };
 
   return (
+    <>
     <div>
       <Text variant="heading-md" className="mb-4">
-        Documents
+        Photos
       </Text>
       <div className="grid grid-cols-2 gap-4">
-        <Upload {...uploadProps(setFileList1)}>
+      <Upload {...uploadProps(setFileList1)}>
           <Button variant="outline">
             <UploadIcon className="h-4 w-4 mr-2" />
-            SSC certificate
+            Passport
           </Button>
         </Upload>
         <Upload {...uploadProps(setFileList2)}>
           <Button variant="outline">
             <UploadIcon className="h-4 w-4 mr-2" />
+            Photo
+          </Button>
+        </Upload>
+      </div>
+    </div>      
+    <div>
+      <Text variant="heading-md" className="mb-4">
+        Documents
+      </Text>
+      <div className="grid grid-cols-2 gap-4">
+        <Upload {...uploadProps(setFileList3)}>
+          <Button variant="outline">
+            <UploadIcon className="h-4 w-4 mr-2" />
+            SSC certificate
+          </Button>
+        </Upload>
+        <Upload {...uploadProps(setFileList4)}>
+          <Button variant="outline">
+            <UploadIcon className="h-4 w-4 mr-2" />
             SSC marksheet
           </Button>
         </Upload>
-        <Upload {...uploadProps(setFileList3)}>
+        <Upload {...uploadProps(setFileList5)}>
           <Button variant="outline">
             <UploadIcon className="h-4 w-4 mr-2" />
             HSC certificate
           </Button>
         </Upload>
-        <Upload {...uploadProps(setFileList4)}>
+        <Upload {...uploadProps(setFileList6)}>
           <Button variant="outline">
             <UploadIcon className="h-4 w-4 mr-2" />
             HSC marksheet
@@ -302,13 +341,13 @@ const UploadFeature = ({changedValues}:any) => {
         </Upload>
         {isMasters && (
           <>
-            <Upload {...uploadProps(setFileList5)}>
+            <Upload {...uploadProps(setFileList7)}>
               <Button variant="outline">
                 <UploadIcon className="h-4 w-4 mr-2" />
                 Bachelor certificate
               </Button>
             </Upload>
-            <Upload {...uploadProps(setFileList6)}>
+            <Upload {...uploadProps(setFileList8)}>
               <Button variant="outline">
                 <UploadIcon className="h-4 w-4 mr-2" />
                 Bachelor marksheet
@@ -318,25 +357,25 @@ const UploadFeature = ({changedValues}:any) => {
         )}
         {isPhd && (
   <>
-    <Upload {...uploadProps(setFileList5)}>
+    <Upload {...uploadProps(setFileList7)}>
       <Button variant="outline">
         <UploadIcon className="h-4 w-4 mr-2" />
         Bachelor certificate
       </Button>
     </Upload>
-    <Upload {...uploadProps(setFileList6)}>
+    <Upload {...uploadProps(setFileList8)}>
       <Button variant="outline">
         <UploadIcon className="h-4 w-4 mr-2" />
         Bachelor marksheet
       </Button>
     </Upload>
-    <Upload {...uploadProps(setFileList7)}>
+    <Upload {...uploadProps(setFileList9)}>
       <Button variant="outline">
         <UploadIcon className="h-4 w-4 mr-2" />
         Master's certificate
       </Button>
     </Upload>
-    <Upload {...uploadProps(setFileList8)}>
+    <Upload {...uploadProps(setFileList10)}>
       <Button variant="outline">
         <UploadIcon className="h-4 w-4 mr-2" />
         Master's marksheet
@@ -355,6 +394,7 @@ const UploadFeature = ({changedValues}:any) => {
         Submit documents
       </Button>
     </div>
+    </>
   );
 };
 
