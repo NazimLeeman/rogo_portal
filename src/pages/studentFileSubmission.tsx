@@ -41,13 +41,13 @@ const StudentFileSubmission: React.FC = () => {
     setChangedFields({});
   }, [studentInfo, studentFiles]);
 
-  const handleInputChange = useCallback((field:any, value:any) => {
-    setFormData((prev:any) => ({ ...prev, [field]: value }));
-    setChangedFields((prev:any) => ({ ...prev, [field]: true }));
+  const handleInputChange = useCallback((field: any, value: any) => {
+    setFormData((prev: any) => ({ ...prev, [field]: value }));
+    setChangedFields((prev: any) => ({ ...prev, [field]: true }));
   }, []);
 
   const getChangedValues = useCallback(() => {
-    return Object.keys(changedFields).reduce((acc:any, field:string) => {
+    return Object.keys(changedFields).reduce((acc: any, field: string) => {
       if (changedFields[field]) {
         acc[field] = formData[field];
       }
@@ -57,7 +57,7 @@ const StudentFileSubmission: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const isAdmin = userRole === 'Admin'
+  const isAdmin = userRole === 'Admin';
 
   const handleBack = () => {
     navigate('/agreement');
@@ -83,41 +83,73 @@ const StudentFileSubmission: React.FC = () => {
         <div className="grid grid-cols-2 gap-6">
           <div className="grid gap-1.5">
             <Label>First Name</Label>
-            <Input defaultValue={formData.firstName} onChange={(e) => handleInputChange('firstName', e.target.value)}  disabled={!isAdmin} />
+            <Input
+              defaultValue={formData.firstName}
+              onChange={(e) => handleInputChange('firstName', e.target.value)}
+              disabled={!isAdmin}
+            />
           </div>
           <div className="grid gap-1.5">
             <Label>Last Name</Label>
-            <Input defaultValue={formData.firstName} onChange={(e) => handleInputChange('lastName', e.target.value)} disabled={!isAdmin} />
+            <Input
+              defaultValue={formData.lastName}
+              onChange={(e) => handleInputChange('lastName', e.target.value)}
+              disabled={!isAdmin}
+            />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-6">
           <div className="grid gap-1.5">
             <Label>Email</Label>
-            <Input defaultValue={formData.email} onChange={(e) => handleInputChange('email', e.target.value)} disabled={!isAdmin} />
+            <Input
+              defaultValue={formData.email}
+              onChange={(e) => handleInputChange('email', e.target.value)}
+              disabled={!isAdmin}
+            />
           </div>
           <div className="grid gap-1.5">
             <Label>Phone</Label>
-            <Input defaultValue={formData.phone ?? ''} onChange={(e) => handleInputChange('phone', e.target.value)} disabled={!isAdmin} />
+            <Input
+              defaultValue={formData.phone ?? ''}
+              onChange={(e) => handleInputChange('phone', e.target.value)}
+              disabled={!isAdmin}
+            />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-6">
           <div className="grid gap-1.5">
             <Label>University</Label>
-            <Input defaultValue={formData.university} onChange={(e) => handleInputChange('university', e.target.value)} disabled={!isAdmin} />
+            <Input
+              defaultValue={formData.university}
+              onChange={(e) => handleInputChange('university', e.target.value)}
+              disabled={!isAdmin}
+            />
           </div>
           <div className="grid gap-1.5">
             <Label>Program</Label>
-            <Input defaultValue={formData.program} onChange={(e) => handleInputChange('program', e.target.value)} disabled={!isAdmin} />
+            <Input
+              defaultValue={formData.program}
+              onChange={(e) => handleInputChange('program', e.target.value)}
+              disabled={!isAdmin}
+            />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-6">
           <div className="grid gap-1.5">
             <Label>Subject</Label>
-            <Input defaultValue={formData.subject} onChange={(e) => handleInputChange('subject', e.target.value)} disabled={!isAdmin} />
+            <Input
+              defaultValue={formData.subject}
+              onChange={(e) => handleInputChange('subject', e.target.value)}
+              disabled={!isAdmin}
+            />
           </div>
           <div className="grid gap-1.5">
             <Label>Payment</Label>
-            <Input defaultValue={formData.payment} onChange={(e) => handleInputChange('payment', e.target.value)} disabled={!isAdmin} />
+            <Input
+              defaultValue={formData.payment}
+              onChange={(e) => handleInputChange('payment', e.target.value)}
+              disabled={!isAdmin}
+            />
           </div>
         </div>
       </div>
