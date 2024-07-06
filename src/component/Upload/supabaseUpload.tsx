@@ -25,7 +25,7 @@ const checkForDuplicateFileNames = (fileLists: UploadFile[][]) => {
   }
 };
 
-const UploadFeature = () => {
+const UploadFeature = ({changedValues}:any) => {
   const [fileList1, setFileList1] = useState<UploadFile[]>([]);
   const [fileList2, setFileList2] = useState<UploadFile[]>([]);
   const [fileList3, setFileList3] = useState<UploadFile[]>([]);
@@ -132,7 +132,8 @@ const UploadFeature = () => {
 
       await Promise.all(uploadPromises);
 
-      onFinish();
+      await handleUpdate()
+      await onFinish();
     } catch (error) {
       console.error(error);
       message.error('File upload failed.');
@@ -212,6 +213,60 @@ const UploadFeature = () => {
       navigate(`/file-details/${fileId}`);
     } catch {
       toast.error('Something went wrong');
+    }
+  };
+
+  const handleUpdate = async () => {
+    if (Object.keys(changedValues).length > 0) {
+      console.log('changed values',changedValues)
+      const studentInfoFields = ['firstName', 'lastName', 'email', 'phone'];
+    const studentFilesFields = ['university', 'program', 'subject', 'payment'];
+
+    const studentInfoUpdates:any = {};
+    const studentFilesUpdates:any = {};
+
+    Object.entries(changedValues).forEach(([key, value]) => {
+      if (studentInfoFields.includes(key)) {
+        const dbKey = key === 'firstName' ? 'first_name' : 
+                      key === 'lastName' ? 'last_name' : 
+                      key === 'phone' ? 'phone_number' : key;
+        studentInfoUpdates[dbKey] = value;
+      } else if (studentFilesFields.includes(key)) {
+        const dbKey = key === 'university' ? 'university_name' : 
+                      key === 'payment' ? 'budget' : key;
+        studentFilesUpdates[dbKey] = value;
+      }
+    });
+
+    console.log('student info update',studentInfoUpdates)
+    console.log('student files update',studentFilesUpdates)
+    try {
+      if (Object.keys(studentInfoUpdates).length > 0) {
+        const { data: studentInfoData, error: studentInfoError } = await publicSupabase
+          .from('studentInfo')
+          .update(studentInfoUpdates)
+          .eq('id', studentInfo?.id) 
+          .select();
+
+        if (studentInfoError) throw studentInfoError;
+        console.log('Updated studentInfo:', studentInfoData);
+      }
+
+      if (Object.keys(studentFilesUpdates).length > 0) {
+        const { data: studentFilesData, error: studentFilesError } = await publicSupabase
+          .from('studentFile')
+          .update(studentFilesUpdates)
+          .eq('id', studentFiles?.id) 
+          .select();
+
+        if (studentFilesError) throw studentFilesError;
+        console.log('Updated studentFiles:', studentFilesData);
+      }
+
+      console.log('All updates completed successfully');
+    } catch (error) {
+      console.error('Error updating data:', error);
+    }
     }
   };
 
