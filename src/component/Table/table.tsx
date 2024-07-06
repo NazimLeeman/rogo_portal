@@ -35,11 +35,30 @@ const SearchTable: React.FC = () => {
         .from('studentFile')
         .select('*');
       setStudentsFile(StudentInfo);
+      console.log('student info',StudentInfo)
       if (error) throw error;
     } catch (error) {
       console.error('ERROR: ', error);
     }
   };
+
+  const getStudentFileDetails = async () => {
+    try {
+      const  {data, error} = await publicSupabase
+        .from('studentInfo')
+        .select(`
+          *,
+          studentFile:foreignKeyColumn(column1, column2)
+        `);
+
+        if(error) {
+          throw new Error;
+        }
+        console.log('dataaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',data)
+    } catch (error) {
+      console.log('error',error)
+    }
+  }
 
   const handleSearch = (
     selectedKeys: string[],

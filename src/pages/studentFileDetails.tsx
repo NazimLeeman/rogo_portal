@@ -337,26 +337,68 @@ const StudentFileDetails: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-row justify-between items center">
-      <div className="flex max-w-screen-md mx-auto flex-col space-y-6 px-8 py-14 md:py-8">
-        <div className="space-y-4">
-          <Button
-            variant="outline"
-            className="w-max"
-            onClick={handleBack}
-            size="sm"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
+    <div className="flex max-w-screen-md mx-auto flex-col space-y-6 px-8 py-14 md:py-8">
+      <div className="space-y-4">
+        <Button
+          variant="outline"
+          className="w-max"
+          onClick={handleBack}
+          size="sm"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </Button>
+      </div>
+      <div className="flex flex-col gap-12">
+      <Text variant="heading-lg">Student Details</Text>
+    <div className="space-y-6">
+        <div className="grid grid-cols-2 gap-6">
+          <div className="grid gap-1.5">
+            <Label>First Name</Label>
+            <Input value={studentInfo.first_name} disabled />
+          </div>
+          <div className="grid gap-1.5">
+            <Label>Last Name</Label>
+            <Input value={studentInfo.last_name} disabled />
+          </div>
         </div>
-        <div className="flex flex-col gap-12">
-          <div className="space-y-12">
-            <div className="space-y-6">
-              <Text variant="heading-lg">Process timeline</Text>
-              {fileId && step !== undefined ? (
-                <Step fileId={fileId} statusType="fileStatus" />
-              ) : null}
-            </div>
+        <div className="grid grid-cols-2 gap-6">
+          <div className="grid gap-1.5">
+            <Label>Email</Label>
+            <Input value={studentInfo.email} disabled />
+          </div>
+          <div className="grid gap-1.5">
+            <Label>Phone</Label>
+            <Input value={studentInfo.phone_number} disabled />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-6">
+          <div className="grid gap-1.5">
+            <Label>University</Label>
+            <Input value={studentFile.university_name} disabled />
+          </div>
+          <div className="grid gap-1.5">
+            <Label>Program</Label>
+            <Input value={studentFile.program} disabled />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-6">
+          <div className="grid gap-1.5">
+            <Label>Subject</Label>
+            <Input value={studentFile.subject} disabled />
+          </div>
+          <div className="grid gap-1.5">
+            <Label>Payment</Label>
+            <Input value={studentFile.budget} disabled />
+          </div>
+        </div>
+      </div>
+        <div className="space-y-12">
+          <div className="space-y-6">
+            <Text variant="heading-lg">Process timeline</Text>
+            {fileId && step !== undefined ? (
+              <Step fileId={fileId} statusType="fileStatus" />
+            ) : null}
+          </div>
 
             <div className="space-y-6">
               <div>
@@ -503,76 +545,22 @@ const StudentFileDetails: React.FC = () => {
                       beforeUpload={() => false}
                       multiple={true}
                     >
-                      <Button>Click to Upload</Button>
-                    </Upload>
-                  </Form.Item>
-                  <Form.Item name="access">
-                    <div className="flex flex-row space-x-2 items-center">
-                      <Checkbox value={'true'} />
-                      <p>Allow student to view this file</p>
-                    </div>
-                  </Form.Item>
-                </Form>
-              </Modal>
+                    <Button>Click to Upload</Button>
+                  </Upload>
+                </Form.Item>
+                <Form.Item name="access">
+                  <div className='flex flex-row space-x-2 items-center'>
+                <Checkbox
+                value={"true"}
+                    />
+                    <p>
+                    Allow student to view this file
+                    </p>
+                  </div>
+                </Form.Item>
+              </Form>
+            </Modal>
             </div>
-          </div>
-        </div>
-      </div>
-      <div className="w-full">
-        <div className="flex max-w-screen-md mx-auto flex-col space-y-6 px-8 py-14 mt-14 md:py-8">
-          <Text variant="heading-lg">Student Details</Text>
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-6">
-              <div className="grid gap-1.5">
-                <Label>First Name</Label>
-                <Input value={studentInfo.first_name} disabled />
-              </div>
-              <div className="grid gap-1.5">
-                <Label>Last Name</Label>
-                <Input value={studentInfo.last_name} disabled />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-6">
-              <div className="grid gap-1.5">
-                <Label>Email</Label>
-                <Input value={studentInfo.email} disabled />
-              </div>
-              <div className="grid gap-1.5">
-                <Label>Phone</Label>
-                <Input value={studentInfo.phone_number} disabled />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-6">
-              <div className="grid gap-1.5">
-                <Label>University</Label>
-                <Input value={studentFile.university_name} disabled />
-              </div>
-              <div className="grid gap-1.5">
-                <Label>Course</Label>
-                <Input value={studentFile.course} disabled />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-6">
-              <div className="grid gap-1.5">
-                <Label>Program</Label>
-                <Input value={studentFile.program} disabled />
-              </div>
-              <div className="grid gap-1.5">
-                <Label>Subject</Label>
-                <Input value={studentFile.subject} disabled />
-              </div>
-              <div className="grid gap-1.5">
-                <Label>Payment</Label>
-                <Input value={studentFile.budget} disabled />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-6">
-              <div className="grid gap-1.5">
-                <Label>Payment</Label>
-                <Input value={studentFile.budget} disabled />
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
