@@ -1,7 +1,15 @@
 import { Button } from '@/component/ui/button';
 import { Checkbox } from '@/component/ui/checkbox';
 import Text from '@/component/ui/text';
-import { Form, Input, Modal, Select, Upload, UploadFile, UploadProps } from 'antd';
+import {
+  Form,
+  Input,
+  Modal,
+  Select,
+  Upload,
+  UploadFile,
+  UploadProps,
+} from 'antd';
 import { ChevronLeft, DownloadIcon, FileIcon, Loader } from 'lucide-react';
 import { Label } from '@/component/ui/label';
 import React, { useEffect, useState } from 'react';
@@ -74,7 +82,6 @@ const StudentFileDetails: React.FC = () => {
   }, [studentInfo]);
 
   const changeServiceCheck = (serviceCheck: any, check: boolean) => {
-
     if (userRole === 'Admin') {
       const newServicesObj = { ...servicesObj };
 
@@ -135,20 +142,20 @@ const StudentFileDetails: React.FC = () => {
     });
 
     const publicURLs = await Promise.all(
-      names.map(async (name:string) => {
+      names.map(async (name: string) => {
         const { data } = await publicSupabase.storage
           .from('avatars')
           .getPublicUrl(name);
-        
+
         return data.publicUrl;
-      })
+      }),
     );
-  
+
     if (publicURLs.length === 0) {
       console.error('Error getting public URLs');
       return null;
     }
-  
+
     console.log('Public URLs:', publicURLs);
     setDownloadUrl(publicURLs);
     // const { data: publicUrlData } = await publicSupabase.storage
@@ -180,13 +187,13 @@ const StudentFileDetails: React.FC = () => {
         throw new Error();
       }
       setServicesObj(data[0].servicesobj);
-      console.log('dataaaaaaaaaaaaaaaaaa',data[0])
-      if(data[0].additionalFile) {
-        setAdditionalFile(data[0].additionalFile)
+      console.log('dataaaaaaaaaaaaaaaaaa', data[0]);
+      if (data[0].additionalFile) {
+        setAdditionalFile(data[0].additionalFile);
       }
       // setServices(data[0].services)
       setStudentId(data[0].studentid);
-      setStudentFileId(data[0].studentfileid)
+      setStudentFileId(data[0].studentfileid);
     } catch (error) {
       console.log(error);
     }
@@ -210,30 +217,29 @@ const StudentFileDetails: React.FC = () => {
     setOpen(false);
   };
 
-  const getStudentDetails = async(studentId:string) => {
+  const getStudentDetails = async (studentId: string) => {
     try {
-        const { data: studentInfoData, error: studentInfoError } = await publicSupabase
-          .from('studentInfo')
-          .select()
-          .eq('id', studentId); 
+      const { data: studentInfoData, error: studentInfoError } =
+        await publicSupabase.from('studentInfo').select().eq('id', studentId);
 
-        if (studentInfoError) throw studentInfoError;
-        console.log(' studentInfo:', studentInfoData);
-        setStudentInfo(studentInfoData[0])
-        const { data: studentFilesData, error: studentFilesError } = await publicSupabase
+      if (studentInfoError) throw studentInfoError;
+      console.log(' studentInfo:', studentInfoData);
+      setStudentInfo(studentInfoData[0]);
+      const { data: studentFilesData, error: studentFilesError } =
+        await publicSupabase
           .from('studentFile')
           .select()
-          .eq('id', studentFileId) ;
+          .eq('id', studentFileId);
 
-        if (studentFilesError) throw studentFilesError;
-        console.log(' studentFiles:', studentFilesData);
-        setStudentFile(studentFilesData[0])
+      if (studentFilesError) throw studentFilesError;
+      console.log(' studentFiles:', studentFilesData);
+      setStudentFile(studentFilesData[0]);
 
       // console.log('All updates completed successfully');
     } catch (error) {
       console.error('Error updating data:', error);
     }
-  }
+  };
 
   const handleCancel = () => {
     setOpen(false);
@@ -245,313 +251,330 @@ const StudentFileDetails: React.FC = () => {
   };
 
   const saveAddtionalFile = async (studentId: string) => {
-    console.log('student id', studentId)
-    
+    console.log('student id', studentId);
+
     try {
       const values = await form.validateFields();
-      console.log('values', values)
-  
+      console.log('values', values);
+
       const { upload, access } = values;
-      const fileName = upload?.file?.name
-      const additionalFile = upload
-  
+      const fileName = upload?.file?.name;
+      const additionalFile = upload;
+
       if (additionalFile && additionalFile.file) {
         // Upload file to Supabase Storage
-        const { data: uploadData, error: uploadError } = await publicSupabase.storage
-          .from('avatars')
-          .upload(`additionalFile/${studentId}/${additionalFile.file.name}`, additionalFile.file)
-  
+        const { data: uploadData, error: uploadError } =
+          await publicSupabase.storage
+            .from('avatars')
+            .upload(
+              `additionalFile/${studentId}/${additionalFile.file.name}`,
+              additionalFile.file,
+            );
+
         if (uploadError) {
-          throw uploadError
+          throw uploadError;
         }
-  
+
         // Get public URL of the uploaded file
         const { data: urlData } = publicSupabase.storage
           .from('avatars')
-          .getPublicUrl(`additionalFile/${studentId}/${additionalFile.file.name}`)
-  
+          .getPublicUrl(
+            `additionalFile/${studentId}/${additionalFile.file.name}`,
+          );
+
         // Update the filedetails column in the database
-          const additionalFiles = [{[access]: urlData.publicUrl}];
+        const additionalFiles = [{ [access]: urlData.publicUrl }];
 
         const { data, error } = await publicSupabase
           .from('filedetails')
-          .update({ 
-            additionalFile: additionalFiles
+          .update({
+            additionalFile: additionalFiles,
           })
-          .eq('studentid', studentId)
-  
+          .eq('studentid', studentId);
+
         if (error) {
-          toast.error('something went wrong')
-          throw error
+          toast.error('something went wrong');
+          throw error;
         }
-  
-        toast.success('File uploaded and database updated successfully')
+
+        toast.success('File uploaded and database updated successfully');
       }
     } catch (error) {
-      console.error('Error saving additional file:', error)
+      console.error('Error saving additional file:', error);
     }
-  }
+  };
 
-  const handleDocumentDelete = async (studentId: string,fileName:any) => {
+  const handleDocumentDelete = async (studentId: string, fileName: any) => {
     try {
       // List files in the student's folder
       // const values = await form.validateFields();
       // const fileName = values.status
       const originalName = extractFilenameFromUrl(fileName);
       // Delete the file
-      const { data: deleteData, error: deleteError } = await publicSupabase.storage
-        .from('avatars')
-        .remove([`${studentId}/${originalName}`]);
-  
+      const { data: deleteData, error: deleteError } =
+        await publicSupabase.storage
+          .from('avatars')
+          .remove([`${studentId}/${originalName}`]);
+
       if (deleteError) {
-        toast.error('error while deleting')
+        toast.error('error while deleting');
         throw deleteError;
       }
 
       const remainingFiles = files.filter((item: any) => {
-        return item.name !== originalName; 
+        return item.name !== originalName;
       });
 
       console.log('remaining files', remainingFiles);
-      toast.success('successfully deleted file')
-      setOpenDelete(false)
-      setFiles(remainingFiles)
-      signedUrls(remainingFiles)
+      toast.success('successfully deleted file');
+      setOpenDelete(false);
+      setFiles(remainingFiles);
+      signedUrls(remainingFiles);
     } catch (error) {
       console.error('Error deleting file:', error);
       throw error;
     }
   };
-  
 
   return (
-    <div className='flex flex-row justify-between items center'>
-    <div className="flex max-w-screen-md mx-auto flex-col space-y-6 px-8 py-14 md:py-8">
-      <div className="space-y-4">
-        <Button
-          variant="outline"
-          className="w-max"
-          onClick={handleBack}
-          size="sm"
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </Button>
-      </div>
-      <div className="flex flex-col gap-12">
-        <div className="space-y-12">
-          <div className="space-y-6">
-            <Text variant="heading-lg">Process timeline</Text>
-            {fileId && step !== undefined ? (
-              <Step fileId={fileId} statusType="fileStatus" />
-            ) : null}
-          </div>
-
-          <div className="space-y-6">
-            <div>
-              <Text variant="heading-lg" className="mb-6">
-                Received services
-              </Text>
-              <div className="grid grid-cols-2 gap-4">
-                {Object.keys(servicesObj).map((service: any, index: number) => (
-                  <div className="flex items-center space-x-2" key={index}>
-                    <Checkbox
-                      id={service}
-                      checked={servicesObj[service]}
-                      onCheckedChange={() => {
-                        changeServiceCheck(service, servicesObj[service]);
-                      }}
-                    />
-                    <label
-                      htmlFor="terms"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      {service}
-                    </label>
-                  </div>
-                ))}
-              </div>
+    <div className="flex flex-row justify-between items center">
+      <div className="flex max-w-screen-md mx-auto flex-col space-y-6 px-8 py-14 md:py-8">
+        <div className="space-y-4">
+          <Button
+            variant="outline"
+            className="w-max"
+            onClick={handleBack}
+            size="sm"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+        </div>
+        <div className="flex flex-col gap-12">
+          <div className="space-y-12">
+            <div className="space-y-6">
+              <Text variant="heading-lg">Process timeline</Text>
+              {fileId && step !== undefined ? (
+                <Step fileId={fileId} statusType="fileStatus" />
+              ) : null}
             </div>
 
-            {userRole === 'Admin' ? (
-              <Button onClick={addNewService}>Add service</Button>
-            ) : null}
+            <div className="space-y-6">
+              <div>
+                <Text variant="heading-lg" className="mb-6">
+                  Received services
+                </Text>
+                <div className="grid grid-cols-2 gap-4">
+                  {Object.keys(servicesObj).map(
+                    (service: any, index: number) => (
+                      <div className="flex items-center space-x-2" key={index}>
+                        <Checkbox
+                          id={service}
+                          checked={servicesObj[service]}
+                          onCheckedChange={() => {
+                            changeServiceCheck(service, servicesObj[service]);
+                          }}
+                        />
+                        <label
+                          htmlFor="terms"
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {service}
+                        </label>
+                      </div>
+                    ),
+                  )}
+                </div>
+              </div>
 
-            <Modal
-              title="Add Service"
-              open={open}
-              onOk={updateServices}
-              confirmLoading={confirmLoading}
-              onCancel={handleCancel}
-            >
-              <Form form={form} layout="vertical">
-                <Form.Item
-                  name="service"
-                  label="Serivce"
-                  rules={[
-                    { required: true, message: 'Please select a status' },
-                  ]}
-                >
-                  <Input />
-                </Form.Item>
-              </Form>
-            </Modal>
+              {userRole === 'Admin' ? (
+                <Button onClick={addNewService}>Add service</Button>
+              ) : null}
+
+              <Modal
+                title="Add Service"
+                open={open}
+                onOk={updateServices}
+                confirmLoading={confirmLoading}
+                onCancel={handleCancel}
+              >
+                <Form form={form} layout="vertical">
+                  <Form.Item
+                    name="service"
+                    label="Serivce"
+                    rules={[
+                      { required: true, message: 'Please select a status' },
+                    ]}
+                  >
+                    <Input />
+                  </Form.Item>
+                </Form>
+              </Modal>
+            </div>
+            <div className="space-y-6">
+              <Text variant="heading-lg" className="mb-4">
+                Payment history
+              </Text>
+              {fileId && <Step fileId={fileId} statusType="payment" />}
+            </div>
           </div>
           <div className="space-y-6">
             <Text variant="heading-lg" className="mb-4">
-              Payment history
+              Documents
             </Text>
-            {fileId && <Step fileId={fileId} statusType="payment" />}
-          </div>
-        </div>
-        <div className="space-y-6">
-          <Text variant="heading-lg" className="mb-4">
-            Documents
-          </Text>
-          {downloadUrl.length > 0 ? (
-            <>
-            <div className="grid grid-cols-2 gap-6">
-              {downloadUrl.map((file: any) => (
-                <div key={file} className="space-y-2">
-                  <div className="w-full h-60 border rounded-md">
-                    <Image src={file} />
-                  </div>
-                  <div className='flex flex-row justify-between items-center'>
-                  <a
-                    href={file}
-                    rel="noopener noreferrer"
-                    download={extractFilenameFromUrl(file)} 
-                    target="_blank"
-                    className="block"
-                    >
-                    <Button size="sm" variant="ghost">
-                      <DownloadIcon className="h-4 w-4 mr-2" />
-                      {/* {extractFilename(file.path)} */}
-                      {extractFilenameFromUrl(file)}
-                    </Button>
-                  </a>
-                  {userRole === 'Admin' ? (
-                    <div className='flex flex-row space-x-4'>
-              <Trash2 className='cursor-pointer' onClick={() => handleDocumentDelete(studentId, file)} />
-              </div>
-            ) : null}
-            </div>
+            {downloadUrl.length > 0 ? (
+              <>
+                <div className="grid grid-cols-2 gap-6">
+                  {downloadUrl.map((file: any) => (
+                    <div key={file} className="space-y-2">
+                      <div className="w-full h-60 border rounded-md">
+                        <Image src={file} />
+                      </div>
+                      <div className="flex flex-row justify-between items-center">
+                        <a
+                          href={file}
+                          rel="noopener noreferrer"
+                          download={extractFilenameFromUrl(file)}
+                          target="_blank"
+                          className="block"
+                        >
+                          <Button size="sm" variant="ghost">
+                            <DownloadIcon className="h-4 w-4 mr-2" />
+                            {/* {extractFilename(file.path)} */}
+                            {extractFilenameFromUrl(file)}
+                          </Button>
+                        </a>
+                        {userRole === 'Admin' ? (
+                          <div className="flex flex-row space-x-4">
+                            <Trash2
+                              className="cursor-pointer"
+                              onClick={() =>
+                                handleDocumentDelete(studentId, file)
+                              }
+                            />
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+                <div></div>
+              </>
+            ) : (
+              <Loader className="h-6 w-6 animate-spin" />
+            )}
+          </div>
+          <div className="space-y-6">
+            <Text variant="heading-lg" className="mb-4">
+              Additional Files
+            </Text>
             <div>
-            </div>
-            </>
-          ) : (
-            <Loader className="h-6 w-6 animate-spin" />
-          )}
-        </div>
-        <div className="space-y-6">
-          <Text variant="heading-lg" className="mb-4">
-            Additional Files
-          </Text>
-          <div>
-            {userRole === 'Admin' ? (
-              <div className='flex flex-row space-x-4'>
-              {/* <Button onClick={}>Add status</Button> */}
-              <Button onClick={() => setOpenUpload(!openUpload)}>Add File</Button>
-              </div>
-            ) : null}
-            {additionalFile.length > 0 ? (
-              additionalFile.map((item:any, index:number) => (
-                <div key={index} className="flex flex-col mt-2">
-                  <img src={item.true} className='w-[300px]' alt="" />
-                  <p>
-                  {extractFilenameFromUrl(item.true)}
-                  </p>
+              {userRole === 'Admin' ? (
+                <div className="flex flex-row space-x-4">
+                  {/* <Button onClick={}>Add status</Button> */}
+                  <Button onClick={() => setOpenUpload(!openUpload)}>
+                    Add File
+                  </Button>
                 </div>
-              ))
-            
-          ) : (
-            <Loader className="h-6 w-6 animate-spin" />
-          )}
-            <Modal
-              title="Add Document"
-              open={openUpload}
-              onOk={() => {
-                saveAddtionalFile(studentId);
-              }}
-              confirmLoading={confirmLoading}
-              onCancel={() => setOpenUpload(!openUpload)}
-            >
-              <Form form={form} layout="vertical">
-              <Form.Item name="upload">
-                  <Upload
-                    fileList={fileList}
-                    onChange={handleChange}
-                    beforeUpload={() => false}
-                    multiple={true}
-                    >
-                    <Button>Click to Upload</Button>
-                  </Upload>
-                </Form.Item>
-                <Form.Item name="access">
-                  <div className='flex flex-row space-x-2 items-center'>
-                <Checkbox
-                value={"true"}
-                    />
-                    <p>
-                    Allow student to view this file
-                    </p>
+              ) : null}
+              {additionalFile.length > 0 ? (
+                additionalFile.map((item: any, index: number) => (
+                  <div key={index} className="flex flex-col mt-2">
+                    <img src={item.true} className="w-[300px]" alt="" />
+                    <p>{extractFilenameFromUrl(item.true)}</p>
                   </div>
-                </Form.Item>
-              </Form>
-            </Modal>
+                ))
+              ) : (
+                <Loader className="h-6 w-6 animate-spin" />
+              )}
+              <Modal
+                title="Add Document"
+                open={openUpload}
+                onOk={() => {
+                  saveAddtionalFile(studentId);
+                }}
+                confirmLoading={confirmLoading}
+                onCancel={() => setOpenUpload(!openUpload)}
+              >
+                <Form form={form} layout="vertical">
+                  <Form.Item name="upload">
+                    <Upload
+                      fileList={fileList}
+                      onChange={handleChange}
+                      beforeUpload={() => false}
+                      multiple={true}
+                    >
+                      <Button>Click to Upload</Button>
+                    </Upload>
+                  </Form.Item>
+                  <Form.Item name="access">
+                    <div className="flex flex-row space-x-2 items-center">
+                      <Checkbox value={'true'} />
+                      <p>Allow student to view this file</p>
+                    </div>
+                  </Form.Item>
+                </Form>
+              </Modal>
             </div>
-        </div>
-      </div>
-    </div>
-    <div className='w-full'>
-    <div className="flex max-w-screen-md mx-auto flex-col space-y-6 px-8 py-14 mt-14 md:py-8">
-    <Text variant="heading-lg">Student Details</Text>
-    <div className="space-y-6">
-        <div className="grid grid-cols-2 gap-6">
-          <div className="grid gap-1.5">
-            <Label>First Name</Label>
-            <Input value={studentInfo.first_name} disabled />
-          </div>
-          <div className="grid gap-1.5">
-            <Label>Last Name</Label>
-            <Input value={studentInfo.last_name} disabled />
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-6">
-          <div className="grid gap-1.5">
-            <Label>Email</Label>
-            <Input value={studentInfo.email} disabled />
-          </div>
-          <div className="grid gap-1.5">
-            <Label>Phone</Label>
-            <Input value={studentInfo.phone_number} disabled />
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-6">
-          <div className="grid gap-1.5">
-            <Label>University</Label>
-            <Input value={studentFile.university_name} disabled />
-          </div>
-          <div className="grid gap-1.5">
-            <Label>Program</Label>
-            <Input value={studentFile.program} disabled />
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-6">
-          <div className="grid gap-1.5">
-            <Label>Subject</Label>
-            <Input value={studentFile.subject} disabled />
-          </div>
-          <div className="grid gap-1.5">
-            <Label>Payment</Label>
-            <Input value={studentFile.budget} disabled />
           </div>
         </div>
       </div>
+      <div className="w-full">
+        <div className="flex max-w-screen-md mx-auto flex-col space-y-6 px-8 py-14 mt-14 md:py-8">
+          <Text variant="heading-lg">Student Details</Text>
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-6">
+              <div className="grid gap-1.5">
+                <Label>First Name</Label>
+                <Input value={studentInfo.first_name} disabled />
+              </div>
+              <div className="grid gap-1.5">
+                <Label>Last Name</Label>
+                <Input value={studentInfo.last_name} disabled />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="grid gap-1.5">
+                <Label>Email</Label>
+                <Input value={studentInfo.email} disabled />
+              </div>
+              <div className="grid gap-1.5">
+                <Label>Phone</Label>
+                <Input value={studentInfo.phone_number} disabled />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="grid gap-1.5">
+                <Label>University</Label>
+                <Input value={studentFile.university_name} disabled />
+              </div>
+              <div className="grid gap-1.5">
+                <Label>Course</Label>
+                <Input value={studentFile.course} disabled />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="grid gap-1.5">
+                <Label>Program</Label>
+                <Input value={studentFile.program} disabled />
+              </div>
+              <div className="grid gap-1.5">
+                <Label>Subject</Label>
+                <Input value={studentFile.subject} disabled />
+              </div>
+              <div className="grid gap-1.5">
+                <Label>Payment</Label>
+                <Input value={studentFile.budget} disabled />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="grid gap-1.5">
+                <Label>Payment</Label>
+                <Input value={studentFile.budget} disabled />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
     </div>
   );
 };
