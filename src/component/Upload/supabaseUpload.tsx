@@ -256,9 +256,7 @@ const UploadFeature = ({changedValues}:any) => {
         studentFilesUpdates[dbKey] = value;
       }
     });
-
-    console.log('student info update',studentInfoUpdates)
-    console.log('student files update',studentFilesUpdates)
+    
     try {
       if (Object.keys(studentInfoUpdates).length > 0) {
         const { data: studentInfoData, error: studentInfoError } = await publicSupabase

@@ -3,6 +3,7 @@ import { Checkbox } from '@/component/ui/checkbox';
 import Text from '@/component/ui/text';
 import { Form, Input, Modal, Select, Upload, UploadFile, UploadProps } from 'antd';
 import { ChevronLeft, DownloadIcon, FileIcon, Loader } from 'lucide-react';
+import { Label } from '@/component/ui/label';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { publicSupabase } from '../api/SupabaseClient';
@@ -27,6 +28,9 @@ const StudentFileDetails: React.FC = () => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [openDelete, setOpenDelete] = useState(false);
   const [openUpload, setOpenUpload] = useState(false);
+  const [studentInfo, setStudentInfo] = useState<any>([]);
+  const [studentFileId, setStudentFileId] = useState<any>([]);
+  const [studentFile, setStudentFile] = useState<any>([]);
   const [form] = Form.useForm();
 
   const navigate = useNavigate();
@@ -42,11 +46,6 @@ const StudentFileDetails: React.FC = () => {
     navigate('/dashboard');
   };
 
-  // useEffect(() => {
-  //   getUserRole()
-  //   getFilesForStudent()
-  //   getStudentId()
-  // },[])
   useEffect(() => {
     const fetchData = async () => {
       getUserRole();
@@ -60,6 +59,7 @@ const StudentFileDetails: React.FC = () => {
       if (studentId) {
         try {
           await getFilesForStudent(studentId);
+          await getStudentDetails(studentId);
         } catch (error) {
           console.error('Error fetching files:', error);
         }
@@ -67,6 +67,11 @@ const StudentFileDetails: React.FC = () => {
     };
     fetchFiles();
   }, [studentId]);
+
+  useEffect(() => {
+    // Log studentInfo whenever it changes
+    console.log('Student Info updated:', studentInfo);
+  }, [studentInfo]);
 
   const changeServiceCheck = (serviceCheck: any, check: boolean) => {
 
@@ -149,12 +154,13 @@ const StudentFileDetails: React.FC = () => {
         throw new Error();
       }
       setServicesObj(data[0].servicesobj);
-      console.log('dataaaaaaaaaaaaaaaaaa',data[0].additionalFile)
+      console.log('dataaaaaaaaaaaaaaaaaa',data[0])
       if(data[0].additionalFile) {
         setAdditionalFile(data[0].additionalFile)
       }
       // setServices(data[0].services)
       setStudentId(data[0].studentid);
+      setStudentFileId(data[0].studentfileid)
     } catch (error) {
       console.log(error);
     }
@@ -177,6 +183,31 @@ const StudentFileDetails: React.FC = () => {
     setServicesObj(updatedServices);
     setOpen(false);
   };
+
+  const getStudentDetails = async(studentId:string) => {
+    try {
+        const { data: studentInfoData, error: studentInfoError } = await publicSupabase
+          .from('studentInfo')
+          .select()
+          .eq('id', studentId); 
+
+        if (studentInfoError) throw studentInfoError;
+        console.log(' studentInfo:', studentInfoData);
+        setStudentInfo(studentInfoData[0])
+        const { data: studentFilesData, error: studentFilesError } = await publicSupabase
+          .from('studentFile')
+          .select()
+          .eq('id', studentFileId) ;
+
+        if (studentFilesError) throw studentFilesError;
+        console.log(' studentFiles:', studentFilesData);
+        setStudentFile(studentFilesData[0])
+
+      // console.log('All updates completed successfully');
+    } catch (error) {
+      console.error('Error updating data:', error);
+    }
+  }
 
   const handleCancel = () => {
     setOpen(false);
@@ -274,6 +305,7 @@ const StudentFileDetails: React.FC = () => {
   
 
   return (
+    <div className='flex flex-row justify-between items center'>
     <div className="flex max-w-screen-md mx-auto flex-col space-y-6 px-8 py-14 md:py-8">
       <div className="space-y-4">
         <Button
@@ -385,40 +417,6 @@ const StudentFileDetails: React.FC = () => {
               ))}
             </div>
             <div>
-            {/* {userRole === 'Admin' ? (
-              <div className='flex flex-row space-x-4'>
-              <Button onClick={() => setOpenDelete(!openDelete)}>Delete Document</Button>
-              </div>
-            ) : null} */}
-            {/* <Modal
-              title="Danger"
-              open={openDelete}
-              onOk={() => {
-                handleDocumentDelete(studentId);
-              }}
-              confirmLoading={confirmLoading}
-              onCancel={() => setOpenDelete(!openDelete)}
-            >
-              <Form form={form} layout="vertical">
-              <Form.Item
-                  name="status"
-                  label={'Select the Document you want to delete!'}
-                  rules={[
-                    { required: true, message: 'Please enter an amount' },
-                  ]}
-                >
-                  <Select style={{ width: '100%' }}>
-                  {downloadUrl.map((item, index) => (
-                    <Select.Option key={index} value={item.path || index.toString()}>
-                      <div className="flex gap-4 items-center">
-                        <span>{extractFilename(item.path)}</span>
-                      </div>
-                    </Select.Option>
-                  ))}
-                </Select>
-                </Form.Item>
-              </Form>
-            </Modal> */}
             </div>
             </>
           ) : (
@@ -482,27 +480,56 @@ const StudentFileDetails: React.FC = () => {
               </Form>
             </Modal>
             </div>
-          {/* {downloadUrl.length > 0 ? (
-            <div className="grid grid-cols-2 gap-6">
-              <Form form={form} layout="vertical">
-              <Form.Item name="upload">
-                  <Upload
-                    fileList={fileList}
-                    onChange={handleChange}
-                    beforeUpload={() => false}
-                    multiple={true}
-                    >
-                    <Button>Click to Upload</Button>
-                  </Upload>
-                </Form.Item>
-              </Form>
-            </div>
-            
-          ) : (
-            <Loader className="h-6 w-6 animate-spin" />
-          )} */}
         </div>
       </div>
+    </div>
+    <div className='w-full'>
+    <div className="flex max-w-screen-md mx-auto flex-col space-y-6 px-8 py-14 mt-14 md:py-8">
+    <Text variant="heading-lg">Student Details</Text>
+    <div className="space-y-6">
+        <div className="grid grid-cols-2 gap-6">
+          <div className="grid gap-1.5">
+            <Label>First Name</Label>
+            <Input value={studentInfo.first_name} disabled />
+          </div>
+          <div className="grid gap-1.5">
+            <Label>Last Name</Label>
+            <Input value={studentInfo.last_name} disabled />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-6">
+          <div className="grid gap-1.5">
+            <Label>Email</Label>
+            <Input value={studentInfo.email} disabled />
+          </div>
+          <div className="grid gap-1.5">
+            <Label>Phone</Label>
+            <Input value={studentInfo.phone_number} disabled />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-6">
+          <div className="grid gap-1.5">
+            <Label>University</Label>
+            <Input value={studentFile.university_name} disabled />
+          </div>
+          <div className="grid gap-1.5">
+            <Label>Program</Label>
+            <Input value={studentFile.program} disabled />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-6">
+          <div className="grid gap-1.5">
+            <Label>Subject</Label>
+            <Input value={studentFile.subject} disabled />
+          </div>
+          <div className="grid gap-1.5">
+            <Label>Payment</Label>
+            <Input value={studentFile.budget} disabled />
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
     </div>
   );
 };
