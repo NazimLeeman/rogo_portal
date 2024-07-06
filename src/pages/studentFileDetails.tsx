@@ -130,17 +130,43 @@ const StudentFileDetails: React.FC = () => {
       // toast.error('No File Found')
       throw new Error();
     }
-    const name = resultData.map((item: any) => {
+    const names = resultData.map((item: any) => {
       return `${studentId}/${item.name}`;
     });
-    const { data, error } = await publicSupabase.storage
-      .from('avatars')
-      .createSignedUrls(name, 60, { download: true });
 
-    if (error) {
-      throw error;
+    const publicURLs = await Promise.all(
+      names.map(async (name:string) => {
+        const { data } = await publicSupabase.storage
+          .from('avatars')
+          .getPublicUrl(name);
+        
+        return data.publicUrl;
+      })
+    );
+  
+    if (publicURLs.length === 0) {
+      console.error('Error getting public URLs');
+      return null;
     }
-    setDownloadUrl(data);
+  
+    console.log('Public URLs:', publicURLs);
+    setDownloadUrl(publicURLs);
+    // const { data: publicUrlData } = await publicSupabase.storage
+    //   .from('avatars')
+    //   .getPublicUrl(name);
+    //   // .createSignedUrls(name, 60, { download: true });
+
+    // // if (error) {
+    // //   throw error;
+    // // }
+    // const publicURL = publicUrlData?.publicUrl;
+
+    // if (!publicURL) {
+    //   console.error('Error getting public URL');
+    //   return null;
+    // }
+    // console.log('publiccccccccccccccccccccccccccc',publicURL)
+    // setDownloadUrl(publicURL);
   };
 
   const getStudentId = async () => {
@@ -218,12 +244,6 @@ const StudentFileDetails: React.FC = () => {
     setFileList(newFileList);
   };
 
-  // const saveAddtionalFile = async (studentId:string) => {
-  //   console.log('student id',studentId)
-  //   const values = await form.validateFields();
-  //   console.log('values',values)
-  // }
-
   const saveAddtionalFile = async (studentId: string) => {
     console.log('student id', studentId)
     
@@ -277,7 +297,7 @@ const StudentFileDetails: React.FC = () => {
       // List files in the student's folder
       // const values = await form.validateFields();
       // const fileName = values.status
-      const originalName = extractFilename(fileName);
+      const originalName = extractFilenameFromUrl(fileName);
       // Delete the file
       const { data: deleteData, error: deleteError } = await publicSupabase.storage
         .from('avatars')
@@ -391,25 +411,27 @@ const StudentFileDetails: React.FC = () => {
             <>
             <div className="grid grid-cols-2 gap-6">
               {downloadUrl.map((file: any) => (
-                <div key={file.path} className="space-y-2">
+                <div key={file} className="space-y-2">
                   <div className="w-full h-60 border rounded-md">
-                    <Image src={file.signedUrl} />
+                    <Image src={file} />
                   </div>
                   <div className='flex flex-row justify-between items-center'>
                   <a
-                    href={file.signedUrl}
+                    href={file}
                     rel="noopener noreferrer"
+                    download={extractFilenameFromUrl(file)} 
                     target="_blank"
                     className="block"
                     >
                     <Button size="sm" variant="ghost">
                       <DownloadIcon className="h-4 w-4 mr-2" />
-                      {extractFilename(file.path)}
+                      {/* {extractFilename(file.path)} */}
+                      {extractFilenameFromUrl(file)}
                     </Button>
                   </a>
                   {userRole === 'Admin' ? (
                     <div className='flex flex-row space-x-4'>
-              <Trash2 className='cursor-pointer' onClick={() => handleDocumentDelete(studentId, file.path)} />
+              <Trash2 className='cursor-pointer' onClick={() => handleDocumentDelete(studentId, file)} />
               </div>
             ) : null}
             </div>
