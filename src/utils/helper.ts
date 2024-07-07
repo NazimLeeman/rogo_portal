@@ -117,13 +117,72 @@ export const formatDate = (dataString: any) => {
 
 
 
+// export function combineData(firstSource: FirstDataSource[], secondSource: SecondDataSource[]): (FirstDataSource & SecondDataSource)[] {
+//   const combinedData = firstSource.map(firstItem => {
+//     const matchingSecondItem = secondSource.find(secondItem => {
+//       console.log('secodeeeeeeeeeeeeeee',secondItem.filedetails.studentfileid)
+//       if (!secondItem) {
+//         console.log('secondItem is undefined or null');
+//         return false;
+//       }
+      
+//       if (!secondItem.filedetails) {
+//         console.log('secondItem.filedetails is undefined or null');
+//         return false;
+//       }
+      
+//       if (!secondItem.filedetails.studentfileid) {
+//         console.log('secondItem.filedetails.studentfileid is undefined or null');
+//         return false;
+//       }
+//       secondItem.filedetails.studentfileid === firstItem.id
+//     }
+//     );
+
+//     console.log('matched item',matchingSecondItem)
+
+//     if (matchingSecondItem) {
+//       return { ...firstItem, ...matchingSecondItem };
+//     }
+
+//     return firstItem;
+//   });
+
+//   return combinedData as (FirstDataSource & SecondDataSource)[] ;
+// }
+
 export function combineData(firstSource: FirstDataSource[], secondSource: SecondDataSource[]): (FirstDataSource & SecondDataSource)[] {
   const combinedData = firstSource.map(firstItem => {
-    const matchingSecondItem = secondSource.find(secondItem => 
-      secondItem.filedetails.studentfileid === firstItem.id
-    );
+    const matchingSecondItem = secondSource.find(secondItem => {
+      // Log the entire secondItem for debugging
+      // console.log('Current secondItem:', JSON.stringify(secondItem, null, 2));
+      
+      // Check if secondItem and its properties exist
+      if (!secondItem || typeof secondItem !== 'object') {
+        // console.log('secondItem is not a valid object');
+        return false;
+      }
+      
+      if (!secondItem.filedetails || typeof secondItem.filedetails !== 'object') {
+        // console.log('secondItem.filedetails is not a valid object');
+        return false;
+      }
+      
+      // Use optional chaining and nullish coalescing for safer property access
+      const studentFileId = secondItem.filedetails?.studentfileid ?? null;
+      // console.log('studentFileId:', studentFileId);
+      // console.log('firstItem.id:', firstItem.id);
+      
+      if (studentFileId === null) {
+        // console.log('studentfileid is null or undefined');
+        return false;
+      }
+      
+      // Ensure both values are of the same type before comparison
+      return String(studentFileId) === String(firstItem.id);
+    });
 
-    console.log('matched item',matchingSecondItem)
+    // console.log('Matched item:', matchingSecondItem);
 
     if (matchingSecondItem) {
       return { ...firstItem, ...matchingSecondItem };
@@ -132,5 +191,5 @@ export function combineData(firstSource: FirstDataSource[], secondSource: Second
     return firstItem;
   });
 
-  return combinedData as (FirstDataSource & SecondDataSource)[] ;
+  return combinedData as (FirstDataSource & SecondDataSource)[];
 }

@@ -16,8 +16,9 @@ const SearchTable: React.FC = () => {
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
   const [fileDetails, setFileDetails] = useState<any>([])
+  const [combinedData, setCombinedData] = useState<any>([])
   const { studentsFile, setStudentsFile } = useFile();
-  const data: CombinedDataSource[] | null = studentsFile;
+  const data: CombinedDataSource[] | null = combinedData;
 
   const searchInput = useRef<InputRef>(null);
 
@@ -30,6 +31,7 @@ const SearchTable: React.FC = () => {
     if(studentsFile && studentsFile.length > 0 && fileDetails && fileDetails.length > 0) {
       const final = combineData(studentsFile,fileDetails)
       console.log('final', final)
+      setCombinedData(final)
     }
   },[studentsFile,fileDetails])
 
@@ -48,7 +50,6 @@ const SearchTable: React.FC = () => {
 
   const getStudentFileDetails = async () => {
     try {
-      // First, get all unique filedetailsids
       const { data: uniqueFileDetails, error: uniqueError } = await publicSupabase
         .from('statusSteps')
         .select('filedetailsid')
@@ -56,10 +57,8 @@ const SearchTable: React.FC = () => {
   
       if (uniqueError) throw uniqueError;
   
-      // Extract unique filedetailsids
       const uniqueIds = [...new Set(uniqueFileDetails.map(item => item.filedetailsid))];
   
-      // Now, get the latest status step for each unique filedetailsid
       const { data: allStatusSteps, error: statusError } = await publicSupabase
         .from('statusSteps')
         .select(`*,filedetails:filedetailsid(*)`)
@@ -68,14 +67,12 @@ const SearchTable: React.FC = () => {
   
       if (statusError) throw statusError;
   
-      // Process the data to get only the latest entry for each filedetailsid
       const latestStatusSteps = uniqueIds.map(id => {
         return allStatusSteps.find(step => step.filedetailsid === id);
-      }).filter(Boolean); // Remove any undefined entries
+      }).filter(Boolean); 
   
       console.log('Latest status steps:', latestStatusSteps);
       setFileDetails(latestStatusSteps)
-      // return latestStatusSteps;
     } catch (error) {
       console.error('Error fetching latest status steps:', error);
       throw error;
@@ -195,34 +192,86 @@ const SearchTable: React.FC = () => {
       ),
   });
 
+  const getNestedColumnSearchProps = (dataIndex: string, nestedField: string) => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }:any) => (
+      <div style={{ padding: 8 }}>
+        <Input
+          placeholder={`Search ${dataIndex}`}
+          value={selectedKeys[0]}
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => confirm()}
+          style={{ width: 188, marginBottom: 8, display: 'block' }}
+        />
+        <Button
+          type="primary"
+          onClick={() => confirm()}
+          size="small"
+          style={{ width: 90, marginRight: 8 }}
+        >
+          Search
+        </Button>
+        <Button onClick={() => clearFilters()} size="small" style={{ width: 90 }}>
+          Reset
+        </Button>
+      </div>
+    ),
+    filterIcon: (filtered:any) => (
+      <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+    ),
+    onFilter: (value:any, record:any) =>
+      record[dataIndex] && record[dataIndex][nestedField]
+        ? record[dataIndex][nestedField].toString().toLowerCase().includes(value.toLowerCase())
+        : '',
+    render: (text:any, record:any) =>
+      record[dataIndex] && record[dataIndex][nestedField] ? record[dataIndex][nestedField] : 'N/A',
+  });
+
   const columns: TableColumnsType<CombinedDataSource> = [
     {
       title: 'Email',
       dataIndex: 'studentInfo',
       key: 'studentInfo.email',
-      width: '30%',
-      render: (studentInfo) => studentInfo?.email || 'N/A',
+      width: '20%',
+      // render: (studentInfo) => studentInfo?.email || 'N/A',
+      ...getNestedColumnSearchProps('studentInfo', 'email'),
       //   ...getColumnSearchProps('name'),
+    },
+    {
+      title: 'First Name',
+      dataIndex: 'studentInfo',
+      key: 'studentInfo.first_name',
+      // width: '20%',
+      // render: (studentInfo) => studentInfo?.first_name || 'N/A',
+      ...getNestedColumnSearchProps('studentInfo', 'first_name'),
+      //   ...getColumnSearchProps('name'),
+    },
+    {
+      title: 'Last Name',
+      dataIndex: 'studentInfo',
+      key: 'studentInfo.last_name',
+      // render: (studentInfo) => studentInfo?.last_name || 'N/A',
+      ...getNestedColumnSearchProps('studentInfo', 'last_name'),
+        // ...getColumnSearchProps('studentInfo'),
     },
     {
       title: 'University',
       dataIndex: 'university_name',
       key: 'university_name',
-      width: '20%',
+      width: '10%',
       ...getColumnSearchProps('university_name'),
     },
     {
       title: 'Program',
       dataIndex: 'program',
       key: 'program',
-      width: '20%',
+      width: '10%',
       ...getColumnSearchProps('program'),
     },
     {
       title: 'Subject',
       dataIndex: 'subject',
       key: 'subject',
-      width: '20%',
+      width: '10%',
       ...getColumnSearchProps('subject'),
     },
     {
@@ -233,13 +282,14 @@ const SearchTable: React.FC = () => {
       //   sorter: (a, b) => a.address.length - b.address.length,
       sortDirections: ['descend', 'ascend'],
     },
-      // {
-      //   title: 'Title',
-      //   dataIndex: 'title',
-      //   key: 'title',
-      //   render: (title) => title || 'N/A',
-      // },
-    
+    {
+      title: 'Status',
+      dataIndex: 'title',
+      key: 'title',
+      render: (text) => {
+          return text || 'N/A';
+        },
+      },
   ];
 
   return (
