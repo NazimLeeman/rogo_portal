@@ -39,6 +39,7 @@ const StudentFileDetails: React.FC = () => {
   const [studentInfo, setStudentInfo] = useState<any>([]);
   const [studentFileId, setStudentFileId] = useState<any>([]);
   const [studentFile, setStudentFile] = useState<any>([]);
+  const [isEdit, setIsEdit] = useState<boolean>(true)
   const [form] = Form.useForm();
 
   const navigate = useNavigate();
@@ -354,43 +355,46 @@ const StudentFileDetails: React.FC = () => {
         <div className="grid grid-cols-2 gap-6">
           <div className="grid gap-1.5">
             <Label>First Name</Label>
-            <Input value={studentInfo.first_name} disabled />
+            <Input value={studentInfo.first_name} disabled={isEdit} />
           </div>
           <div className="grid gap-1.5">
             <Label>Last Name</Label>
-            <Input value={studentInfo.last_name} disabled />
+            <Input value={studentInfo.last_name} disabled={isEdit} />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-6">
           <div className="grid gap-1.5">
             <Label>Email</Label>
-            <Input value={studentInfo.email} disabled />
+            <Input value={studentInfo.email} disabled={isEdit} />
           </div>
           <div className="grid gap-1.5">
             <Label>Phone</Label>
-            <Input value={studentInfo.phone_number} disabled />
+            <Input value={studentInfo.phone_number} disabled={isEdit} />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-6">
           <div className="grid gap-1.5">
             <Label>University</Label>
-            <Input value={studentFile.university_name} disabled />
+            <Input value={studentFile.university_name} disabled={isEdit} />
           </div>
           <div className="grid gap-1.5">
             <Label>Program</Label>
-            <Input value={studentFile.program} disabled />
+            <Input value={studentFile.program} disabled={isEdit} />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-6">
           <div className="grid gap-1.5">
             <Label>Subject</Label>
-            <Input value={studentFile.subject} disabled />
+            <Input value={studentFile.subject} disabled={isEdit} />
           </div>
           <div className="grid gap-1.5">
             <Label>Payment</Label>
-            <Input value={studentFile.budget} disabled />
+            <Input value={studentFile.budget} disabled={isEdit} />
           </div>
         </div>
+        {userRole === 'Admin' ? (
+                <Button onClick={() => setIsEdit(false)}>Edit Details</Button>
+              ) : null}
       </div>
         <div className="space-y-12">
           <div className="space-y-6">
