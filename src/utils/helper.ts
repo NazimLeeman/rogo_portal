@@ -1,3 +1,4 @@
+import { FirstDataSource, SecondDataSource } from "@/interface/filedetails.interface";
 import toast from "react-hot-toast";
 
 export const formatDate = (dataString: any) => {
@@ -113,3 +114,23 @@ export const formatDate = (dataString: any) => {
       return decodeURIComponent(filename);
     }
   }
+
+
+
+export function combineData(firstSource: FirstDataSource[], secondSource: SecondDataSource[]): (FirstDataSource & SecondDataSource)[] {
+  const combinedData = firstSource.map(firstItem => {
+    const matchingSecondItem = secondSource.find(secondItem => 
+      secondItem.filedetails.studentfileid === firstItem.id
+    );
+
+    console.log('matched item',matchingSecondItem)
+
+    if (matchingSecondItem) {
+      return { ...firstItem, ...matchingSecondItem };
+    }
+
+    return firstItem;
+  });
+
+  return combinedData as (FirstDataSource & SecondDataSource)[] ;
+}

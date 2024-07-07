@@ -7,33 +7,37 @@ import Highlighter from 'react-highlight-words';
 import { StudentFile } from '../../interface/studentInfo.interface';
 import { publicSupabase } from '../../api/SupabaseClient';
 import { useFile } from '../../context/FileContext';
+import { combineData } from '@/utils/helper';
+import { CombinedDataSource } from '@/interface/filedetails.interface';
 
-interface DataType {
-  key: string;
-  name: string;
-  age: number;
-  address: string;
-}
-
-type DataIndex = keyof StudentFile;
+type DataIndex = keyof CombinedDataSource;
 
 const SearchTable: React.FC = () => {
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
+  const [fileDetails, setFileDetails] = useState<any>([])
   const { studentsFile, setStudentsFile } = useFile();
-  const data: StudentFile[] | null = studentsFile;
+  const data: CombinedDataSource[] | null = studentsFile;
 
   const searchInput = useRef<InputRef>(null);
 
   useEffect(() => {
     getStudentFile();
+    getStudentFileDetails()
   }, []);
+
+  useEffect(() => {
+    if(studentsFile && studentsFile.length > 0 && fileDetails && fileDetails.length > 0) {
+      const final = combineData(studentsFile,fileDetails)
+      console.log('final', final)
+    }
+  },[studentsFile,fileDetails])
 
   const getStudentFile = async () => {
     try {
       const { data: StudentInfo, error } = await publicSupabase
         .from('studentFile')
-        .select('*');
+        .select(`*,studentInfo:student_id(*)`);
       setStudentsFile(StudentInfo);
       console.log('student info',StudentInfo)
       if (error) throw error;
@@ -44,21 +48,40 @@ const SearchTable: React.FC = () => {
 
   const getStudentFileDetails = async () => {
     try {
-      const  {data, error} = await publicSupabase
-        .from('studentInfo')
-        .select(`
-          *,
-          studentFile:foreignKeyColumn(column1, column2)
-        `);
-
-        if(error) {
-          throw new Error;
-        }
-        console.log('dataaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',data)
+      // First, get all unique filedetailsids
+      const { data: uniqueFileDetails, error: uniqueError } = await publicSupabase
+        .from('statusSteps')
+        .select('filedetailsid')
+        .order('filedetailsid');
+  
+      if (uniqueError) throw uniqueError;
+  
+      // Extract unique filedetailsids
+      const uniqueIds = [...new Set(uniqueFileDetails.map(item => item.filedetailsid))];
+  
+      // Now, get the latest status step for each unique filedetailsid
+      const { data: allStatusSteps, error: statusError } = await publicSupabase
+        .from('statusSteps')
+        .select(`*,filedetails:filedetailsid(*)`)
+        .in('filedetailsid', uniqueIds)
+        .order('createdAt', { ascending: false });
+  
+      if (statusError) throw statusError;
+  
+      // Process the data to get only the latest entry for each filedetailsid
+      const latestStatusSteps = uniqueIds.map(id => {
+        return allStatusSteps.find(step => step.filedetailsid === id);
+      }).filter(Boolean); // Remove any undefined entries
+  
+      console.log('Latest status steps:', latestStatusSteps);
+      setFileDetails(latestStatusSteps)
+      // return latestStatusSteps;
     } catch (error) {
-      console.log('error',error)
+      console.error('Error fetching latest status steps:', error);
+      throw error;
     }
-  }
+  };
+
 
   const handleSearch = (
     selectedKeys: string[],
@@ -74,10 +97,11 @@ const SearchTable: React.FC = () => {
     clearFilters();
     setSearchText('');
   };
+//<T>(dataIndex: keyof T): Partial<TableColumnsType<T>[number]> 
 
   const getColumnSearchProps = (
     dataIndex: DataIndex,
-  ): TableColumnType<StudentFile> => ({
+  ): TableColumnType<CombinedDataSource> => ({
     filterDropdown: ({
       setSelectedKeys,
       selectedKeys,
@@ -143,11 +167,16 @@ const SearchTable: React.FC = () => {
     filterIcon: (filtered: boolean) => (
       <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
     ),
-    onFilter: (value, record) =>
-      record[dataIndex]
-        .toString()
-        .toLowerCase()
-        .includes((value as string).toLowerCase()),
+    onFilter: (value, record) => {
+      const recordValue = record[dataIndex];
+      return recordValue != null && typeof recordValue === 'string'
+        ? recordValue.toLowerCase().includes((value as string).toLowerCase())
+        : false;
+},
+      // record[dataIndex]
+      //   .toString()
+      //   .toLowerCase()
+      //   .includes((value as string).toLowerCase()),
     onFilterDropdownOpenChange: (visible) => {
       if (visible) {
         setTimeout(() => searchInput.current?.select(), 100);
@@ -166,12 +195,13 @@ const SearchTable: React.FC = () => {
       ),
   });
 
-  const columns: TableColumnsType<StudentFile> = [
+  const columns: TableColumnsType<CombinedDataSource> = [
     {
-      title: 'Student Id',
-      dataIndex: 'student_id',
-      key: 'student_id',
+      title: 'Email',
+      dataIndex: 'studentInfo',
+      key: 'studentInfo.email',
       width: '30%',
+      render: (studentInfo) => studentInfo?.email || 'N/A',
       //   ...getColumnSearchProps('name'),
     },
     {
@@ -203,6 +233,13 @@ const SearchTable: React.FC = () => {
       //   sorter: (a, b) => a.address.length - b.address.length,
       sortDirections: ['descend', 'ascend'],
     },
+      // {
+      //   title: 'Title',
+      //   dataIndex: 'title',
+      //   key: 'title',
+      //   render: (title) => title || 'N/A',
+      // },
+    
   ];
 
   return (
