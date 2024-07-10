@@ -222,7 +222,7 @@ const SearchTable: React.FC = () => {
       record[dataIndex] && record[dataIndex][nestedField]
         ? record[dataIndex][nestedField].toString().toLowerCase().includes(value.toLowerCase())
         : '',
-    render: (text:any, record:any) =>
+    render: (_:any, record:any) => 
       record[dataIndex] && record[dataIndex][nestedField] ? record[dataIndex][nestedField] : 'N/A',
   });
 
