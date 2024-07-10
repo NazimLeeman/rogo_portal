@@ -12,7 +12,7 @@ import {
 } from 'antd';
 import { ChevronLeft, DownloadIcon, FileIcon, Loader } from 'lucide-react';
 import { Label } from '@/component/ui/label';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { publicSupabase } from '../api/SupabaseClient';
 import Step from '../component/Step/step';
@@ -40,7 +40,53 @@ const StudentFileDetails: React.FC = () => {
   const [studentFileId, setStudentFileId] = useState<any>([]);
   const [studentFile, setStudentFile] = useState<any>([]);
   const [isEdit, setIsEdit] = useState<boolean>(true)
+  const [isSave, setIsSave] = useState<boolean>(true)
   const [form] = Form.useForm();
+
+  const [formData, setFormData] = useState<any>({
+    firstName: studentInfo?.first_name || '',
+    lastName: studentInfo?.last_name || '',
+    email: studentInfo?.email || '',
+    phone: studentInfo?.phone_number || '',
+    university: studentFile?.university_name || '',
+    program: studentFile?.program || '',
+    subject: studentFile?.subject || '',
+    payment: studentFile?.budget || '',
+  });
+
+  const [changedFields, setChangedFields] = useState<any>({});
+
+  useEffect(() => {
+    // Update formData when props change
+    setFormData({
+      firstName: studentInfo?.first_name || '',
+      lastName: studentInfo?.last_name || '',
+      email: studentInfo?.email || '',
+      phone: studentInfo?.phone_number || '',
+      university: studentFile?.university_name || '',
+      program: studentFile?.program || '',
+      subject: studentFile?.subject || '',
+      payment: studentFile?.budget || '',
+    });
+    // Reset changedFields when props change
+    setChangedFields({});
+  }, [studentInfo, studentFile]);
+
+  const handleInputChange = useCallback((field: any, value: any) => {
+    console.log('handle Input')
+    setIsSave(false)
+    setFormData((prev: any) => ({ ...prev, [field]: value }));
+    setChangedFields((prev: any) => ({ ...prev, [field]: true }));
+  }, []);
+
+  const getChangedValues = useCallback(() => {
+    return Object.keys(changedFields).reduce((acc: any, field: string) => {
+      if (changedFields[field]) {
+        acc[field] = formData[field];
+      }
+      return acc;
+    }, {});
+  }, [changedFields, formData]);
 
   const navigate = useNavigate();
 
@@ -76,11 +122,6 @@ const StudentFileDetails: React.FC = () => {
     };
     fetchFiles();
   }, [studentId]);
-
-  useEffect(() => {
-    // Log studentInfo whenever it changes
-    console.log('Student Info updated:', studentInfo);
-  }, [studentInfo]);
 
   const changeServiceCheck = (serviceCheck: any, check: boolean) => {
     if (userRole === 'Admin') {
@@ -157,24 +198,8 @@ const StudentFileDetails: React.FC = () => {
       return null;
     }
 
-    console.log('Public URLs:', publicURLs);
     setDownloadUrl(publicURLs);
-    // const { data: publicUrlData } = await publicSupabase.storage
-    //   .from('avatars')
-    //   .getPublicUrl(name);
-    //   // .createSignedUrls(name, 60, { download: true });
 
-    // // if (error) {
-    // //   throw error;
-    // // }
-    // const publicURL = publicUrlData?.publicUrl;
-
-    // if (!publicURL) {
-    //   console.error('Error getting public URL');
-    //   return null;
-    // }
-    // console.log('publiccccccccccccccccccccccccccc',publicURL)
-    // setDownloadUrl(publicURL);
   };
 
   const getStudentId = async () => {
@@ -188,7 +213,6 @@ const StudentFileDetails: React.FC = () => {
         throw new Error();
       }
       setServicesObj(data[0].servicesobj);
-      console.log('dataaaaaaaaaaaaaaaaaa', data[0]);
       if (data[0].additionalFile) {
         setAdditionalFile(data[0].additionalFile);
       }
@@ -224,7 +248,6 @@ const StudentFileDetails: React.FC = () => {
         await publicSupabase.from('studentInfo').select().eq('id', studentId);
 
       if (studentInfoError) throw studentInfoError;
-      console.log(' studentInfo:', studentInfoData);
       setStudentInfo(studentInfoData[0]);
       const { data: studentFilesData, error: studentFilesError } =
         await publicSupabase
@@ -233,7 +256,6 @@ const StudentFileDetails: React.FC = () => {
           .eq('id', studentFileId);
 
       if (studentFilesError) throw studentFilesError;
-      console.log(' studentFiles:', studentFilesData);
       setStudentFile(studentFilesData[0]);
 
       // console.log('All updates completed successfully');
@@ -337,6 +359,59 @@ const StudentFileDetails: React.FC = () => {
     }
   };
 
+  const handleUpdate = async () => {
+    const changedValues = getChangedValues()
+    if (Object.keys(changedValues).length > 0) {
+      console.log('changed values',changedValues)
+      const studentInfoFields = ['firstName', 'lastName', 'email', 'phone'];
+    const studentFilesFields = ['university', 'program', 'subject', 'payment'];
+
+    const studentInfoUpdates:any = {};
+    const studentFilesUpdates:any = {};
+
+    Object.entries(changedValues).forEach(([key, value]) => {
+      if (studentInfoFields.includes(key)) {
+        const dbKey = key === 'firstName' ? 'first_name' : 
+                      key === 'lastName' ? 'last_name' : 
+                      key === 'phone' ? 'phone_number' : key;
+        studentInfoUpdates[dbKey] = value;
+      } else if (studentFilesFields.includes(key)) {
+        const dbKey = key === 'university' ? 'university_name' : 
+                      key === 'payment' ? 'budget' : key;
+        studentFilesUpdates[dbKey] = value;
+      }
+    });
+    
+    try {
+      if (Object.keys(studentInfoUpdates).length > 0) {
+        const { data: studentInfoData, error: studentInfoError } = await publicSupabase
+          .from('studentInfo')
+          .update(studentInfoUpdates)
+          .eq('id', studentInfo?.id) 
+          .select();
+
+        if (studentInfoError) throw studentInfoError;
+        console.log('Updated studentInfo:', studentInfoData);
+      }
+
+      if (Object.keys(studentFilesUpdates).length > 0) {
+        const { data: studentFilesData, error: studentFilesError } = await publicSupabase
+          .from('studentFile')
+          .update(studentFilesUpdates)
+          .eq('id', studentFile?.id) 
+          .select();
+
+        if (studentFilesError) throw studentFilesError;
+        console.log('Updated studentFiles:', studentFilesData);
+      }
+
+      console.log('All updates completed successfully');
+    } catch (error) {
+      console.error('Error updating data:', error);
+    }
+    }
+  };
+
   return (
     <div className="flex max-w-screen-md mx-auto flex-col space-y-6 px-8 py-14 md:py-8">
       <div className="space-y-4">
@@ -355,45 +430,59 @@ const StudentFileDetails: React.FC = () => {
         <div className="grid grid-cols-2 gap-6">
           <div className="grid gap-1.5">
             <Label>First Name</Label>
-            <Input value={studentInfo.first_name} disabled={isEdit} />
+            <Input value={formData.firstName} onChange={(e) => handleInputChange('firstName', e.target.value)} disabled={isEdit} />
           </div>
           <div className="grid gap-1.5">
             <Label>Last Name</Label>
-            <Input value={studentInfo.last_name} disabled={isEdit} />
+            <Input value={formData.lastName} onChange={(e) => handleInputChange('lastName', e.target.value)} disabled={isEdit} />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-6">
           <div className="grid gap-1.5">
             <Label>Email</Label>
-            <Input value={studentInfo.email} disabled={isEdit} />
+            <Input value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)} disabled={isEdit} />
           </div>
           <div className="grid gap-1.5">
             <Label>Phone</Label>
-            <Input value={studentInfo.phone_number} disabled={isEdit} />
+            <Input value={formData.phone} onChange={(e) => handleInputChange('phone', e.target.value)} disabled={isEdit} />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-6">
           <div className="grid gap-1.5">
             <Label>University</Label>
-            <Input value={studentFile.university_name} disabled={isEdit} />
+            <Input value={formData.university} onChange={(e) => handleInputChange('university', e.target.value)} disabled={isEdit} />
           </div>
           <div className="grid gap-1.5">
             <Label>Program</Label>
-            <Input value={studentFile.program} disabled={isEdit} />
+            <Input value={formData.program} onChange={(e) => handleInputChange('program', e.target.value)} disabled={isEdit} />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-6">
           <div className="grid gap-1.5">
             <Label>Subject</Label>
-            <Input value={studentFile.subject} disabled={isEdit} />
+            <Input value={formData.subject} onChange={(e) => handleInputChange('subject', e.target.value)} disabled={isEdit} />
           </div>
           <div className="grid gap-1.5">
             <Label>Payment</Label>
-            <Input value={studentFile.budget} disabled={isEdit} />
+            <Input value={formData.payment} onChange={(e) => handleInputChange('payment', e.target.value)} disabled={isEdit} />
           </div>
         </div>
         {userRole === 'Admin' ? (
+          <div>
+            {
+              !isEdit ? (
+                <div className='flex flex-row space-x-2'>
+                <Button onClick={() => {
+                  handleUpdate()
+                  setIsEdit(true)
+                }} disabled={isSave}>Save</Button>
+                <Button onClick={() => setIsEdit(true)}>Cancel</Button>    
+                </div>
+              ) : (
                 <Button onClick={() => setIsEdit(false)}>Edit Details</Button>
+              )
+            }
+          </div>
               ) : null}
       </div>
         <div className="space-y-12">
