@@ -178,7 +178,7 @@ const FileForm: React.FC = () => {
           {/* <Input /> */}
           <Select>
             <Select.Option value="Mardovia State University">
-              Mardovia State University
+              Mordovia State University
             </Select.Option>
             <Select.Option value="Russian State University for the Humanities">
               Russian State University for the Humanities
