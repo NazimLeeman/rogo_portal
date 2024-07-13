@@ -4,6 +4,7 @@ import Dashboard from './pages/dashboard';
 import StudentFileSubmission from './pages/studentFileSubmission';
 import StudentFileDetails from './pages/studentFileDetails';
 import Agreement from './pages/agreement';
+import FileRejection from './pages/fileRejection';
 
 export const routes = [
   // {
@@ -41,4 +42,9 @@ export const routes = [
     path: '/agreement',
     element: <Agreement />,
   },
+  {
+    name: 'file-rejection',
+    path: '/file-rejection',
+    element: <FileRejection />,
+  }
 ];

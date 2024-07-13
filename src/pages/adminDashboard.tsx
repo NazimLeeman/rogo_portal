@@ -86,7 +86,7 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-  const getStudentInfo = async (id: string, fileId: string) => {
+  const getStudentInfo = async (id: string, fileId: string, fileStatus: string) => {
     try {
       const { data, error } = await publicSupabase
         .from('studentInfo')
@@ -95,7 +95,13 @@ const AdminDashboard: React.FC = () => {
       if (error) throw error;
       if (data && data.length > 0) {
         setStudentInfo(data[0]);
-        navigate(`/file-details/${fileId}`);
+        
+
+        if(fileStatus === 'Rejected') {
+          navigate('/file-rejection')
+        } else {
+          navigate(`/file-details/${fileId}`);
+        }
       } else {
         console.error('No student info found');
       }
@@ -140,11 +146,11 @@ const AdminDashboard: React.FC = () => {
         toast.error('Error while opening file.');
         throw fileDetailsError;
       }
-      console.log('file id', fileDetailsData);
       if (fileDetailsData && fileDetailsData?.length > 0) {
         const fileId = fileDetailsData[0].id;
         setFileData(fileDetailsData[0]);
-        await getStudentInfo(student_id, fileId);
+        const fileStatus = fileDetailsData[0].fileStatus
+        await getStudentInfo(student_id, fileId, fileStatus);
       } else {
         selectedStudentInfo(student_id, id);
         // navigate('/agreement');
@@ -241,11 +247,13 @@ const AdminDashboard: React.FC = () => {
                         border: 'none',
                       }}
                       className="mt-2"
-                      onClick={() =>
+                      onClick={() => {
+                        setStudentFiles(studentFile)
                         handleStudentFileDetails(
                           studentFile.id,
                           studentFile.student_id,
                         )
+                      }
                       }
                     >
                       Click here to proceed
