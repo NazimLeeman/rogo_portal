@@ -349,9 +349,11 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
       setConfirmLoading(true);
       console.log('Form values:', { ...values, upload: fileList });
 
-      if(values.status.toLowerCase().includes('rejected')) {
-        console.log('status',values.status)
-        updateRejection()
+      if(bucketName === 'statusSteps') {
+        if(values.status.toLowerCase().includes('rejected')) {
+          console.log('status',values.status)
+          updateRejection()
+        }
       }
 
       try {
