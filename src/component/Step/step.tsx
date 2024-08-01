@@ -16,7 +16,12 @@ import React, { useEffect, useState } from 'react';
 import { publicSupabase } from '../../api/SupabaseClient';
 import { useFile } from '../../context/FileContext';
 import { useRole } from '../../hooks/useRole';
-import { extractFilenameFromUrl, formatDate, generateRandomId, highestState } from '../../utils/helper';
+import {
+  extractFilenameFromUrl,
+  formatDate,
+  generateRandomId,
+  highestState,
+} from '../../utils/helper';
 import { Alert, AlertTitle } from '../ui/alert';
 import { Skeleton } from '../ui/skeleton';
 import Text from '../ui/text';
@@ -29,13 +34,19 @@ interface StepProps {
 }
 
 const checkForDuplicateFileNames = (fileLists: UploadFile[][]) => {
-  const allFileNames = fileLists.flat().map(file => file.name);
+  const allFileNames = fileLists.flat().map((file) => file.name);
   const uniqueFileNames = new Set(allFileNames);
-  
+
   if (allFileNames.length !== uniqueFileNames.size) {
-    const duplicates = allFileNames.filter((name, index) => allFileNames.indexOf(name) !== index);
-    toast.error(`Duplicate file names found: ${duplicates.join(', ')}. Please rename these files before uploading.`)
-    throw new Error(`Duplicate file names found: ${duplicates.join(', ')}. Please rename these files before uploading.`);
+    const duplicates = allFileNames.filter(
+      (name, index) => allFileNames.indexOf(name) !== index,
+    );
+    toast.error(
+      `Duplicate file names found: ${duplicates.join(', ')}. Please rename these files before uploading.`,
+    );
+    throw new Error(
+      `Duplicate file names found: ${duplicates.join(', ')}. Please rename these files before uploading.`,
+    );
   }
 };
 
@@ -277,12 +288,12 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
     setBudget(data[0]);
   };
 
-  const updateBudget = async (payment: any, operation:string) => {
+  const updateBudget = async (payment: any, operation: string) => {
     let newRemainingBalance;
     if (operation === 'debit') {
       newRemainingBalance = budget.budget - payment;
     } else {
-      newRemainingBalance = budget.budget + payment
+      newRemainingBalance = budget.budget + payment;
     }
     const { data, error } = await publicSupabase
       .from('filedetails')
@@ -305,8 +316,8 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
   };
 
   const deletePayment = () => {
-    showDeleteModal()
-  }
+    showDeleteModal();
+  };
 
   if (loading) {
     return <Loader className="h-6 w-6 animate-spin" />;
@@ -322,7 +333,7 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
     content: item.content,
     subTitle: item.notes,
     description: formatDate(item.createdAt),
-    id: item.id
+    id: item.id,
   }));
 
   const paymentItems = paymentStep.map((item: any) => ({
@@ -331,7 +342,7 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
     content: item.content,
     subTitle: item.notes,
     description: formatDate(item.createdAt),
-    id: item.id
+    id: item.id,
   }));
 
   const showModal = () => {
@@ -339,8 +350,8 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
   };
 
   const showDeleteModal = () => {
-    setOpenDelete(true)
-  }
+    setOpenDelete(true);
+  };
 
   const handleOk = async (type: string) => {
     try {
@@ -349,10 +360,10 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
       setConfirmLoading(true);
       console.log('Form values:', { ...values, upload: fileList });
 
-      if(bucketName === 'statusSteps') {
-        if(values.status.toLowerCase().includes('rejected')) {
-          console.log('status',values.status)
-          updateRejection()
+      if (bucketName === 'statusSteps') {
+        if (values.status.toLowerCase().includes('rejected')) {
+          console.log('status', values.status);
+          updateRejection();
         }
       }
 
@@ -363,7 +374,6 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
         // The error message is already shown by the toast in checkForDuplicateFileNames
         return; // Exit the function early if duplicates are found
       }
-  
 
       const uploadPromises = fileList
         .filter((file) => file.originFileObj)
@@ -390,50 +400,52 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
   };
 
   const handleDelete = async (type: string) => {
-    console.log('type',type)
+    console.log('type', type);
     const tableName = type === 'status' ? 'statusSteps' : 'paymentSteps';
     const values = await form.validateFields();
-    const id = values.status
-    console.log('values',values)
-    const {data, error} = await publicSupabase
+    const id = values.status;
+    console.log('values', values);
+    const { data, error } = await publicSupabase
       .from(tableName)
       .delete()
-      .eq('id',id)
+      .eq('id', id)
       .select();
 
-    if(error) {
-      toast.error('error while deleting')
-      console.log('error', error)
+    if (error) {
+      toast.error('error while deleting');
+      console.log('error', error);
     }
 
-    if(data && data?.length > 0) {
-      updateSteps(tableName,data,id)
+    if (data && data?.length > 0) {
+      updateSteps(tableName, data, id);
     } else {
-      toast.error('something went wrong')
-      setOpenDelete(false)
+      toast.error('something went wrong');
+      setOpenDelete(false);
     }
-  }
+  };
 
-  const updateSteps = (tableName:string,data:any, id:string) => {
-    if(tableName === 'statusSteps') {
-      toast.success('Successfully Deleted Status')
-      setOpenDelete(false)
-      const updatedStatusItems = step.filter((item:any) => item.id !== id)
-      setStep(updatedStatusItems)
+  const updateSteps = (tableName: string, data: any, id: string) => {
+    if (tableName === 'statusSteps') {
+      toast.success('Successfully Deleted Status');
+      setOpenDelete(false);
+      const updatedStatusItems = step.filter((item: any) => item.id !== id);
+      setStep(updatedStatusItems);
     } else {
-      toast.success('Successfully Deleted Payment')
-      setOpenDelete(false)
-      const payment = Number(data[0].title)
-      let operation = 'credit'
-      updateBudget(payment,operation)
-      const updatedPaymentItems = paymentStep.filter((item:any) => item.id !== id)
-      setPaymentStep(updatedPaymentItems)
+      toast.success('Successfully Deleted Payment');
+      setOpenDelete(false);
+      const payment = Number(data[0].title);
+      const operation = 'credit';
+      updateBudget(payment, operation);
+      const updatedPaymentItems = paymentStep.filter(
+        (item: any) => item.id !== id,
+      );
+      setPaymentStep(updatedPaymentItems);
     }
-  }
+  };
 
   const handleCancel = () => {
     setOpen(false);
-    setOpenDelete(false)
+    setOpenDelete(false);
     form.resetFields();
     setFileList([]);
   };
@@ -471,17 +483,17 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
     return publicURL;
   };
 
-  const updateRejection = async() => {
-    const {data, error} = await publicSupabase
+  const updateRejection = async () => {
+    const { data, error } = await publicSupabase
       .from('filedetails')
       .update({ fileStatus: 'Rejected' })
       .eq('id', fileId)
       .select();
 
-    if(error) throw new Error;
-    
-    console.log('updated data',data)
-  }
+    if (error) throw new Error();
+
+    console.log('updated data', data);
+  };
 
   return (
     <>
@@ -544,9 +556,9 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
           </div>
           <div style={{ marginTop: 24 }}>
             {userRole === 'Admin' ? (
-              <div className='flex flex-row space-x-4'>
-              <Button onClick={() => next()}>Add status</Button>
-              <Button onClick={() => deletePayment()}>Delete Status</Button>
+              <div className="flex flex-row space-x-4">
+                <Button onClick={() => next()}>Add status</Button>
+                <Button onClick={() => deletePayment()}>Delete Status</Button>
               </div>
             ) : null}
 
@@ -560,7 +572,7 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
               onCancel={handleCancel}
             >
               <Form form={form} layout="vertical">
-              <Form.Item
+                <Form.Item
                   name="status"
                   label={'Select the status you want to delete!'}
                   rules={[
@@ -568,15 +580,18 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
                   ]}
                 >
                   <Select style={{ width: '100%' }}>
-                  {[...items].reverse().map((item, index) => (
-                    <Select.Option key={index} value={item.id || index.toString()}>
-                      <div className="flex gap-4 items-center">
-                        <span>{item?.title}</span>
-                        <span>{item?.description}</span>
-                      </div>
-                    </Select.Option>
-                  ))}
-                </Select>
+                    {[...items].reverse().map((item, index) => (
+                      <Select.Option
+                        key={index}
+                        value={item.id || index.toString()}
+                      >
+                        <div className="flex gap-4 items-center">
+                          <span>{item?.title}</span>
+                          <span>{item?.description}</span>
+                        </div>
+                      </Select.Option>
+                    ))}
+                  </Select>
                 </Form.Item>
               </Form>
             </Modal>
@@ -649,8 +664,8 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
                     <Option value="Invitation received">
                       Invitation received
                     </Option>
-                    <Option value="Finalizating documents for visa application">
-                      Finalizating documents for visa application
+                    <Option value="Finalizing documents for visa application">
+                      Finalizing documents for visa application
                     </Option>
                     <Option value="Finalized documents for visa application">
                       Finalized documents for visa application
@@ -734,7 +749,7 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
                                     rel="noopener noreferrer"
                                     className="text-sm"
                                   >
-                                     {extractFilenameFromUrl(contentItem)}
+                                    {extractFilenameFromUrl(contentItem)}
                                   </a>
                                 </div>
                               ),
@@ -753,9 +768,9 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
 
           <div style={{ marginTop: 24 }}>
             {userRole === 'Admin' ? (
-              <div className='flex flex-row space-x-4'>
-              <Button onClick={() => nextPayment()}>Add payment</Button>
-              <Button onClick={() => deletePayment()}>Delete payment</Button>
+              <div className="flex flex-row space-x-4">
+                <Button onClick={() => nextPayment()}>Add payment</Button>
+                <Button onClick={() => deletePayment()}>Delete payment</Button>
               </div>
             ) : null}
 
@@ -769,7 +784,7 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
               onCancel={handleCancel}
             >
               <Form form={form} layout="vertical">
-              <Form.Item
+                <Form.Item
                   name="status"
                   label={'Select the payment you want to delete!'}
                   rules={[
@@ -777,15 +792,18 @@ const Step: React.FC<StepProps> = ({ statusType, fileId }) => {
                   ]}
                 >
                   <Select style={{ width: '100%' }}>
-                  {[...paymentItems].reverse().map((item, index) => (
-                    <Select.Option key={index} value={item.id || index.toString()}>
-                      <div className="flex gap-4 items-center">
-                        <span>{formatCurrency(item?.title)}</span>
-                        <span>{item?.description}</span>
-                      </div>
-                    </Select.Option>
-                  ))}
-                </Select>
+                    {[...paymentItems].reverse().map((item, index) => (
+                      <Select.Option
+                        key={index}
+                        value={item.id || index.toString()}
+                      >
+                        <div className="flex gap-4 items-center">
+                          <span>{formatCurrency(item?.title)}</span>
+                          <span>{item?.description}</span>
+                        </div>
+                      </Select.Option>
+                    ))}
+                  </Select>
                 </Form.Item>
               </Form>
             </Modal>
